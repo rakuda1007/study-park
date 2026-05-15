@@ -11,11 +11,18 @@
   <body>
     <header class="app-header">
       <h1 class="app-title">県庁所在地クイズ</h1>
-      <a class="btn-home" href="/">トップへ</a>
+      <div class="header-actions">
+        <select id="modeSelect" class="mode-select" aria-label="出題モード">
+          <option value="full">ぜんぶ47問</option>
+          <option value="weak">苦手問題</option>
+        </select>
+        <a class="btn-home" href="/">トップへ</a>
+      </div>
     </header>
 
     <div class="stats-bar" aria-live="polite">
-      <span class="stat-pill">第 <strong id="questionNum">1</strong> / 47 問</span>
+      <span class="stat-pill">第 <strong id="questionNum">1</strong> / <strong id="sessionTotal">47</strong> 問</span>
+      <span class="stat-pill">苦手 <strong id="weakCount">0</strong> 件</span>
       <span class="stat-pill">せいかい <strong id="sessionScore">0</strong></span>
       <span class="stat-pill">連続 <strong id="streak">0</strong></span>
       <span class="stat-pill">最高 <strong id="highStreak">0</strong></span>

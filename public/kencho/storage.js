@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "kenchoAppData";
-  const DATA_VERSION = 1;
+  const DATA_VERSION = 2;
 
   function canUseStorage() {
     try {
@@ -22,7 +22,19 @@
       bestSessionScore: 0,
       masteredIds: [],
       totalCorrect: 0,
+      mode: "full",
+      weakProblems: [],
     };
+  }
+
+  function parseWeak(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter((e) => e && typeof e.id === "string" && e.id.length > 0)
+      .map((e) => ({
+        id: e.id,
+        n: Math.max(1, Number(e.n) || 1),
+      }));
   }
 
   function normalize(input) {
@@ -46,6 +58,9 @@
         (id) => typeof id === "string" && id.length > 0,
       );
     }
+
+    base.mode = input.mode === "weak" ? "weak" : "full";
+    base.weakProblems = parseWeak(input.weakProblems);
 
     return base;
   }
@@ -116,6 +131,29 @@
       const n = read().totalCorrect + 1;
       patch({ totalCorrect: n });
       return n;
+    },
+    getMode() {
+      return read().mode === "weak" ? "weak" : "full";
+    },
+    setMode(mode) {
+      patch({ mode: mode === "weak" ? "weak" : "full" });
+    },
+    getWeakList() {
+      return parseWeak(read().weakProblems);
+    },
+    recordWeak(id) {
+      if (typeof id !== "string" || !id) return read().weakProblems;
+      const list = parseWeak(read().weakProblems);
+      const found = list.find((e) => e.id === id);
+      if (found) found.n += 1;
+      else list.push({ id, n: 1 });
+      patch({ weakProblems: list });
+      return list;
+    },
+    removeWeak(id) {
+      const list = parseWeak(read().weakProblems).filter((e) => e.id !== id);
+      patch({ weakProblems: list });
+      return list;
     },
     clearAll() {
       if (!canUseStorage()) return;

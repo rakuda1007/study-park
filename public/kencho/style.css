@@ -47,6 +47,24 @@ body {
   border-bottom: 2px solid #d6e4ff;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+select.mode-select {
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 5px 6px;
+  border-radius: 8px;
+  border: 1px solid #d0d9e8;
+  background: var(--surface);
+  color: var(--ink);
+  max-width: 7.5rem;
+}
+
 .app-title {
   margin: 0;
   font-size: 1rem;

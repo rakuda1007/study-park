@@ -10,6 +10,7 @@
   const MASTERED_MILESTONES = [5, 10, 15, 20, 25, 30, 35, 40, 47];
 
   const state = {
+    mode: "full",
     current: null,
     choices: [],
     streak: 0,
@@ -17,6 +18,7 @@
     highStreak: 0,
     bestSessionScore: 0,
     masteredIds: [],
+    weakCount: 0,
     charIndex: 0,
     locked: false,
     shownMasterMilestones: new Set(),
@@ -25,8 +27,13 @@
       index: 0,
       correct: 0,
       finished: false,
+      total: TOTAL,
     },
   };
+
+  function sessionTotal() {
+    return state.session.total || state.session.queue.length || TOTAL;
+  }
 
   const els = {};
 
@@ -62,12 +69,26 @@
   function loadProgress() {
     const data = store ? store.load() : null;
     if (!data) return;
+    state.mode = store ? store.getMode() : "full";
     state.highStreak = data.highStreak || 0;
     state.bestSessionScore = data.bestSessionScore || 0;
     state.masteredIds = store ? store.getMasteredIds() : [];
+    state.weakCount = store ? store.getWeakList().length : 0;
     state.shownMasterMilestones = new Set(
       MASTERED_MILESTONES.filter((n) => state.masteredIds.length >= n),
     );
+  }
+
+  function syncWeakCount() {
+    state.weakCount = store ? store.getWeakList().length : 0;
+  }
+
+  function buildSessionQueue() {
+    if (state.mode === "weak") {
+      const list = store ? store.getWeakList() : [];
+      return shuffle(list.map((e) => e.id));
+    }
+    return shuffle(PREFS.map((p) => p.id));
   }
 
   function persistHighStreak() {
@@ -153,15 +174,20 @@
 
   function renderStats() {
     const idx = state.session.index;
+    const total = sessionTotal();
     const mastered = state.masteredIds.length;
 
-    if (els.questionNum) els.questionNum.textContent = String(Math.min(idx + 1, TOTAL));
+    if (els.questionNum) {
+      els.questionNum.textContent = String(Math.min(idx + 1, total));
+    }
+    if (els.sessionTotal) els.sessionTotal.textContent = String(total);
     if (els.sessionScore) els.sessionScore.textContent = String(state.session.correct);
     if (els.streakEl) els.streakEl.textContent = String(state.streak);
     if (els.highEl) els.highEl.textContent = String(state.highStreak);
     if (els.masteredEl) els.masteredEl.textContent = `${mastered} / ${TOTAL}`;
-    if (els.sessionFill) {
-      els.sessionFill.style.width = `${(idx / TOTAL) * 100}%`;
+    if (els.weakCount) els.weakCount.textContent = String(state.weakCount);
+    if (els.sessionFill && total > 0) {
+      els.sessionFill.style.width = `${(idx / total) * 100}%`;
     }
   }
 
@@ -237,11 +263,27 @@
   }
 
   function startSession() {
+    syncWeakCount();
+    const queue = buildSessionQueue();
+
+    if (state.mode === "weak" && queue.length === 0) {
+      openModal(
+        "苦手問題はまだありません",
+        "ぜんぶ47問モードで学習して、まちがえた県がここにたまります。\nモードを「ぜんぶ47問」に変えて始めてみよう！",
+        false,
+      );
+      if (els.modeSelect) els.modeSelect.value = "full";
+      state.mode = "full";
+      if (store) store.setMode("full");
+      return startSession();
+    }
+
     state.session = {
-      queue: shuffle(PREFS.map((p) => p.id)),
+      queue,
       index: 0,
       correct: 0,
       finished: false,
+      total: queue.length,
     };
     state.streak = 0;
     state.sessionBestStreak = 0;
@@ -251,13 +293,24 @@
     closeModal();
     showSingleChar();
     renderCharacter();
-    setSpeech("47問チャレンジ！ がんばって！");
+    if (state.mode === "weak") {
+      setSpeech(`苦手${queue.length}問を復習しよう！`);
+    } else {
+      setSpeech("47問チャレンジ！ がんばって！");
+    }
     renderStats();
     nextQuestion();
   }
 
+  function onModeChange(nextMode) {
+    state.mode = nextMode === "weak" ? "weak" : "full";
+    if (store) store.setMode(state.mode);
+    startSession();
+  }
+
   function nextQuestion() {
-    if (state.session.index >= TOTAL) {
+    const total = sessionTotal();
+    if (state.session.index >= total) {
       finishSession();
       return;
     }
@@ -329,11 +382,14 @@
   function finishSession() {
     state.session.finished = true;
     state.locked = true;
+    syncWeakCount();
 
+    const total = sessionTotal();
     const score = state.session.correct;
-    const perfect = score === TOTAL;
+    const perfect = score === total && total > 0;
+    const isFull = state.mode === "full";
 
-    if (store) {
+    if (store && isFull) {
       store.setBestSessionScore(score);
       state.bestSessionScore = Math.max(state.bestSessionScore, score);
     }
@@ -341,30 +397,51 @@
     renderStats();
     renderQuestion();
 
-    let msg = `${score}問 せいかい / ${TOTAL}問\n`;
+    let msg = `${score}問 せいかい / ${total}問\n`;
     msg += `この回の連続ベスト ${state.sessionBestStreak}問\n`;
-    msg += `ベスト記録 ${state.bestSessionScore}問 / ${TOTAL}問`;
-
-    if (perfect) {
-      msg += "\n\n🎉 ぜんもんせいかい！ すごすぎる！";
-      openModal("🗾 47問クリア！", msg, true);
-      playRecordBurst();
-      showSquad();
-      setSpeech("ぜんぶせいかい！ みんなも大喜び！");
-    } else if (score >= 35) {
-      openModal("🎌 1しゅうごう！", msg, true);
-      setSpeech("おつかれさま！ よくがんばったね！");
-    } else {
-      openModal("🎌 1しゅうごう！", msg, false);
-      setSpeech("おつかれさま！ もういちど挑戦してみよう！");
+    if (isFull) {
+      msg += `ベスト記録 ${state.bestSessionScore}問 / ${TOTAL}問\n`;
+    }
+    if (state.weakCount > 0) {
+      msg += `\n苦手が ${state.weakCount}件 のこっています。\n「苦手問題」モードで復習しよう！`;
+    } else if (isFull) {
+      msg += "\n苦手問題はゼロ！ ばっちりだね！";
     }
 
+    let title = "おつかれさま！";
+    let showImage = false;
+
+    if (isFull) {
+      if (perfect && total === TOTAL) {
+        title = "🗾 47問ぜんぶせいかい！";
+        msg += "\n\n🎉 ぜんもんせいかい！ すごすぎる！";
+        showImage = true;
+        playRecordBurst();
+        showSquad();
+        setSpeech("ぜんぶせいかい！ みんなも大喜び！");
+      } else {
+        title = "🎌 47問チャレンジおわり！";
+        showImage = score >= 35;
+        setSpeech("おつかれさま！ よくがんばったね！");
+      }
+    } else {
+      title = perfect ? "✨ 苦手復習クリア！" : "📚 苦手復習おわり！";
+      showImage = perfect;
+      setSpeech(
+        perfect
+          ? "苦手を克服したね！"
+          : "おつかれさま！ まだ苦手モードで練習できるよ",
+      );
+    }
+
+    openModal(title, msg, showImage);
     if (els.btnModalRestart) els.btnModalRestart.hidden = false;
   }
 
   function advanceAfterAnswer() {
+    const total = sessionTotal();
     state.session.index += 1;
-    if (state.session.index >= TOTAL) {
+    if (state.session.index >= total) {
       window.setTimeout(() => finishSession(), 600);
     } else {
       window.setTimeout(() => nextQuestion(), 900);
@@ -384,6 +461,8 @@
       updateSessionBestStreak();
       persistHighStreak();
 
+      if (store) store.removeWeak(pref.id);
+
       const wasNew = !state.masteredIds.includes(pref.id);
       if (wasNew && store) {
         store.addMastered(pref.id);
@@ -391,6 +470,7 @@
         store.incrementTotalCorrect();
         checkMasteredMilestones(state.masteredIds.length);
       }
+      syncWeakCount();
 
       els.questionCard?.classList.add("flash-ok");
       setSpeech(`せいかい！ ${pref.name}は「${pref.capital}」`);
@@ -400,6 +480,9 @@
       advanceAfterAnswer();
     } else {
       state.streak = 0;
+      if (store) store.recordWeak(pref.id);
+      syncWeakCount();
+
       els.choicesWrap?.querySelectorAll(".choice-btn").forEach((btn) => {
         if (btn.dataset.capital === capital) btn.classList.add("wrong");
       });
@@ -428,6 +511,9 @@
     els.highEl = $("highStreak");
     els.masteredEl = $("masteredCount");
     els.sessionFill = $("sessionFill");
+    els.sessionTotal = $("sessionTotal");
+    els.weakCount = $("weakCount");
+    els.modeSelect = $("modeSelect");
     els.banner = $("celebrateBanner");
     els.modal = $("celebrateModal");
     els.modalCard = $("celebrateModalCard");
@@ -439,6 +525,14 @@
 
     loadProgress();
     renderSquadGrid();
+
+    if (els.modeSelect) {
+      els.modeSelect.value = state.mode;
+      els.modeSelect.addEventListener("change", () => {
+        onModeChange(els.modeSelect.value);
+      });
+    }
+
     startSession();
 
     $("btnModalRestart")?.addEventListener("click", () => {
