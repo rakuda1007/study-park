@@ -1,13 +1,12 @@
 /**
- * 九九アプリ — キャラクター定義（画像は public 直下の PNG を参照）
- * index.html から /kuku/ で開く想定のため image は ../<file>.png
+ * 九九アプリ — キャラクター定義（画像は public 直下の PNG、絶対パス）
  */
 window.KUKU_CHARACTERS = [
   {
     id: "orange",
     name: "みかんぼうや",
     emoji: "🍊",
-    image: "../orange.png",
+    image: "/orange.png",
     traits: "明るい、太陽みたい",
     phrases: ["やったね！", "あったかい気持ち！"],
     fx3: "fx-orange-peel",
@@ -18,7 +17,7 @@ window.KUKU_CHARACTERS = [
     id: "dog",
     name: "ぽちまる",
     emoji: "🐶",
-    image: "../dog.png",
+    image: "/dog.png",
     traits: "元気、励まし上手",
     phrases: ["やったね！", "いけるいける！"],
     fx3: "fx-dog-tail",
@@ -29,7 +28,7 @@ window.KUKU_CHARACTERS = [
     id: "cat",
     name: "みけにゃん",
     emoji: "🐱",
-    image: "../cat.png",
+    image: "/cat.png",
     traits: "ツンデレ",
     phrases: ["べ、別にすごいなんて…", "…でもやるじゃん"],
     fx3: "fx-cat-heart-tail",
@@ -40,7 +39,7 @@ window.KUKU_CHARACTERS = [
     id: "tofu",
     name: "とうふさん",
     emoji: "🧊",
-    image: "../tofu.png",
+    image: "/tofu.png",
     traits: "メンタル豆腐、応援は全力",
     phrases: ["ふるふる…でも大丈夫！"],
     fx3: "fx-tofu-shake",
@@ -51,7 +50,7 @@ window.KUKU_CHARACTERS = [
     id: "apple",
     name: "りんごっち",
     emoji: "🍎",
-    image: "../apple.png",
+    image: "/apple.png",
     traits: "まじめ、努力家",
     phrases: ["すばらしいです！", "その調子です！"],
     fx3: "fx-apple-leaf",
@@ -62,7 +61,7 @@ window.KUKU_CHARACTERS = [
     id: "panda",
     name: "ぱんだるま",
     emoji: "🐼",
-    image: "../panda.png",
+    image: "/panda.png",
     traits: "おっとり、優しい",
     phrases: ["すごいねぇ〜", "ゆっくりでいいよ〜"],
     fx3: "fx-panda-bounce",

@@ -10,7 +10,7 @@ export default function Home() {
         学習用 Web アプリの入口です。九九の練習は下のボタンからどうぞ。
       </p>
       <Link
-        href="/kuku"
+        href="/kuku/"
         className="bg-foreground text-background inline-flex w-fit items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold no-underline transition-opacity hover:opacity-90"
       >
         九九パークをはじめる
