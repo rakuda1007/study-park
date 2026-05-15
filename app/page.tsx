@@ -7,14 +7,22 @@ export default function Home() {
         Study Park
       </h1>
       <p className="text-foreground/80">
-        学習用 Web アプリの入口です。九九の練習は下のボタンからどうぞ。
+        学習用 Web アプリの入口です。メニューから学習を選んでください。
       </p>
-      <Link
-        href="/kuku/"
-        className="bg-foreground text-background inline-flex w-fit items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold no-underline transition-opacity hover:opacity-90"
-      >
-        九九パークをはじめる
-      </Link>
+      <nav className="flex flex-col gap-3" aria-label="学習メニュー">
+        <Link
+          href="/kuku/"
+          className="bg-foreground text-background inline-flex w-fit items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold no-underline transition-opacity hover:opacity-90"
+        >
+          九九パーク
+        </Link>
+        <Link
+          href="/kencho/"
+          className="border-foreground/20 text-foreground inline-flex w-fit items-center justify-center rounded-xl border-2 bg-transparent px-6 py-3 text-lg font-semibold no-underline transition-opacity hover:opacity-90"
+        >
+          県庁所在地
+        </Link>
+      </nav>
     </main>
   );
 }

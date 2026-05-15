@@ -1,0 +1,363 @@
+/* 県庁所在地クイズ */
+:root {
+  --bg: #f3f8ff;
+  --surface: #ffffff;
+  --ink: #1a2744;
+  --muted: #5c6b82;
+  --accent: #3d7dd6;
+  --accent-2: #5cb88a;
+  --danger: #e85a5a;
+  --ok: #43a047;
+  --radius: 16px;
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-bottom: 2px solid #d6e4ff;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.btn-home {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #d0d9e8;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #e8f1ff, #dce9ff);
+  border-bottom: 1px solid #c5d8f5;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.stats-bar strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.stat-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid #d0d9e8;
+}
+
+.master-progress {
+  flex: 1 1 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.master-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #64b5f6, #3d7dd6);
+  transition: width 0.35s ease;
+}
+
+.quiz-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 12px;
+}
+
+.speech-bubble {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 2px solid #c5d8f5;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.question-card {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 2px solid #d6e4ff;
+  box-shadow: 0 8px 24px rgba(61, 125, 214, 0.1);
+  min-height: 140px;
+}
+
+.question-label {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.prefecture-name {
+  margin: 0;
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.question-card.flash-ok {
+  animation: flashOk 0.5s ease;
+}
+
+.question-card.flash-ng {
+  animation: flashNg 0.5s ease;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.choice-btn {
+  font: inherit;
+  cursor: pointer;
+  min-height: 52px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 2px solid #d0d9e8;
+  background: var(--surface);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.choice-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.choice-btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.choice-btn.correct {
+  border-color: var(--ok);
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.choice-btn.wrong {
+  border-color: var(--danger);
+  background: #ffebee;
+  color: #c62828;
+}
+
+.choice-btn.dim {
+  opacity: 0.45;
+}
+
+.celebrate-banner {
+  position: fixed;
+  left: 50%;
+  top: 22%;
+  transform: translate(-50%, -16px) scale(0.92);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  max-width: 90%;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #81d4fa, #4fc3f7);
+  color: #01579b;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.celebrate-banner.show {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 39, 68, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.celebrate-modal-card {
+  position: relative;
+  width: min(100%, 360px);
+  max-height: 92vh;
+  overflow: auto;
+  background: linear-gradient(180deg, #e3f2fd, #fff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  text-align: center;
+  border: 3px solid #64b5f6;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.celebrate-modal-card.record-burst {
+  animation: recordShake 0.45s ease, recordGlow 1.2s ease 2;
+}
+
+.celebrate-modal-title {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1565c0;
+}
+
+.celebrate-modal-msg {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.celebrate-modal-img {
+  display: block;
+  width: min(100%, 280px);
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  animation: popIn 0.5s ease;
+}
+
+.celebrate-modal-actions {
+  margin-top: 8px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), #2563b8);
+  color: #fff;
+}
+
+@keyframes flashOk {
+  0% {
+    box-shadow: 0 0 0 0 rgba(67, 160, 71, 0.45);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+@keyframes flashNg {
+  0% {
+    box-shadow: 0 0 0 0 rgba(232, 90, 90, 0.4);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes recordShake {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-2deg) scale(1.02);
+  }
+  75% {
+    transform: rotate(2deg) scale(1.02);
+  }
+}
+
+@keyframes recordGlow {
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(100, 181, 246, 0.5),
+      0 20px 50px rgba(61, 125, 214, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question-card.flash-ok,
+  .question-card.flash-ng,
+  .celebrate-modal-card.record-burst,
+  .celebrate-modal-img {
+    animation: none !important;
+  }
+}
