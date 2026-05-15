@@ -22,6 +22,10 @@
     totalCorrect: 0,
     manualCharId: null,
     useAutoChar: true,
+    /** 順番・ランダム・苦手で「やめる」後、つづけるまで操作停止 */
+    sessionStopped: false,
+    /** timedModal の主ボタン挙動分岐: null | "timed" | "play" */
+    quitKind: null,
     timed: {
       active: false,
       remainingMs: TIMED_LIMIT_MS,
@@ -202,6 +206,8 @@
     state.seqOrder = buildSequentialOrder();
     state.seqIndex = 0;
     state.streak = 0;
+    state.sessionStopped = false;
+    state.quitKind = null;
     state.timed = {
       active: true,
       remainingMs: TIMED_LIMIT_MS,
@@ -216,6 +222,7 @@
     setSpeech("100秒で81問ぜんぶ！ がんばって！");
     nextQuestion();
     renderFooter();
+    setNumpadDisabled(false);
   }
 
   function tickTimed() {
@@ -284,6 +291,8 @@
   }
 
   function showTimedCelebrateModal(sec, prevBest, isNewRecord) {
+    state.quitKind = null;
+    setNumpadDisabled(true);
     if (!els.timedModal) return;
     if (els.timedModalTitle) {
       els.timedModalTitle.textContent = isNewRecord
@@ -308,6 +317,8 @@
   }
 
   function showTimedFailModal() {
+    state.quitKind = null;
+    setNumpadDisabled(true);
     if (!els.timedModal) return;
     if (els.timedModalTitle) els.timedModalTitle.textContent = "⏰ 時間ぎれ";
     if (els.timedModalMsg) {
@@ -347,7 +358,11 @@
     state.mode = nextMode;
     state.seqIndex = 0;
     state.streak = 0;
+    state.sessionStopped = false;
+    state.quitKind = null;
     state.timed.ended = false;
+    state.timed.lastResult = null;
+    if (els.modeSelect) els.modeSelect.value = nextMode;
     if (nextMode === "timed") {
       startTimedChallenge();
     } else {
@@ -357,6 +372,89 @@
     persistProgress();
     renderFooter();
     renderCharacter();
+    setNumpadDisabled(false);
+  }
+
+  function setNumpadDisabled(disabled) {
+    document.querySelectorAll(".numpad button").forEach((btn) => {
+      btn.disabled = disabled;
+    });
+  }
+
+  function showTimedQuitModal() {
+    state.quitKind = "timed";
+    const sec = Math.max(0, Math.ceil(state.timed.remainingMs / 1000));
+    if (els.timedModalTitle) els.timedModalTitle.textContent = "🛑 途中でやめたよ";
+    if (els.timedModalMsg) {
+      els.timedModalMsg.textContent = `${state.timed.solved}問 せいかい / ${TIMED_TOTAL}問\n残り ${sec}秒\n\nベストタイムは、最後までクリアしたときだけ更新されます。`;
+    }
+    if (els.timedModalImg) els.timedModalImg.hidden = true;
+    if (els.timedModalTime) els.timedModalTime.textContent = "";
+    if (els.btnTimedRetry) {
+      els.btnTimedRetry.hidden = false;
+      els.btnTimedRetry.textContent = "タイムアタックにもどる";
+    }
+    if (els.btnTimedModalClose) {
+      els.btnTimedModalClose.textContent = "順番モードで遊ぶ";
+    }
+    if (els.timedModal) els.timedModal.hidden = false;
+    setNumpadDisabled(true);
+  }
+
+  function showSessionQuitModal() {
+    state.quitKind = "play";
+    if (els.timedModalTitle) els.timedModalTitle.textContent = "🛑 途中でやめたよ";
+    if (els.timedModalMsg) {
+      els.timedModalMsg.textContent =
+        "またあとでつづきから遊べます。\n「つづける」でつぎの問題へ。";
+    }
+    if (els.timedModalImg) els.timedModalImg.hidden = true;
+    if (els.timedModalTime) els.timedModalTime.textContent = "";
+    if (els.btnTimedRetry) els.btnTimedRetry.hidden = true;
+    if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "つづける";
+    if (els.timedModal) els.timedModal.hidden = false;
+    setNumpadDisabled(true);
+  }
+
+  function resumePlaySession() {
+    state.sessionStopped = false;
+    state.quitKind = null;
+    closeTimedModal();
+    setNumpadDisabled(false);
+    nextQuestion();
+    renderFooter();
+    const ch = currentCharacter();
+    setSpeech(randomPhrase(ch));
+  }
+
+  function quitSession() {
+    if (state.sessionStopped) return;
+    if (state.mode === "timed" && state.timed.ended) return;
+    if (
+      !window.confirm(
+        "いまのモードを途中でやめますか？\n（タイムアタックのベストは、最後までクリアしたときだけ更新されます）",
+      )
+    ) {
+      return;
+    }
+
+    state.input = "";
+    clearFxClasses(els.characterPanel);
+    setSpeech("またつぎにがんばろう！");
+
+    if (state.mode === "timed") {
+      stopTimedTimer();
+      state.timed.ended = true;
+      state.timed.active = false;
+      state.timed.lastResult = "quit";
+      renderTimedBar();
+      renderFooter();
+      showTimedQuitModal();
+    } else {
+      state.sessionStopped = true;
+      showSessionQuitModal();
+    }
+    renderProblem();
   }
 
   function expected() {
@@ -560,6 +658,7 @@
   }
 
   function submitAnswer() {
+    if (state.sessionStopped) return;
     if (state.mode === "timed" && state.timed.ended) return;
     if (!state.input) return;
     const n = parseInt(state.input, 10);
@@ -572,6 +671,7 @@
   }
 
   function appendDigit(d) {
+    if (state.sessionStopped) return;
     if (state.input.length >= 2) return;
     if (state.input === "0" && d === "0") return;
     state.input += d;
@@ -579,6 +679,7 @@
   }
 
   function backspace() {
+    if (state.sessionStopped) return;
     state.input = state.input.slice(0, -1);
     renderProblem();
   }
@@ -642,17 +743,41 @@
     }
 
     $("btnTimedModalClose")?.addEventListener("click", () => {
+      if (state.quitKind === "play") {
+        resumePlaySession();
+        return;
+      }
+      if (state.quitKind === "timed") {
+        onModeChange("sequential");
+        return;
+      }
       const wasSuccess = state.timed.lastResult === "success";
       closeTimedModal();
       if (state.mode === "timed" && wasSuccess) startTimedChallenge();
     });
     $("btnTimedRetry")?.addEventListener("click", () => {
+      if (state.quitKind === "timed") {
+        closeTimedModal();
+        startTimedChallenge();
+        return;
+      }
       closeTimedModal();
       if (state.mode === "timed") startTimedChallenge();
     });
     els.timedModal?.addEventListener("click", (ev) => {
-      if (ev.target === els.timedModal) closeTimedModal();
+      if (ev.target !== els.timedModal) return;
+      if (state.quitKind === "play") {
+        resumePlaySession();
+        return;
+      }
+      if (state.quitKind === "timed") {
+        onModeChange("sequential");
+        return;
+      }
+      closeTimedModal();
     });
+
+    $("btnQuit")?.addEventListener("click", quitSession);
 
     $("btnCharPick")?.addEventListener("click", openModal);
     $("btnModalClose")?.addEventListener("click", closeModal);
@@ -682,6 +807,7 @@
     }
     renderCharacter();
     renderFooter();
+    setNumpadDisabled(false);
   }
 
   if (document.readyState === "loading") {
