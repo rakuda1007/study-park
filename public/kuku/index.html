@@ -9,58 +9,62 @@
     <link rel="stylesheet" href="/kuku/style.css" />
   </head>
   <body>
-    <header class="app-header">
-      <h1 class="app-title">九九パーク</h1>
-      <div class="header-actions">
-        <span id="levelPill" class="level-pill" aria-live="polite">Lv.1</span>
-        <select id="modeSelect" class="mode-select" aria-label="出題モード">
-          <option value="sequential">順番（1×1〜9×9）</option>
-          <option value="random">ランダム</option>
-          <option value="weak">苦手問題</option>
-        </select>
-        <button type="button" id="btnCharPick" class="btn-ghost">キャラ</button>
-      </div>
-    </header>
+    <div class="zone-top">
+      <header class="app-header">
+        <h1 class="app-title">九九パーク</h1>
+        <div class="header-actions">
+          <span id="levelPill" class="level-pill" aria-live="polite">Lv.1</span>
+          <select id="modeSelect" class="mode-select" aria-label="出題モード">
+            <option value="sequential">順番（1×1〜9×9）</option>
+            <option value="random">ランダム</option>
+            <option value="weak">苦手問題</option>
+          </select>
+          <button type="button" id="btnCharPick" class="btn-ghost">キャラ</button>
+        </div>
+      </header>
 
-    <section id="characterPanel" class="character-panel" aria-live="polite">
-      <div id="speech" class="speech-bubble">はじめよう！</div>
-      <div class="char-stage-block">
-        <div class="fx-layer" aria-hidden="true">
-          <div class="fx-stars" aria-hidden="true">
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span><span></span>
+      <section id="characterPanel" class="character-panel" aria-live="polite">
+        <div id="speech" class="speech-bubble">はじめよう！</div>
+        <div class="char-stage-block">
+          <div class="fx-layer" aria-hidden="true">
+            <div class="fx-stars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
           </div>
+          <div class="char-stage">
+            <img id="charImg" src="/orange.png" alt="みかんぼうや" />
+          </div>
+          <p id="charLabel" class="char-name">🍊 みかんぼうや</p>
         </div>
-        <div class="char-stage">
-          <img id="charImg" src="/orange.png" alt="みかんぼうや" />
-        </div>
-        <p id="charLabel" class="char-name">🍊 みかんぼうや</p>
-      </div>
-    </section>
-
-    <section id="problemCard" class="problem-card">
-      <p id="problemText" class="problem-text" aria-live="polite">1 × 1 = ?</p>
-    </section>
-
-    <div class="numpad" role="group" aria-label="数字パッド">
-      <button type="button" class="digit" id="d1">1</button>
-      <button type="button" class="digit" id="d2">2</button>
-      <button type="button" class="digit" id="d3">3</button>
-      <button type="button" class="digit" id="d4">4</button>
-      <button type="button" class="digit" id="d5">5</button>
-      <button type="button" class="digit" id="d6">6</button>
-      <button type="button" class="digit" id="d7">7</button>
-      <button type="button" class="digit" id="d8">8</button>
-      <button type="button" class="digit" id="d9">9</button>
-      <button type="button" class="btn-wide btn-clear" id="btnClear">けす</button>
-      <button type="button" class="digit" id="d0">0</button>
-      <button type="button" class="btn-wide btn-submit" id="btnSubmit">OK</button>
+      </section>
     </div>
 
-    <footer class="footer-stats">
-      <span>連続せいかい <strong id="streak">0</strong></span>
-      <span>のこり <strong id="remain">81 / 81</strong></span>
-    </footer>
+    <div class="zone-input">
+      <section id="problemCard" class="problem-card">
+        <p id="problemText" class="problem-text" aria-live="polite">1 × 1 = ?</p>
+      </section>
+
+      <div class="numpad" role="group" aria-label="数字パッド">
+        <button type="button" class="digit" id="d1">1</button>
+        <button type="button" class="digit" id="d2">2</button>
+        <button type="button" class="digit" id="d3">3</button>
+        <button type="button" class="digit" id="d4">4</button>
+        <button type="button" class="digit" id="d5">5</button>
+        <button type="button" class="digit" id="d6">6</button>
+        <button type="button" class="digit" id="d7">7</button>
+        <button type="button" class="digit" id="d8">8</button>
+        <button type="button" class="digit" id="d9">9</button>
+        <button type="button" class="btn-wide btn-clear" id="btnClear">けす</button>
+        <button type="button" class="digit" id="d0">0</button>
+        <button type="button" class="btn-wide btn-submit" id="btnSubmit">OK</button>
+      </div>
+
+      <footer class="footer-stats">
+        <span>連続せいかい <strong id="streak">0</strong></span>
+        <span>のこり <strong id="remain">81 / 81</strong></span>
+      </footer>
+    </div>
 
     <div id="levelBanner" class="levelup-banner" role="status" aria-live="assertive"></div>
 

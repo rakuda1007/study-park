@@ -37,20 +37,44 @@ body {
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
-  gap: 4px;
-  padding: max(4px, env(safe-area-inset-top)) 10px
-    max(4px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   max-width: 480px;
   margin: 0 auto;
 }
 
+/* 上半分：ヘッダー＋キャラ */
+.zone-top {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+/* 下半分：問題＋テンキー＋ステータス */
+.zone-input {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  overflow: hidden;
+  background: var(--bg);
+  border-top: 2px solid #ffe0b2;
+}
+
 .app-header {
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 4px 6px;
+  gap: 2px 4px;
+  padding: 3px 6px;
+  background: var(--bg);
 }
 
 .app-title {
@@ -76,22 +100,24 @@ button {
 }
 
 select.mode-select {
-  padding: 6px 8px;
-  border-radius: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: none;
+  border: 1px solid #eceff1;
   color: var(--ink);
   min-width: 0;
-  max-width: 11rem;
-  font-size: 0.8rem;
+  max-width: 10rem;
+  font-size: 0.75rem;
 }
 
 .btn-ghost {
-  padding: 6px 10px;
-  font-size: 0.85rem;
-  border-radius: 10px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  border-radius: 6px;
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: none;
+  border: 1px solid #eceff1;
   color: var(--ink);
 }
 
@@ -111,11 +137,13 @@ select.mode-select {
 
 .character-panel {
   position: relative;
+  flex: 1 1 0;
   min-height: 0;
+  margin: 0;
+  padding: 2px 4px 4px;
   background: var(--surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  padding: 5px 8px 6px;
+  border-radius: 0;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -124,13 +152,13 @@ select.mode-select {
 
 .speech-bubble {
   flex: 0 0 auto;
-  margin-bottom: 3px;
-  padding: 5px 8px;
-  border-radius: 8px;
+  margin: 0 0 2px;
+  padding: 4px 6px;
+  border-radius: 6px;
   background: #fff3e0;
   border: 1px solid #ffe0b2;
-  font-size: 0.8rem;
-  line-height: 1.25;
+  font-size: 0.78rem;
+  line-height: 1.2;
   text-align: center;
 }
 
@@ -171,19 +199,21 @@ select.mode-select {
 .char-name {
   flex: 0 0 auto;
   margin: 0;
-  padding-top: 2px;
-  font-size: 0.78rem;
-  line-height: 1.15;
+  padding: 0;
+  font-size: 0.72rem;
+  line-height: 1.1;
   color: var(--muted);
   text-align: center;
 }
 
 .problem-card {
+  margin: 0;
   background: var(--surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  padding: 5px 10px;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 4px 6px;
   text-align: center;
+  border-bottom: 1px solid #eceff1;
 }
 
 .problem-card.flash-ok {
@@ -196,26 +226,30 @@ select.mode-select {
 
 .problem-text {
   margin: 0;
-  font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+  font-size: clamp(1.25rem, 5vw, 1.5rem);
   font-weight: 800;
   letter-spacing: 0.04em;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 .numpad {
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(4, 2.5rem);
-  gap: 4px;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px 3px;
 }
 
 .numpad button {
   min-height: 0;
   padding: 0;
-  border-radius: 9px;
+  margin: 0;
+  border-radius: 6px;
   background: var(--surface);
-  box-shadow: 0 2px 6px rgba(43, 38, 34, 0.1);
-  font-size: clamp(0.95rem, 3.8vw, 1.05rem);
+  box-shadow: none;
+  border: 1px solid #eceff1;
+  font-size: clamp(0.95rem, 4.5vw, 1.15rem);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -244,36 +278,26 @@ select.mode-select {
 .footer-stats {
   display: flex;
   justify-content: space-between;
-  gap: 6px;
-  font-size: 0.68rem;
+  gap: 4px;
+  font-size: 0.65rem;
   color: var(--muted);
-  padding: 0;
-  line-height: 1.2;
+  padding: 2px 6px;
+  line-height: 1.1;
+  background: var(--surface);
+  border-top: 1px solid #eceff1;
 }
 
-/* 縦の短いスマホ（iPhone SE など） */
 @media (max-height: 680px) {
-  .char-stage img {
-    max-width: min(70vw, 220px);
-  }
-
-  .speech-bubble {
-    font-size: 0.78rem;
-    padding: 4px 8px;
+  .app-title {
+    font-size: 0.85rem;
   }
 
   .problem-text {
-    font-size: 1.3rem;
-  }
-
-  .numpad {
-    grid-template-rows: repeat(4, 2.35rem);
-    gap: 4px;
-    max-height: min(32dvh, 10.5rem);
+    font-size: 1.2rem;
   }
 
   .numpad button {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 }
 
