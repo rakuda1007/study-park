@@ -1,0 +1,25 @@
+{
+  "name": "Study Park",
+  "short_name": "Study Park",
+  "description": "学習用 Web アプリ（九九・県庁所在地など）",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#5058B8",
+  "theme_color": "#5058B8",
+  "icons": [
+    {
+      "src": "/study-park.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/study-park.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

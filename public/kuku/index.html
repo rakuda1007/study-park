@@ -3,9 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#fff8f0" />
-    <title>九九パーク</title>
+    <meta name="theme-color" content="#5058B8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Study Park" />
+    <title>九九パーク | Study Park</title>
     <base href="/kuku/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/study-park.png" />
     <link rel="stylesheet" href="/kuku/style.css" />
   </head>
   <body>
@@ -120,5 +124,10 @@
     <script src="/kuku/characters.js"></script>
     <script src="/kuku/storage.js"></script>
     <script src="/kuku/app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+      }
+    </script>
   </body>
 </html>

@@ -3,9 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f3f8ff" />
+    <meta name="theme-color" content="#5058B8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Study Park" />
     <title>県庁所在地クイズ | Study Park</title>
     <base href="/kencho/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/study-park.png" />
     <link rel="stylesheet" href="/kencho/style.css" />
   </head>
   <body>
@@ -16,6 +20,7 @@
           <option value="full">ぜんぶ47問</option>
           <option value="weak">苦手問題</option>
         </select>
+        <button type="button" id="btnQuit" class="btn-quit">やめる</button>
         <a class="btn-home" href="/">トップへ</a>
       </div>
     </header>
@@ -79,5 +84,10 @@
     <script src="/kencho/characters.js"></script>
     <script src="/kencho/storage.js"></script>
     <script src="/kencho/app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+      }
+    </script>
   </body>
 </html>

@@ -355,6 +355,39 @@
     if (els.modalCard) els.modalCard.classList.remove("record-burst");
   }
 
+  function quitSession() {
+    if (state.session.finished) return;
+    if (
+      !window.confirm(
+        "いまのチャレンジをやめますか？\n（ベスト記録は、最後までやりきったときだけ更新されます）",
+      )
+    ) {
+      return;
+    }
+
+    state.session.finished = true;
+    state.locked = true;
+    syncWeakCount();
+
+    const total = sessionTotal();
+    const idx = state.session.index;
+    const score = state.session.correct;
+    const atQuestion = Math.min(idx + 1, total);
+
+    let msg = `${atQuestion} 問めのところでやめました。\n`;
+    msg += `${score}問 せいかい / ${total}問 なかでした。\n`;
+    msg += `\nまた「もういちど」から同じモードで始められます。`;
+
+    clearCharFx();
+    showSingleChar();
+    renderCharacter();
+    setSpeech("またつぎにがんばろう！");
+    openModal("🛑 途中でやめたよ", msg, false);
+    renderStats();
+    renderQuestion();
+    if (els.btnModalRestart) els.btnModalRestart.hidden = false;
+  }
+
   function masteredMessage(n) {
     if (n >= 47) return "ぜんこくマスター！ 47都道府県おぼえたね！";
     if (n >= 30) return `${n}けんマスター！ すごい！`;
@@ -534,6 +567,8 @@
     }
 
     startSession();
+
+    $("btnQuit")?.addEventListener("click", quitSession);
 
     $("btnModalRestart")?.addEventListener("click", () => {
       closeModal();
