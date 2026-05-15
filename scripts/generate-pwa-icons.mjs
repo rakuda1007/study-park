@@ -17,7 +17,7 @@ const srcPath = join(root, "public/study-park.png");
 const MAT_BG = { r: 255, g: 255, b: 255, alpha: 1 };
 
 /** 1 辺あたりの余白の割合（四辺とも同じピクセル幅。小さいほど円が大きく見える） */
-const EDGE_PADDING_FRAC = 0.018;
+const EDGE_PADDING_FRAC = 0.009;
 
 const sizes = [512, 192, 180];
 
