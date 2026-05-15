@@ -15,17 +15,31 @@
     </header>
 
     <div class="stats-bar" aria-live="polite">
+      <span class="stat-pill">第 <strong id="questionNum">1</strong> / 47 問</span>
+      <span class="stat-pill">せいかい <strong id="sessionScore">0</strong></span>
       <span class="stat-pill">連続 <strong id="streak">0</strong></span>
       <span class="stat-pill">最高 <strong id="highStreak">0</strong></span>
       <span class="stat-pill">マスター <strong id="masteredCount">0 / 47</strong></span>
-      <div class="master-progress" aria-hidden="true">
-        <div id="masterFill" class="master-progress-fill"></div>
+      <div class="session-progress" aria-hidden="true">
+        <div id="sessionFill" class="session-progress-fill"></div>
       </div>
     </div>
 
-    <main class="quiz-main">
-      <p id="speech" class="speech-bubble">県庁所在地はどこ？</p>
+    <section id="characterPanel" class="character-panel" aria-live="polite">
+      <p id="speech" class="speech-bubble">47問チャレンジ！ がんばって！</p>
+      <div id="charSingle" class="char-single">
+        <div class="char-img-wrap">
+          <img id="charImg" src="/orange.png" alt="みかんぼうや" />
+        </div>
+        <p id="charLabel" class="char-label">🍊 みかんぼうや</p>
+      </div>
+      <div id="charSquad" class="char-squad" hidden>
+        <div id="squadGrid" class="squad-grid"></div>
+        <p class="char-label squad-caption">みんなで応援中！</p>
+      </div>
+    </section>
 
+    <main class="quiz-main">
       <section id="questionCard" class="question-card">
         <p class="question-label">この都道府県の県庁所在地は？</p>
         <p id="prefName" class="prefecture-name">北海道</p>
@@ -44,16 +58,18 @@
           id="celebrateModalImg"
           class="celebrate-modal-img"
           src="/characters.png"
-          alt="お祝い"
+          alt="みんなでお祝い"
           hidden
         />
         <div class="celebrate-modal-actions">
-          <button type="button" id="btnModalClose" class="btn-primary">つづける</button>
+          <button type="button" id="btnModalRestart" class="btn-primary">もういちど</button>
+          <button type="button" id="btnModalClose" class="btn-secondary" hidden>とじる</button>
         </div>
       </div>
     </div>
 
     <script src="/kencho/data.js"></script>
+    <script src="/kencho/characters.js"></script>
     <script src="/kencho/storage.js"></script>
     <script src="/kencho/app.js"></script>
   </body>

@@ -19,6 +19,7 @@
     return {
       version: DATA_VERSION,
       highStreak: 0,
+      bestSessionScore: 0,
       masteredIds: [],
       totalCorrect: 0,
     };
@@ -31,6 +32,10 @@
     const high = Number(input.highStreak);
     base.highStreak =
       Number.isFinite(high) && high >= 0 ? Math.floor(high) : 0;
+
+    const best = Number(input.bestSessionScore);
+    base.bestSessionScore =
+      Number.isFinite(best) && best >= 0 ? Math.floor(best) : 0;
 
     const total = Number(input.totalCorrect);
     base.totalCorrect =
@@ -86,6 +91,15 @@
       const v = Math.floor(Number(n));
       if (!Number.isFinite(v) || v < 0) return;
       patch({ highStreak: v });
+    },
+    getBestSessionScore() {
+      return read().bestSessionScore;
+    },
+    setBestSessionScore(n) {
+      const v = Math.floor(Number(n));
+      if (!Number.isFinite(v) || v < 0) return;
+      const cur = read().bestSessionScore;
+      if (v > cur) patch({ bestSessionScore: v });
     },
     getMasteredIds() {
       return [...read().masteredIds];
