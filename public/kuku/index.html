@@ -18,10 +18,23 @@
             <option value="sequential">順番（1×1〜9×9）</option>
             <option value="random">ランダム</option>
             <option value="weak">苦手問題</option>
+            <option value="timed">タイムアタック（100秒・全81問）</option>
           </select>
           <button type="button" id="btnCharPick" class="btn-ghost">キャラ</button>
         </div>
       </header>
+
+      <div id="timedBar" class="timed-bar" hidden aria-live="polite">
+        <div class="timed-bar-row">
+          <span class="timed-label">⏱ 残り</span>
+          <strong id="timedRemainSec" class="timed-sec">100</strong>
+          <span class="timed-unit">秒</span>
+          <span id="timedBestPill" class="timed-best-pill" hidden></span>
+        </div>
+        <div class="timed-progress-track" aria-hidden="true">
+          <div id="timedProgressFill" class="timed-progress-fill"></div>
+        </div>
+      </div>
 
       <section id="characterPanel" class="character-panel" aria-live="polite">
         <div id="speech" class="speech-bubble">はじめよう！</div>
@@ -67,6 +80,27 @@
     </div>
 
     <div id="levelBanner" class="levelup-banner" role="status" aria-live="assertive"></div>
+
+    <div id="timedModal" class="modal-backdrop timed-modal" hidden>
+      <div class="timed-modal-card" id="timedModalCard" role="dialog" aria-modal="true">
+        <p id="timedModalTitle" class="timed-modal-title"></p>
+        <p id="timedModalMsg" class="timed-modal-msg"></p>
+        <img
+          id="timedModalImg"
+          class="timed-modal-img"
+          src="/characters.png"
+          alt="みんなでお祝い"
+          hidden
+        />
+        <p id="timedModalTime" class="timed-modal-time"></p>
+        <div class="timed-modal-actions">
+          <button type="button" id="btnTimedRetry" class="btn-secondary" hidden>
+            もういちど
+          </button>
+          <button type="button" id="btnTimedModalClose" class="btn-primary">やったね！</button>
+        </div>
+      </div>
+    </div>
 
     <div id="charModal" class="modal-backdrop" hidden>
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="charModalTitle">

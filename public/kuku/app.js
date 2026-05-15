@@ -3,11 +3,14 @@
 
   const store = window.KukuStorage;
   const CORRECT_PER_LEVEL = 10;
+  const TIMED_LIMIT_MS = 100000;
+  const TIMED_TICK_MS = 100;
+  const TIMED_TOTAL = 81;
 
   const CHARS = window.KUKU_CHARACTERS || [];
   const ROSTER_IDS = window.KUKU_CHAR_ROSTER_IDS || CHARS.map((c) => c.id);
 
-  /** @type {{ mode: 'sequential'|'random'|'weak', a: number, b: number, seqIndex: number, seqOrder: {a:number,b:number}[], input: string, streak: number, totalCorrect: number, manualCharId: string|null, useAutoChar: boolean }} */
+  /** @type {{ mode: 'sequential'|'random'|'weak'|'timed', a: number, b: number, seqIndex: number, seqOrder: {a:number,b:number}[], input: string, streak: number, totalCorrect: number, manualCharId: string|null, useAutoChar: boolean, timed: { active: boolean, remainingMs: number, solved: number, intervalId: number|null, ended: boolean } }} */
   const state = {
     mode: "sequential",
     a: 1,
@@ -19,6 +22,14 @@
     totalCorrect: 0,
     manualCharId: null,
     useAutoChar: true,
+    timed: {
+      active: false,
+      remainingMs: TIMED_LIMIT_MS,
+      solved: 0,
+      intervalId: null,
+      ended: false,
+      lastResult: null,
+    },
   };
 
   const els = {};
@@ -110,7 +121,7 @@
   }
 
   function nextQuestion() {
-    if (state.mode === "sequential") {
+    if (state.mode === "sequential" || state.mode === "timed") {
       if (state.seqOrder.length === 0) {
         state.seqOrder = buildSequentialOrder();
       }
@@ -131,8 +142,221 @@
   }
 
   function advanceSequential() {
-    if (state.mode !== "sequential") return;
-    state.seqIndex = (state.seqIndex + 1) % (state.seqOrder.length || 81);
+    if (state.mode !== "sequential" && state.mode !== "timed") return;
+    const total = state.seqOrder.length || TIMED_TOTAL;
+    if (state.mode === "timed") {
+      state.seqIndex = Math.min(state.seqIndex + 1, total - 1);
+      return;
+    }
+    state.seqIndex = (state.seqIndex + 1) % total;
+  }
+
+  function getBestTimedSeconds() {
+    return store ? store.getBestTimedSeconds() : null;
+  }
+
+  function stopTimedTimer() {
+    if (state.timed.intervalId) {
+      clearInterval(state.timed.intervalId);
+      state.timed.intervalId = null;
+    }
+    state.timed.active = false;
+  }
+
+  function timedElapsedSeconds() {
+    const used = TIMED_LIMIT_MS - state.timed.remainingMs;
+    return Math.max(1, Math.ceil(used / 1000));
+  }
+
+  function renderTimedBar() {
+    const show = state.mode === "timed";
+    if (els.timedBar) els.timedBar.hidden = !show;
+    if (!show) return;
+
+    const sec = Math.max(0, Math.ceil(state.timed.remainingMs / 1000));
+    if (els.timedRemainSec) {
+      els.timedRemainSec.textContent = String(sec);
+      els.timedRemainSec.classList.toggle("timed-urgent", sec > 0 && sec <= 10);
+    }
+    if (els.timedProgressFill) {
+      const pct = Math.max(
+        0,
+        Math.min(100, (state.timed.remainingMs / TIMED_LIMIT_MS) * 100),
+      );
+      els.timedProgressFill.style.width = `${pct}%`;
+      els.timedProgressFill.classList.toggle("timed-urgent-fill", sec <= 10);
+    }
+    const best = getBestTimedSeconds();
+    if (els.timedBestPill) {
+      if (best) {
+        els.timedBestPill.hidden = false;
+        els.timedBestPill.textContent = `ベスト ${best}秒`;
+      } else {
+        els.timedBestPill.hidden = true;
+      }
+    }
+  }
+
+  function startTimedChallenge() {
+    stopTimedTimer();
+    state.seqOrder = buildSequentialOrder();
+    state.seqIndex = 0;
+    state.streak = 0;
+    state.timed = {
+      active: true,
+      remainingMs: TIMED_LIMIT_MS,
+      solved: 0,
+      intervalId: null,
+      ended: false,
+      lastResult: null,
+    };
+    state.timed.intervalId = window.setInterval(tickTimed, TIMED_TICK_MS);
+    closeTimedModal();
+    renderTimedBar();
+    setSpeech("100秒で81問ぜんぶ！ がんばって！");
+    nextQuestion();
+    renderFooter();
+  }
+
+  function tickTimed() {
+    if (!state.timed.active || state.timed.ended) return;
+    state.timed.remainingMs -= TIMED_TICK_MS;
+    if (state.timed.remainingMs <= 0) {
+      state.timed.remainingMs = 0;
+      onTimedTimeout();
+      return;
+    }
+    renderTimedBar();
+  }
+
+  function onTimedTimeout() {
+    stopTimedTimer();
+    state.timed.ended = true;
+    state.timed.lastResult = "fail";
+    setSpeech("時間ぎれ… あと少しだったね！");
+    renderTimedBar();
+    renderFooter();
+    showTimedFailModal();
+  }
+
+  function streakTierFromCount(streak) {
+    if (streak <= 0 || streak % 5 !== 0) return 0;
+    const block = Math.floor(streak / 5) - 1;
+    return [3, 10, 20][block % 3];
+  }
+
+  function getTimedCelebrateMessages(sec, prevBest, isNewRecord) {
+    const lines = [];
+    lines.push("みんなでお祝い！ ぜんぶクリアだよ！");
+    if (isNewRecord) {
+      if (prevBest == null) {
+        lines.push("🎉 はじめてのクリア！ 記録をのこしたよ！");
+      } else {
+        lines.push(`🏆 タイム更新！ ${prevBest}秒 → ${sec}秒！`);
+      }
+    } else if (prevBest != null) {
+      lines.push(`クリア！ ${sec}秒（ベスト ${prevBest}秒のまま）`);
+    } else {
+      lines.push(`クリア！ タイム ${sec}秒`);
+    }
+    if (sec <= 80) {
+      lines.push("⚡ 80秒切り！ ちょっと待って、はやすぎるよ！");
+    } else if (sec <= 90) {
+      lines.push("🌟 90秒切り！ すごいスピードだね！");
+    }
+    return lines.join("\n");
+  }
+
+  function playRecordBurst() {
+    if (!els.timedModalCard) return;
+    els.timedModalCard.classList.remove("record-burst");
+    void els.timedModalCard.offsetWidth;
+    els.timedModalCard.classList.add("record-burst");
+    window.setTimeout(
+      () => els.timedModalCard.classList.remove("record-burst"),
+      2800,
+    );
+  }
+
+  function closeTimedModal() {
+    if (els.timedModal) els.timedModal.hidden = true;
+    if (els.timedModalCard) els.timedModalCard.classList.remove("record-burst");
+  }
+
+  function showTimedCelebrateModal(sec, prevBest, isNewRecord) {
+    if (!els.timedModal) return;
+    if (els.timedModalTitle) {
+      els.timedModalTitle.textContent = isNewRecord
+        ? "🎊 新記録！"
+        : "🎊 タイムアタッククリア！";
+    }
+    if (els.timedModalMsg) {
+      els.timedModalMsg.textContent = getTimedCelebrateMessages(
+        sec,
+        prevBest,
+        isNewRecord,
+      );
+    }
+    if (els.timedModalTime) {
+      els.timedModalTime.textContent = `タイム ${sec}秒 / 制限 100秒`;
+    }
+    if (els.timedModalImg) els.timedModalImg.hidden = false;
+    if (els.btnTimedRetry) els.btnTimedRetry.hidden = true;
+    if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "やったね！";
+    if (isNewRecord) playRecordBurst();
+    els.timedModal.hidden = false;
+  }
+
+  function showTimedFailModal() {
+    if (!els.timedModal) return;
+    if (els.timedModalTitle) els.timedModalTitle.textContent = "⏰ 時間ぎれ";
+    if (els.timedModalMsg) {
+      els.timedModalMsg.textContent =
+        `${state.timed.solved}問 せいかい！\nもういちど 挑戦してみよう！`;
+    }
+    if (els.timedModalTime) {
+      const best = getBestTimedSeconds();
+      els.timedModalTime.textContent = best
+        ? `いまのベスト ${best}秒`
+        : "100秒以内に81問クリアをめざそう！";
+    }
+    if (els.timedModalImg) els.timedModalImg.hidden = true;
+    if (els.btnTimedRetry) els.btnTimedRetry.hidden = false;
+    if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "とじる";
+    els.timedModal.hidden = false;
+  }
+
+  function finishTimedSuccess() {
+    stopTimedTimer();
+    state.timed.ended = true;
+    state.timed.lastResult = "success";
+    const sec = timedElapsedSeconds();
+    const prevBest = getBestTimedSeconds();
+    const isNewRecord = prevBest === null || sec < prevBest;
+    if (isNewRecord && store) store.setBestTimedSeconds(sec);
+    setSpeech("クリア！！ みんなもよろこんでるよ！");
+    persistProgress();
+    renderFooter();
+    renderTimedBar();
+    showTimedCelebrateModal(sec, prevBest, isNewRecord);
+  }
+
+  function onModeChange(nextMode) {
+    if (state.mode === "timed") stopTimedTimer();
+    closeTimedModal();
+    state.mode = nextMode;
+    state.seqIndex = 0;
+    state.streak = 0;
+    state.timed.ended = false;
+    if (nextMode === "timed") {
+      startTimedChallenge();
+    } else {
+      renderTimedBar();
+      nextQuestion();
+    }
+    persistProgress();
+    renderFooter();
+    renderCharacter();
   }
 
   function expected() {
@@ -147,7 +371,7 @@
     toRemove.forEach((c) => panel.classList.remove(c));
   }
 
-  /** 連続正解 3 / 10 / 20 のマイルストーン演出 */
+  /** 連続正解 5問ごと（5,10,15…）のマイルストーン演出 */
   function applyStreakFxMilestone(streak) {
     const panel = els.characterPanel;
     const ch = currentCharacter();
@@ -155,18 +379,11 @@
 
     clearFxClasses(panel);
 
-    let tier = 0;
+    const tier = streakTierFromCount(streak);
     let charFx = "";
-    if (streak === 20) {
-      tier = 20;
-      charFx = ch.fx20;
-    } else if (streak === 10) {
-      tier = 10;
-      charFx = ch.fx10;
-    } else if (streak === 3) {
-      tier = 3;
-      charFx = ch.fx3;
-    }
+    if (tier === 20) charFx = ch.fx20;
+    else if (tier === 10) charFx = ch.fx10;
+    else if (tier === 3) charFx = ch.fx3;
     if (!tier) return;
 
     panel.classList.add("fx-playing", `fx-tier-${tier}`);
@@ -206,6 +423,10 @@
   }
 
   function remainingInMode() {
+    if (state.mode === "timed") {
+      const left = Math.max(0, TIMED_TOTAL - state.timed.solved);
+      return `${left} / ${TIMED_TOTAL}`;
+    }
     if (state.mode === "sequential") {
       const total = state.seqOrder.length || 81;
       const left = total - (state.seqIndex % total);
@@ -273,7 +494,7 @@
     state.streak += 1;
     state.totalCorrect += 1;
 
-    if (state.streak === 3 || state.streak === 10 || state.streak === 20) {
+    if (state.streak > 0 && state.streak % 5 === 0) {
       applyStreakFxMilestone(state.streak);
     }
 
@@ -293,6 +514,22 @@
         Math.floor(state.totalCorrect / CORRECT_PER_LEVEL)
     ) {
       showLevelUp(prevRoster, newRoster);
+    }
+
+    if (state.mode === "timed") {
+      state.timed.solved += 1;
+      advanceSequential();
+      state.input = "";
+      persistProgress();
+      renderFooter();
+      renderTimedBar();
+      renderCharacter();
+      if (state.timed.solved >= TIMED_TOTAL) {
+        finishTimedSuccess();
+        return;
+      }
+      window.setTimeout(() => nextQuestion(), 450);
+      return;
     }
 
     advanceSequential();
@@ -323,6 +560,7 @@
   }
 
   function submitAnswer() {
+    if (state.mode === "timed" && state.timed.ended) return;
     if (!state.input) return;
     const n = parseInt(state.input, 10);
     if (Number.isNaN(n)) return;
@@ -367,6 +605,18 @@
     els.modal = $("charModal");
     els.charGrid = $("charGrid");
     els.levelBanner = $("levelBanner");
+    els.timedBar = $("timedBar");
+    els.timedRemainSec = $("timedRemainSec");
+    els.timedProgressFill = $("timedProgressFill");
+    els.timedBestPill = $("timedBestPill");
+    els.timedModal = $("timedModal");
+    els.timedModalCard = $("timedModalCard");
+    els.timedModalTitle = $("timedModalTitle");
+    els.timedModalMsg = $("timedModalMsg");
+    els.timedModalImg = $("timedModalImg");
+    els.timedModalTime = $("timedModalTime");
+    els.btnTimedModalClose = $("btnTimedModalClose");
+    els.btnTimedRetry = $("btnTimedRetry");
 
     const modeSelect = $("modeSelect");
 
@@ -387,15 +637,22 @@
     if (modeSelect) {
       modeSelect.value = state.mode;
       modeSelect.addEventListener("change", () => {
-        state.mode = modeSelect.value;
-        state.seqIndex = 0;
-        state.streak = 0;
-        persistProgress();
-        nextQuestion();
-        renderFooter();
-        renderCharacter();
+        onModeChange(modeSelect.value);
       });
     }
+
+    $("btnTimedModalClose")?.addEventListener("click", () => {
+      const wasSuccess = state.timed.lastResult === "success";
+      closeTimedModal();
+      if (state.mode === "timed" && wasSuccess) startTimedChallenge();
+    });
+    $("btnTimedRetry")?.addEventListener("click", () => {
+      closeTimedModal();
+      if (state.mode === "timed") startTimedChallenge();
+    });
+    els.timedModal?.addEventListener("click", (ev) => {
+      if (ev.target === els.timedModal) closeTimedModal();
+    });
 
     $("btnCharPick")?.addEventListener("click", openModal);
     $("btnModalClose")?.addEventListener("click", closeModal);
@@ -417,7 +674,12 @@
     $("btnClear")?.addEventListener("click", backspace);
     $("btnSubmit")?.addEventListener("click", submitAnswer);
 
-    nextQuestion();
+    if (state.mode === "timed") {
+      startTimedChallenge();
+    } else {
+      nextQuestion();
+      renderTimedBar();
+    }
     renderCharacter();
     renderFooter();
   }

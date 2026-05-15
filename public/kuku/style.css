@@ -864,6 +864,217 @@ select.mode-select {
   filter: drop-shadow(0 0 16px rgba(255, 193, 7, 0.85)) brightness(1.1);
 }
 
+/* —— タイムアタック —— */
+.timed-bar {
+  flex: 0 0 auto;
+  padding: 4px 8px 6px;
+  background: linear-gradient(180deg, #fff3e0, #ffe0b2);
+  border-bottom: 1px solid #ffcc80;
+}
+
+.timed-bar-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.timed-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.timed-sec {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #e65100;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.timed-sec.timed-urgent {
+  color: var(--danger);
+  animation: timedPulse 0.55s ease-in-out infinite;
+}
+
+.timed-unit {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.timed-best-pill {
+  margin-left: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.timed-progress-track {
+  margin-top: 4px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.timed-progress-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #81c784, #43a047);
+  transition: width 0.1s linear;
+}
+
+.timed-progress-fill.timed-urgent-fill {
+  background: linear-gradient(90deg, #ff8a65, #e53935);
+}
+
+@keyframes timedPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.timed-modal {
+  z-index: 60;
+}
+
+.timed-modal-card {
+  position: relative;
+  width: min(100%, 360px);
+  max-height: 92vh;
+  overflow: auto;
+  background: linear-gradient(180deg, #fffde7, #fff8e1);
+  border-radius: 20px;
+  padding: 18px 16px 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+  text-align: center;
+  border: 3px solid #ffd54f;
+}
+
+.timed-modal-card.record-burst {
+  animation: recordShake 0.45s ease, recordGlow 1.2s ease 2;
+}
+
+.timed-modal-card.record-burst::before,
+.timed-modal-card.record-burst::after {
+  content: "✨";
+  position: absolute;
+  font-size: 1.4rem;
+  animation: confettiFloat 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
+.timed-modal-card.record-burst::before {
+  left: 8%;
+  top: 10%;
+}
+
+.timed-modal-card.record-burst::after {
+  right: 8%;
+  top: 14%;
+  animation-delay: 0.35s;
+}
+
+@keyframes recordShake {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  20% {
+    transform: rotate(-2deg) scale(1.02);
+  }
+  40% {
+    transform: rotate(2deg) scale(1.03);
+  }
+  60% {
+    transform: rotate(-1deg) scale(1.02);
+  }
+}
+
+@keyframes recordGlow {
+  0%,
+  100% {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(255, 193, 7, 0.5),
+      0 20px 50px rgba(255, 152, 0, 0.35);
+  }
+}
+
+@keyframes confettiFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.6);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-28px) scale(1.1);
+  }
+}
+
+.timed-modal-title {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #e65100;
+}
+
+.timed-modal-msg {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  white-space: pre-line;
+  color: var(--ink);
+}
+
+.timed-modal-img {
+  display: block;
+  width: min(100%, 300px);
+  margin: 0 auto 10px;
+  border-radius: 12px;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.12));
+  animation: celebratePop 0.55s ease;
+}
+
+@keyframes celebratePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.timed-modal-time {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.timed-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .character-panel.fx-playing .char-stage img,
   .character-panel.fx-playing .fx-stars span,

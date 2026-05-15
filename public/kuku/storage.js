@@ -25,6 +25,7 @@
       weakProblems: [],
       manualCharacterId: null,
       useAutoCharacter: true,
+      bestTimedSeconds: null,
     };
   }
 
@@ -109,9 +110,16 @@
 
     const mode = input.mode;
     base.mode =
-      mode === "random" || mode === "weak" || mode === "sequential"
+      mode === "random" ||
+      mode === "weak" ||
+      mode === "sequential" ||
+      mode === "timed"
         ? mode
         : "sequential";
+
+    const best = Number(input.bestTimedSeconds);
+    base.bestTimedSeconds =
+      Number.isFinite(best) && best > 0 ? Math.floor(best) : null;
 
     const seqIndex = Number(input.seqIndex);
     base.seqIndex =
@@ -195,6 +203,15 @@
     },
     getWeakList() {
       return read().weakProblems;
+    },
+    getBestTimedSeconds() {
+      const n = read().bestTimedSeconds;
+      return Number.isFinite(n) && n > 0 ? n : null;
+    },
+    setBestTimedSeconds(sec) {
+      const n = Math.floor(Number(sec));
+      if (!Number.isFinite(n) || n <= 0) return;
+      patch({ bestTimedSeconds: n });
     },
     clearAll() {
       if (!canUseStorage()) return;
