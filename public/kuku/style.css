@@ -112,42 +112,46 @@ select.mode-select {
 
 .character-panel {
   position: relative;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
   background: var(--surface);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  padding: 5px 8px 6px;
+  padding: 6px 10px 8px;
   margin-bottom: 4px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
 }
 
 .speech-bubble {
-  margin-bottom: 3px;
-  padding: 4px 8px;
+  align-self: stretch;
+  margin-bottom: 4px;
+  padding: 6px 10px;
   border-radius: 8px;
   background: #fff3e0;
   border: 1px solid #ffe0b2;
-  font-size: 0.78rem;
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  text-align: center;
 }
 
-.char-row {
+.char-stage-block {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 88px;
+  max-height: min(34dvh, 220px);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
 }
 
 .char-stage {
   position: relative;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,19 +161,20 @@ select.mode-select {
   display: block;
   width: auto;
   height: auto;
-  max-width: 68px;
-  max-height: 68px;
+  max-width: min(52vw, 200px);
+  max-height: min(30dvh, 200px);
   object-fit: contain;
   object-position: center;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.1));
   transition: transform 0.2s ease;
 }
 
 .char-name {
-  margin: 0;
-  font-size: 0.76rem;
+  margin: 2px 0 0;
+  font-size: 0.85rem;
   line-height: 1.2;
   color: var(--muted);
+  text-align: center;
 }
 
 .problem-card {
@@ -199,22 +204,22 @@ select.mode-select {
 }
 
 .numpad {
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, 2.65rem);
   gap: 5px;
   margin-bottom: 4px;
+  max-height: min(36dvh, 12.5rem);
 }
 
 .numpad button {
   min-height: 0;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 9px;
   background: var(--surface);
-  box-shadow: 0 2px 8px rgba(43, 38, 34, 0.1);
-  font-size: clamp(1rem, 4.2vw, 1.15rem);
+  box-shadow: 0 2px 6px rgba(43, 38, 34, 0.1);
+  font-size: clamp(0.95rem, 3.8vw, 1.05rem);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -253,19 +258,19 @@ select.mode-select {
 
 /* 縦の短いスマホ（iPhone SE など） */
 @media (max-height: 680px) {
-  .char-stage {
-    width: 60px;
-    height: 60px;
+  .char-stage-block {
+    min-height: 72px;
+    max-height: min(28dvh, 160px);
   }
 
   .char-stage img {
-    max-width: 56px;
-    max-height: 56px;
+    max-width: min(46vw, 150px);
+    max-height: min(24dvh, 150px);
   }
 
   .speech-bubble {
-    font-size: 0.72rem;
-    padding: 3px 6px;
+    font-size: 0.78rem;
+    padding: 4px 8px;
   }
 
   .problem-text {
@@ -273,7 +278,13 @@ select.mode-select {
   }
 
   .numpad {
+    grid-template-rows: repeat(4, 2.35rem);
     gap: 4px;
+    max-height: min(32dvh, 10.5rem);
+  }
+
+  .numpad button {
+    font-size: 0.9rem;
   }
 }
 
@@ -484,96 +495,126 @@ select.mode-select {
   }
 }
 
-/* 演出用オーバーレイ（簡易 CSS） */
+/* —— 連続正解演出 —— */
 .fx-layer {
   position: absolute;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
-  overflow: hidden;
-  border-radius: var(--radius);
+  overflow: visible;
 }
 
-/* ぱんだるま */
-.fx-panda-bounce .char-stage img {
-  animation: poyon 0.7s ease 2;
-}
-
-.fx-panda-bamboo .fx-layer::after {
-  content: "🎋";
-  position: absolute;
-  font-size: 2rem;
-  right: 8%;
-  bottom: 12%;
-  animation: poyon 1s ease infinite;
-}
-
-.fx-panda-firework .fx-layer::before {
-  content: "✨🎋✨";
-  position: absolute;
-  left: 50%;
-  top: 8%;
-  transform: translateX(-50%);
-  font-size: 1.4rem;
-  animation: wiggle 0.8s ease infinite;
-}
-
-/* ぽちまる */
-.fx-dog-tail .char-stage img {
-  transform-origin: 50% 90%;
-  animation: tailWag 0.35s ease 6;
-}
-
-.fx-dog-bone .fx-layer::after {
-  content: "🦴";
-  position: absolute;
-  left: 10%;
-  bottom: 18%;
-  font-size: 1.6rem;
-  animation: poyon 0.9s ease infinite;
-}
-
-.fx-dog-stars .fx-layer::before {
-  content: "⭐🐾⭐";
+.fx-stars {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: start center;
-  padding-top: 4px;
-  font-size: 1.2rem;
-  animation: spinSlow 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-/* みけにゃん */
-.fx-cat-heart-tail .char-stage img {
-  animation: wiggle 0.5s ease 4;
-}
-
-.fx-cat-heart-tail .fx-layer::after {
-  content: "💕";
-  position: absolute;
-  right: 6%;
-  bottom: 10%;
-  font-size: 1.4rem;
-}
-
-.fx-cat-paw .fx-layer::before {
-  content: "🐾";
+.fx-stars span {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  font-size: 3rem;
-  animation: stampPop 0.6s ease forwards;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  font-size: 0;
+  background: linear-gradient(135deg, #ffe082, #ffb300);
+  clip-path: polygon(
+    50% 0%,
+    61% 38%,
+    100% 50%,
+    61% 62%,
+    50% 100%,
+    39% 62%,
+    0% 50%,
+    39% 38%
+  );
+  opacity: 0;
+  transform: scale(0.2);
 }
 
-.fx-cat-mega-heart .fx-layer::before {
-  content: "💖🐾💖";
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  animation: pulseGlow 1.2s ease infinite;
+.fx-stars span:nth-child(1) {
+  --fx-angle: 0deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(2) {
+  --fx-angle: 45deg;
+  --fx-dist: 50%;
+}
+.fx-stars span:nth-child(3) {
+  --fx-angle: 90deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(4) {
+  --fx-angle: 135deg;
+  --fx-dist: 50%;
+}
+.fx-stars span:nth-child(5) {
+  --fx-angle: 180deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(6) {
+  --fx-angle: 225deg;
+  --fx-dist: 50%;
+}
+.fx-stars span:nth-child(7) {
+  --fx-angle: 270deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(8) {
+  --fx-angle: 315deg;
+  --fx-dist: 50%;
+}
+
+@keyframes charJump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-18px) scale(1.03);
+  }
+  55% {
+    transform: translateY(-6px) scale(1.01);
+  }
+}
+
+@keyframes starBurst {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--fx-angle)) translateY(0) scale(0.2);
+  }
+  25% {
+    opacity: 1;
+    transform: rotate(var(--fx-angle)) translateY(calc(-1 * var(--fx-dist)))
+      scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--fx-angle))
+      translateY(calc(-1.1 * var(--fx-dist))) scale(0.6);
+  }
+}
+
+@keyframes charGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1)) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(255, 193, 7, 0.95))
+      drop-shadow(0 0 28px rgba(255, 152, 0, 0.55)) brightness(1.12);
+  }
+}
+
+@keyframes orbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes stampPop {
@@ -590,79 +631,236 @@ select.mode-select {
   }
 }
 
-/* とうふさん */
-.fx-tofu-shake .char-stage img {
-  animation: shakeSoft 0.45s ease 3;
-}
-
-.fx-tofu-negi .fx-layer::after {
-  content: "🌿 🌿";
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  top: 0;
-  font-size: 1.2rem;
-  animation: poyon 1.1s ease infinite;
-}
-
-.fx-tofu-gold .char-stage img {
-  animation: pulseGlow 1.1s ease infinite;
-}
-
-/* みかん */
-.fx-orange-peel .char-stage img {
-  clip-path: inset(0 0 0 0 round 50%);
-  animation: peelHint 0.8s ease 2;
-}
-
 @keyframes peelHint {
   0%,
   100% {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.06);
+    transform: scale(1.08);
   }
 }
 
-.fx-orange-juice .fx-layer::before {
+@keyframes floatEmoji {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* 3連続：ジャンプ（キャラ別で上書き可） */
+.character-panel.fx-tier-3 .char-stage img {
+  transform-origin: center bottom;
+  animation: charJump 0.52s ease 3;
+}
+
+/* 10連続：星 */
+.character-panel.fx-tier-10 .fx-stars {
+  opacity: 1;
+}
+
+.character-panel.fx-tier-10 .fx-stars span {
+  animation: starBurst 1.4s ease-out infinite;
+}
+
+.character-panel.fx-tier-10 .fx-stars span:nth-child(1) {
+  animation-delay: 0s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(5) {
+  animation-delay: 0.32s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(6) {
+  animation-delay: 0.4s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(7) {
+  animation-delay: 0.48s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(8) {
+  animation-delay: 0.56s;
+}
+
+/* 20連続：光る */
+.character-panel.fx-tier-20 .char-stage img {
+  animation: charGlow 0.85s ease-in-out infinite;
+}
+
+.character-panel.fx-tier-20 .fx-stars {
+  opacity: 1;
+}
+
+.character-panel.fx-tier-20 .fx-stars span {
+  background: linear-gradient(135deg, #fff9c4, #ffeb3b);
+  animation: starBurst 1.8s ease-in-out infinite;
+}
+
+/* —— キャラ別の追加演出 —— */
+
+/* ぱんだるま：ぽよん / 竹 / 竹花火 */
+.fx-panda-bamboo.fx-tier-10 .fx-layer::after {
+  content: "🎋";
+  position: absolute;
+  right: 6%;
+  bottom: 8%;
+  font-size: 1.75rem;
+  animation: floatEmoji 0.9s ease-in-out infinite;
+}
+
+.fx-panda-firework.fx-tier-20 .fx-layer::before {
+  content: "✨🎋✨";
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  font-size: 1.35rem;
+  animation: wiggle 0.7s ease-in-out infinite;
+}
+
+/* ぽちまる：しっぽ / 骨 / 星走り */
+.fx-dog-tail.fx-tier-3 .char-stage img {
+  animation: tailWag 0.32s ease 8;
+}
+
+.fx-dog-bone.fx-tier-10 .fx-layer::after {
+  content: "🦴";
+  position: absolute;
+  left: 8%;
+  bottom: 10%;
+  font-size: 1.5rem;
+  animation: floatEmoji 0.75s ease-in-out infinite;
+}
+
+.fx-dog-stars.fx-tier-20 .fx-layer::before {
+  content: "🐾";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -0.6rem 0 0 -0.6rem;
+  font-size: 1.2rem;
+  animation: orbitSpin 2.5s linear infinite;
+}
+
+/* みけにゃん：ハートしっぽ / 肉球 / 巨大ハート */
+.fx-cat-heart-tail.fx-tier-3 .char-stage img {
+  animation: wiggle 0.45s ease 5;
+}
+
+.fx-cat-heart-tail.fx-tier-3 .fx-layer::after {
+  content: "💕";
+  position: absolute;
+  right: 8%;
+  bottom: 12%;
+  font-size: 1.25rem;
+  animation: floatEmoji 0.8s ease-in-out infinite;
+}
+
+.fx-cat-paw.fx-tier-10 .fx-layer::before {
+  content: "🐾";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 2.5rem;
+  transform: translate(-50%, -50%) scale(0);
+  animation: stampPop 0.65s ease forwards;
+}
+
+.fx-cat-mega-heart.fx-tier-20 .fx-layer::before {
+  content: "💖";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  animation: stampPop 0.5s ease forwards, floatEmoji 1s ease-in-out 0.5s infinite;
+}
+
+/* とうふさん：ぷるぷる / ネギ / 金豆腐 */
+.fx-tofu-shake.fx-tier-3 .char-stage img {
+  animation: shakeSoft 0.4s ease 4;
+}
+
+.fx-tofu-negi.fx-tier-10 .fx-layer::after {
+  content: "🌿✨🌿";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4%;
+  text-align: center;
+  font-size: 1.1rem;
+  animation: wiggle 0.65s ease-in-out infinite;
+}
+
+.fx-tofu-gold.fx-tier-20 .char-stage img {
+  animation: charGlow 0.75s ease-in-out infinite,
+    shakeSoft 0.5s ease 2;
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.9)) brightness(1.15);
+}
+
+/* みかん：皮が開く / 果汁 / 太陽 */
+.fx-orange-peel.fx-tier-3 .char-stage img {
+  animation: peelHint 0.65s ease 3, charJump 0.52s ease 3;
+}
+
+.fx-orange-juice.fx-tier-10 .fx-layer::before {
   content: "✨💧✨";
   position: absolute;
   left: 0;
   right: 0;
-  top: 10%;
+  top: 8%;
   text-align: center;
-  font-size: 1.1rem;
-  animation: wiggle 0.7s ease infinite;
+  font-size: 1rem;
+  animation: wiggle 0.6s ease-in-out infinite;
 }
 
-.fx-orange-sun .char-stage img {
-  animation: pulseGlow 1.2s ease infinite;
-}
-
-.fx-orange-sun .fx-layer::after {
+.fx-orange-sun.fx-tier-20 .fx-layer::after {
   content: "☀️";
   position: absolute;
-  right: 4%;
-  top: 4%;
-  font-size: 1.5rem;
+  right: 6%;
+  top: 6%;
+  font-size: 1.4rem;
+  animation: orbitSpin 3s linear infinite;
 }
 
-/* りんご */
-.fx-apple-leaf .char-stage img {
-  animation: wiggle 0.55s ease 5;
+/* りんご：葉っぱ / 香り / 金りんご */
+.fx-apple-leaf.fx-tier-3 .char-stage img {
+  animation: wiggle 0.5s ease 6;
 }
 
-.fx-apple-scent .fx-layer::before {
-  content: "～～✨";
+.fx-apple-scent.fx-tier-10 .fx-layer::before {
+  content: "～♪～";
   position: absolute;
-  left: 8%;
-  top: 12%;
-  font-size: 1rem;
+  left: 10%;
+  top: 10%;
+  font-size: 0.95rem;
   color: #8d6e63;
-  animation: poyon 1.2s ease infinite;
+  animation: floatEmoji 1s ease-in-out infinite;
 }
 
-.fx-apple-gold .char-stage img {
-  animation: pulseGlow 1.1s ease infinite;
+.fx-apple-gold.fx-tier-20 .char-stage img {
+  filter: drop-shadow(0 0 16px rgba(255, 193, 7, 0.85)) brightness(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-panel.fx-playing .char-stage img,
+  .character-panel.fx-playing .fx-stars span,
+  .character-panel.fx-playing .fx-layer::before,
+  .character-panel.fx-playing .fx-layer::after {
+    animation: none !important;
+  }
+
+  .character-panel.fx-tier-10 .fx-stars,
+  .character-panel.fx-tier-20 .fx-stars {
+    opacity: 0.6;
+  }
 }

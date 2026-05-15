@@ -141,22 +141,39 @@
 
   function clearFxClasses(panel) {
     if (!panel) return;
-    const toRemove = [...panel.classList].filter((c) => c.startsWith("fx-"));
+    const toRemove = [...panel.classList].filter(
+      (c) => c.startsWith("fx-") || c === "fx-playing",
+    );
     toRemove.forEach((c) => panel.classList.remove(c));
   }
 
+  /** 連続正解 3 / 10 / 20 のマイルストーン演出 */
   function applyStreakFxMilestone(streak) {
     const panel = els.characterPanel;
     const ch = currentCharacter();
+    if (!panel || !ch) return;
+
     clearFxClasses(panel);
-    if (!ch) return;
-    let cls = "";
-    if (streak === 20) cls = ch.fx20;
-    else if (streak === 10) cls = ch.fx10;
-    else if (streak === 3) cls = ch.fx3;
-    if (!cls) return;
-    panel.classList.add(cls);
-    window.setTimeout(() => clearFxClasses(panel), 2200);
+
+    let tier = 0;
+    let charFx = "";
+    if (streak === 20) {
+      tier = 20;
+      charFx = ch.fx20;
+    } else if (streak === 10) {
+      tier = 10;
+      charFx = ch.fx10;
+    } else if (streak === 3) {
+      tier = 3;
+      charFx = ch.fx3;
+    }
+    if (!tier) return;
+
+    panel.classList.add("fx-playing", `fx-tier-${tier}`);
+    if (charFx) panel.classList.add(charFx);
+
+    const duration = tier === 20 ? 3200 : tier === 10 ? 2800 : 2200;
+    window.setTimeout(() => clearFxClasses(panel), duration);
   }
 
   function randomPhrase(ch) {

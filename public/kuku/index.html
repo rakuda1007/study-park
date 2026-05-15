@@ -24,13 +24,18 @@
 
     <section id="characterPanel" class="character-panel" aria-live="polite">
       <div id="speech" class="speech-bubble">はじめよう！</div>
-      <div class="fx-layer" aria-hidden="true"></div>
-      <div class="char-row">
+      <div class="char-stage-block">
+        <div class="fx-layer" aria-hidden="true">
+          <div class="fx-stars" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
         <div class="char-stage">
           <img id="charImg" src="/orange.png" alt="みかんぼうや" />
         </div>
-        <p id="charLabel" class="char-name">🍊 みかんぼうや</p>
       </div>
+      <p id="charLabel" class="char-name">🍊 みかんぼうや</p>
     </section>
 
     <section id="problemCard" class="problem-card">
