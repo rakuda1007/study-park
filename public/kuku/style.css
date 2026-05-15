@@ -30,22 +30,24 @@ body {
 }
 
 body {
-  padding: 12px 14px 20px;
+  padding: 8px 12px max(10px, env(safe-area-inset-bottom));
+  padding-top: max(8px, env(safe-area-inset-top));
   max-width: 480px;
   margin: 0 auto;
+  min-height: 100dvh;
 }
 
 .app-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .app-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   flex: 1 1 auto;
 }
@@ -65,16 +67,19 @@ button {
 }
 
 select.mode-select {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-radius: 10px;
   background: var(--surface);
   box-shadow: var(--shadow);
   color: var(--ink);
-  min-width: 140px;
+  min-width: 0;
+  max-width: 11rem;
+  font-size: 0.8rem;
 }
 
 .btn-ghost {
-  padding: 8px 12px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
   border-radius: 10px;
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -99,9 +104,8 @@ select.mode-select {
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 12px 12px 8px;
-  margin-bottom: 12px;
-  min-height: 180px;
+  padding: 8px 10px 4px;
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -109,20 +113,20 @@ select.mode-select {
 
 .speech-bubble {
   align-self: stretch;
-  margin-bottom: 8px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  margin-bottom: 4px;
+  padding: 6px 10px;
+  border-radius: 10px;
   background: #fff3e0;
   border: 2px solid #ffe0b2;
-  font-size: 0.95rem;
-  line-height: 1.45;
-  min-height: 3.2em;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  min-height: 0;
 }
 
 .char-stage {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 112px;
+  height: 112px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,8 +137,8 @@ select.mode-select {
   display: block;
   width: auto;
   height: auto;
-  max-width: 140px;
-  max-height: 140px;
+  max-width: 104px;
+  max-height: 104px;
   object-fit: contain;
   object-position: center;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
@@ -142,8 +146,10 @@ select.mode-select {
 }
 
 .char-name {
-  margin-top: 4px;
-  font-size: 0.85rem;
+  margin: 0;
+  padding-top: 2px;
+  font-size: 0.78rem;
+  line-height: 1.2;
   color: var(--muted);
 }
 
@@ -151,9 +157,9 @@ select.mode-select {
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 20px 16px;
+  padding: 10px 12px;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .problem-card.flash-ok {
@@ -165,31 +171,26 @@ select.mode-select {
 }
 
 .problem-text {
-  font-size: 2rem;
+  margin: 0;
+  font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-}
-
-.answer-preview {
-  margin-top: 10px;
-  font-size: 1.35rem;
-  color: var(--muted);
-  min-height: 1.5em;
+  line-height: 1.2;
 }
 
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 7px;
+  margin-bottom: 6px;
 }
 
 .numpad button {
-  padding: 16px 8px;
-  border-radius: 14px;
+  padding: 11px 6px;
+  border-radius: 12px;
   background: var(--surface);
   box-shadow: var(--shadow);
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
@@ -215,10 +216,61 @@ select.mode-select {
 .footer-stats {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  font-size: 0.9rem;
+  gap: 8px;
+  font-size: 0.78rem;
   color: var(--muted);
-  padding: 0 4px;
+  padding: 0 2px;
+}
+
+/* 画面の高さが低いスマホ向けにさらに詰める */
+@media (max-height: 740px) {
+  .app-header {
+    margin-bottom: 4px;
+  }
+
+  .app-title {
+    font-size: 0.95rem;
+  }
+
+  .character-panel {
+    padding: 6px 8px 2px;
+    margin-bottom: 6px;
+  }
+
+  .speech-bubble {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  .char-stage {
+    width: 96px;
+    height: 96px;
+  }
+
+  .char-stage img {
+    max-width: 88px;
+    max-height: 88px;
+  }
+
+  .problem-card {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+
+  .problem-text {
+    font-size: 1.55rem;
+  }
+
+  .numpad {
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .numpad button {
+    padding: 9px 4px;
+    font-size: 1.1rem;
+  }
 }
 
 .footer-stats strong {

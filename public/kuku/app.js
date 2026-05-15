@@ -183,10 +183,8 @@
 
   function renderProblem() {
     if (els.problemText) {
-      els.problemText.textContent = `${state.a} × ${state.b} = ?`;
-    }
-    if (els.answerPreview) {
-      els.answerPreview.textContent = state.input ? state.input : "（  ）";
+      const tail = state.input ? state.input : "?";
+      els.problemText.textContent = `${state.a} × ${state.b} = ${tail}`;
     }
   }
 
@@ -346,7 +344,6 @@
     els.speech = $("speech");
     els.problemCard = $("problemCard");
     els.problemText = $("problemText");
-    els.answerPreview = $("answerPreview");
     els.streakEl = $("streak");
     els.remainEl = $("remain");
     els.levelEl = $("levelPill");
