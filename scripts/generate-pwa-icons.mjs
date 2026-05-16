@@ -15,8 +15,8 @@ const root = join(__dirname, "..");
 const srcPath = join(root, "public/study-park.png");
 const MAT_BG = { r: 255, g: 255, b: 255, alpha: 1 };
 
-/** 1 辺の外周余白の割合（四辺とも同じピクセル） */
-const EDGE_PADDING_FRAC = 0.001;
+/** 1 辺の外周余白の割合（四辺とも同じピクセル）。目安: 512→2px, 192/180→1px */
+const EDGE_PADDING_FRAC = 0.003;
 
 /** trim: 角に近い均一色を削る感度（大きいとロゴまで食うので控えめ） */
 const TRIM_THRESHOLD = 22;
