@@ -1,10 +1,10 @@
 /**
  * PWA / ホーム画面用の正方形アイコンを生成する。
  *
- * 1. 元画像から「中央の正方形」に切り出し（円形ロゴが画面中央に来る想定の横長画像向け）
- * 2. その正方形を縮小し、四辺に同じ太さの余白を付与
- *    余白は白 (#fff)。円形ロゴを「白い座布団」の上に載せた見え方にし、
- *    ブランド色（DIC439 相当の紫）で外枠を敷かない（ホーム画面で二重の枠にならないようにする）。
+ * 1. 元画像から中央の正方形に切り出し
+ * 2. 可能なら trim で外周の均一な帯を落とし、ロゴ本体に近い矩形へ
+ * 3. 内側 (size - 2*pad) の正方形に fit:contain で収め、上下左右に同じ白余白で中央配置
+ * 4. 外周に同じ太さの白 (MAT_BG) を extend → 最終 size×size で四辺の余白が一致
  */
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,11 +13,16 @@ import sharp from "sharp";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const srcPath = join(root, "public/study-park.png");
-/** 座布団＝アイコン全体の下地（紫ではなく白） */
 const MAT_BG = { r: 255, g: 255, b: 255, alpha: 1 };
 
-/** 1 辺あたりの余白の割合（四辺とも同じピクセル幅。小さいほど円が大きく見える） */
-const EDGE_PADDING_FRAC = 0.003;
+/** 1 辺の外周余白の割合（四辺とも同じピクセル） */
+const EDGE_PADDING_FRAC = 0.001;
+
+/** trim: 角に近い均一色を削る感度（大きいとロゴまで食うので控えめ） */
+const TRIM_THRESHOLD = 22;
+
+/** trim 後に極端に小さくなったら無効とみなす（壊れ防止） */
+const TRIM_MIN_SIDE_FRAC = 0.35;
 
 const sizes = [512, 192, 180];
 
@@ -32,20 +37,42 @@ const side = Math.min(w, h);
 const left = Math.floor((w - side) / 2);
 const top = Math.floor((h - side) / 2);
 
+const rawSquare = await sharp(srcPath)
+  .extract({ left, top, width: side, height: side })
+  .toBuffer();
+
+let contentBuf = rawSquare;
+try {
+  const trimmed = await sharp(rawSquare)
+    .trim({ threshold: TRIM_THRESHOLD })
+    .toBuffer({ resolveWithObject: true });
+  const tw = trimmed.info.width;
+  const th = trimmed.info.height;
+  if (
+    tw >= side * TRIM_MIN_SIDE_FRAC &&
+    th >= side * TRIM_MIN_SIDE_FRAC &&
+    tw <= side &&
+    th <= side
+  ) {
+    contentBuf = trimmed.data;
+  }
+} catch {
+  /* 単色などで trim できない場合は正方形のまま */
+}
+
 for (const size of sizes) {
   const outPath = join(root, "public", `icon-${size}.png`);
 
-  const padPx = Math.max(1, Math.round(size * EDGE_PADDING_FRAC));
+  const padPx = Math.max(0, Math.round(size * EDGE_PADDING_FRAC));
   let inner = size - 2 * padPx;
-  if (inner < 1) {
-    inner = 1;
-  }
+  if (inner < 1) inner = 1;
 
-  await sharp(srcPath)
-    .extract({ left, top, width: side, height: side })
+  await sharp(contentBuf)
     .resize(inner, inner, {
+      fit: "contain",
+      position: "centre",
       kernel: sharp.kernel.lanczos3,
-      fit: "fill",
+      background: MAT_BG,
     })
     .extend({
       top: padPx,
