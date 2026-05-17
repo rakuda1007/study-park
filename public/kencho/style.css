@@ -84,6 +84,21 @@ select.mode-select {
   margin: 0;
   font-size: 1rem;
   font-weight: 800;
+  min-width: 0;
+}
+
+.app-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-title-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-title-link:active {
+  opacity: 0.85;
 }
 
 .btn-home {
@@ -96,6 +111,11 @@ select.mode-select {
   color: var(--ink);
   text-decoration: none;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-home:active {
+  transform: scale(0.97);
 }
 
 .stats-bar {

@@ -16,7 +16,9 @@
   <body>
     <div class="zone-top">
       <header class="app-header">
-        <h1 class="app-title">九九パーク</h1>
+        <h1 class="app-title">
+          <a href="/" class="app-title-link">九九パーク</a>
+        </h1>
         <div class="header-actions">
           <span id="levelPill" class="level-pill" aria-live="polite">Lv.1</span>
           <select id="modeSelect" class="mode-select" aria-label="出題モード">
@@ -25,6 +27,7 @@
             <option value="weak">苦手問題</option>
             <option value="timed">タイムアタック（100秒・全81問）</option>
           </select>
+          <a class="btn-home" href="/">トップ</a>
           <button type="button" id="btnQuit" class="btn-quit">やめる</button>
           <button type="button" id="btnCharPick" class="btn-ghost">キャラ</button>
         </div>
