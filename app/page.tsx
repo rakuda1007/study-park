@@ -1,28 +1,105 @@
+import Image from "next/image";
 import Link from "next/link";
+
+type MenuItem = {
+  label: string;
+  href?: string;
+  ready: boolean;
+};
+
+type SubjectMenu = {
+  subject: string;
+  items: MenuItem[];
+};
+
+const subjectMenus: SubjectMenu[] = [
+  {
+    subject: "算数",
+    items: [{ label: "九九", href: "/kuku/", ready: true }],
+  },
+  {
+    subject: "社会",
+    items: [{ label: "県庁所在地", href: "/kencho/", ready: true }],
+  },
+  {
+    subject: "理科",
+    items: [{ label: "準備中", ready: false }],
+  },
+];
+
+function MenuItemButton({ item }: { item: MenuItem }) {
+  const inner = (
+    <>
+      <span className="menu-item-label">{item.label}</span>
+      {item.ready ? (
+        <span className="menu-item-arrow" aria-hidden="true">
+          →
+        </span>
+      ) : (
+        <span className="menu-item-badge">工事中</span>
+      )}
+    </>
+  );
+
+  if (item.ready && item.href) {
+    return (
+      <Link href={item.href} className="menu-item menu-item--active">
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <span className="menu-item menu-item--disabled" aria-disabled="true">
+      {inner}
+    </span>
+  );
+}
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-6 px-6 py-16">
-      <h1 className="text-foreground text-3xl font-semibold tracking-tight">
-        Study Park
-      </h1>
-      <p className="text-foreground/80">
-        学習用 Web アプリの入口です。メニューから学習を選んでください。
-      </p>
-      <nav className="flex flex-col gap-3" aria-label="学習メニュー">
-        <Link
-          href="/kuku/"
-          className="bg-foreground text-background inline-flex w-fit items-center justify-center rounded-xl px-6 py-3 text-lg font-semibold no-underline transition-opacity hover:opacity-90"
-        >
-          九九パーク
-        </Link>
-        <Link
-          href="/kencho/"
-          className="border-foreground/20 text-foreground inline-flex w-fit items-center justify-center rounded-xl border-2 bg-transparent px-6 py-3 text-lg font-semibold no-underline transition-opacity hover:opacity-90"
-        >
-          県庁所在地
-        </Link>
-      </nav>
+    <main className="home">
+      <div className="home-caution" aria-hidden="true" />
+      <div className="home-inner">
+        <header className="home-header">
+          <div className="home-brand">
+            <Image
+              src="/study-park.png"
+              alt=""
+              width={72}
+              height={72}
+              className="home-logo"
+              priority
+            />
+            <div className="home-title-block">
+              <p className="home-renovation-badge">
+                <span aria-hidden="true">🚧</span> 改装中
+              </p>
+              <h1 className="home-title">Study Park</h1>
+              <p className="home-lead">
+                公園を少しずつ改装しています。できたエリアから遊んでね。
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <nav className="home-nav" aria-label="学習メニュー">
+          <ul className="home-subject-list">
+            {subjectMenus.map((group) => (
+              <li key={group.subject} className="home-subject">
+                <h2 className="home-subject-name">{group.subject}</h2>
+                <ul className="home-item-list">
+                  {group.items.map((item) => (
+                    <li key={`${group.subject}-${item.label}`}>
+                      <MenuItemButton item={item} />
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </main>
   );
 }
