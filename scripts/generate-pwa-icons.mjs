@@ -15,8 +15,8 @@ const root = join(__dirname, "..");
 const srcPath = join(root, "public/study-park.png");
 const MAT_BG = { r: 255, g: 255, b: 255, alpha: 1 };
 
-/** 1 辺の外周余白の割合（四辺とも同じピクセル）。目安: 512→2px, 192/180→1px */
-const EDGE_PADDING_FRAC = 0.003;
+/** 1 辺の外周余白の割合（四辺とも同じピクセル）。目安: 512→4px, 192/180→2px */
+const EDGE_PADDING_FRAC = 0.006;
 
 /** trim: 角に近い均一色を削る感度（大きいとロゴまで食うので控えめ） */
 const TRIM_THRESHOLD = 22;
@@ -63,7 +63,10 @@ try {
 for (const size of sizes) {
   const outPath = join(root, "public", `icon-${size}.png`);
 
-  const padPx = Math.max(0, Math.round(size * EDGE_PADDING_FRAC));
+  const padPx = Math.max(
+    0,
+    2 * Math.round((size * EDGE_PADDING_FRAC) / 2),
+  );
   let inner = size - 2 * padPx;
   if (inner < 1) inner = 1;
 
