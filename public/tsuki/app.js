@@ -632,6 +632,7 @@
     els.orderSelect = $("orderSelect");
     els.modeSelect = $("modeSelect");
     els.btnReset = $("btnReset");
+    els.btnUpdate = $("btnUpdate");
     els.btnReveal = $("btnReveal");
     els.selfGrade = $("selfGrade");
     els.btnOk = $("btnOk");
@@ -665,6 +666,13 @@
     startSession();
 
     els.btnReset?.addEventListener("click", resetProgress);
+    els.btnUpdate?.addEventListener("click", () => {
+      if (window.StudyParkPwa?.forceRefresh) {
+        window.StudyParkPwa.forceRefresh();
+        return;
+      }
+      window.location.reload();
+    });
     $("btnQuit")?.addEventListener("click", quitSession);
     els.btnReveal?.addEventListener("click", onRevealAnswer);
     els.btnOk?.addEventListener("click", () => onSelfGrade(true));
