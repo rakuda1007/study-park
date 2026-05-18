@@ -19,7 +19,10 @@ const subjectMenus: SubjectMenu[] = [
   },
   {
     subject: "社会",
-    items: [{ label: "県庁所在地", href: "/kencho/", ready: true }],
+    items: [
+      { label: "県庁所在地", href: "/kencho/", ready: true },
+      { label: "雪の多い地域の特色", ready: false },
+    ],
   },
   {
     subject: "理科",
@@ -59,6 +62,49 @@ function MenuItemButton({ item }: { item: MenuItem }) {
   );
 }
 
+function SubjectSection({ group }: { group: SubjectMenu }) {
+  const readyCount = group.items.filter((item) => item.ready).length;
+
+  if (group.items.length === 1) {
+    return (
+      <section className="home-subject" aria-labelledby={`subject-${group.subject}`}>
+        <h2 id={`subject-${group.subject}`} className="home-subject-name">
+          {group.subject}
+        </h2>
+        <ul className="home-item-list">
+          <li>
+            <MenuItemButton item={group.items[0]} />
+          </li>
+        </ul>
+      </section>
+    );
+  }
+
+  return (
+    <details className="home-subject home-subject-dropdown">
+      <summary className="home-subject-dropdown-trigger">
+        <span id={`subject-${group.subject}`} className="home-subject-name">
+          {group.subject}
+        </span>
+        <span className="home-subject-dropdown-meta">
+          <span className="home-subject-dropdown-count">{readyCount}件</span>
+          <span className="home-subject-dropdown-chevron" aria-hidden="true" />
+        </span>
+      </summary>
+      <ul
+        className="home-item-list home-subject-dropdown-panel"
+        aria-labelledby={`subject-${group.subject}`}
+      >
+        {group.items.map((item) => (
+          <li key={`${group.subject}-${item.label}`}>
+            <MenuItemButton item={item} />
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 export default function Home() {
   return (
     <main className="home">
@@ -66,14 +112,16 @@ export default function Home() {
       <div className="home-inner">
         <header className="home-header">
           <div className="home-brand">
-            <Image
-              src="/study-park.png"
-              alt=""
-              width={72}
-              height={72}
-              className="home-logo"
-              priority
-            />
+            <div className="home-logo-wrap">
+              <Image
+                src="/study-park-logo.png"
+                alt=""
+                width={72}
+                height={72}
+                className="home-logo"
+                priority
+              />
+            </div>
             <div className="home-title-block">
               <p className="home-renovation-badge">
                 <span aria-hidden="true">🚧</span> 改装中
@@ -87,20 +135,11 @@ export default function Home() {
         </header>
 
         <nav className="home-nav" aria-label="学習メニュー">
-          <ul className="home-subject-list">
+          <div className="home-subject-list">
             {subjectMenus.map((group) => (
-              <li key={group.subject} className="home-subject">
-                <h2 className="home-subject-name">{group.subject}</h2>
-                <ul className="home-item-list">
-                  {group.items.map((item) => (
-                    <li key={`${group.subject}-${item.label}`}>
-                      <MenuItemButton item={item} />
-                    </li>
-                  ))}
-                </ul>
-              </li>
+              <SubjectSection key={group.subject} group={group} />
             ))}
-          </ul>
+          </div>
         </nav>
       </div>
     </main>

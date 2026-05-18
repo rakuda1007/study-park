@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
+    "logo:home": "node scripts/generate-home-logo.mjs",
     "firebase:deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
