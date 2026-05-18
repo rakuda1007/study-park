@@ -21,9 +21,23 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (path === "/shokubutsu" || path === "/shokubutsu/") {
+    url.pathname = "/shokubutsu/index.html";
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/kuku", "/kuku/", "/kencho", "/kencho/", "/tsuki", "/tsuki/"],
+  matcher: [
+    "/kuku",
+    "/kuku/",
+    "/kencho",
+    "/kencho/",
+    "/tsuki",
+    "/tsuki/",
+    "/shokubutsu",
+    "/shokubutsu/",
+  ],
 };
