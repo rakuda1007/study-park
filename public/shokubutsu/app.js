@@ -7,7 +7,7 @@
   const CHARS = window.SHOKUBUTSU_CHARACTERS || [];
   const SQUAD_IDS = window.SHOKUBUTSU_SQUAD_IDS || ["orange", "dog", "cat", "tofu"];
 
-  const MASTERED_MILESTONES = [3, 5, 7];
+  const MASTERED_MILESTONES = [3, 5, 8, 10];
 
   const state = {
     mode: "full",
@@ -93,9 +93,19 @@
     return blank.answers[0];
   }
 
+  function answerEntries(question) {
+    if (Array.isArray(question.answerDisplay) && question.answerDisplay.length > 0) {
+      return question.answerDisplay;
+    }
+    return question.blanks.map((b) => ({
+      marker: b.marker,
+      text: formatCorrectAnswer(b),
+    }));
+  }
+
   function allCorrectSummary(question) {
-    return question.blanks
-      .map((b) => `（${b.marker}）${formatCorrectAnswer(b)}`)
+    return answerEntries(question)
+      .map((e) => `（${e.marker}）${e.text}`)
       .join("、");
   }
 
@@ -292,9 +302,9 @@
   function renderAnswerList(question) {
     if (!els.answerList) return;
     els.answerList.innerHTML = "";
-    question.blanks.forEach((blank) => {
+    answerEntries(question).forEach((entry) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="answer-marker">（${blank.marker}）</span><span class="answer-text">${formatCorrectAnswer(blank)}</span>`;
+      li.innerHTML = `<span class="answer-marker">（${entry.marker}）</span><span class="answer-text">${entry.text}</span>`;
       els.answerList.appendChild(li);
     });
   }
@@ -530,7 +540,7 @@
 
     if (isFull) {
       if (perfect && totalInt === TOTAL) {
-        title = `🌙 ${TOTAL}問ぜんぶできた！`;
+        title = `🌱 ${TOTAL}問ぜんぶできた！`;
         msg += "\n\n🎉 ぜんぶ思い出せたね！ すごすぎる！";
         showImage = true;
         playRecordBurst();

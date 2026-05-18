@@ -24,7 +24,7 @@
           <option value="random">ランダム</option>
         </select>
         <select id="modeSelect" class="mode-select" aria-label="出題モード">
-          <option value="full">ぜんぶ7問</option>
+          <option value="full">ぜんぶ10問</option>
           <option value="weak">苦手問題</option>
         </select>
         <button type="button" id="btnUpdate" class="btn-update">更新</button>
@@ -35,19 +35,19 @@
     </header>
 
     <div class="stats-bar" aria-live="polite">
-      <span class="stat-pill">第 <strong id="questionNum">1</strong> / <strong id="sessionTotal">7</strong> 問</span>
+      <span class="stat-pill">第 <strong id="questionNum">1</strong> / <strong id="sessionTotal">10</strong> 問</span>
       <span class="stat-pill">苦手 <strong id="weakCount">0</strong> 件</span>
       <span class="stat-pill">できた <strong id="sessionScore">0</strong></span>
       <span class="stat-pill">連続 <strong id="streak">0</strong></span>
       <span class="stat-pill">最高 <strong id="highStreak">0</strong></span>
-      <span class="stat-pill">マスター <strong id="masteredCount">0 / 7</strong></span>
+      <span class="stat-pill">マスター <strong id="masteredCount">0 / 10</strong></span>
       <div class="session-progress" aria-hidden="true">
         <div id="sessionFill" class="session-progress-fill"></div>
       </div>
     </div>
 
     <section id="characterPanel" class="character-panel" aria-live="polite">
-      <p id="speech" class="speech-bubble">7問チャレンジ！ がんばって！</p>
+      <p id="speech" class="speech-bubble">10問チャレンジ！ がんばって！</p>
       <div id="charSingle" class="char-single">
         <div class="char-img-wrap">
           <img id="charImg" src="/orange.png" alt="みかんぼうや" />
