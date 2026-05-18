@@ -16,9 +16,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (path === "/tsuki" || path === "/tsuki/") {
+    url.pathname = "/tsuki/index.html";
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/kuku", "/kuku/", "/kencho", "/kencho/"],
+  matcher: ["/kuku", "/kuku/", "/kencho", "/kencho/", "/tsuki", "/tsuki/"],
 };

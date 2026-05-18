@@ -23,7 +23,7 @@ const subjectMenus: SubjectMenu[] = [
   },
   {
     subject: "理科",
-    items: [{ label: "準備中", ready: false }],
+    items: [{ label: "月の動き", href: "/tsuki/", ready: true }],
   },
 ];
 
