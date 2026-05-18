@@ -23,6 +23,7 @@
       masteredIds: [],
       totalCorrect: 0,
       mode: "full",
+      order: "sequential",
       weakProblems: [],
     };
   }
@@ -60,6 +61,7 @@
     }
 
     base.mode = input.mode === "weak" ? "weak" : "full";
+    base.order = input.order === "random" ? "random" : "sequential";
     base.weakProblems = parseWeak(input.weakProblems);
 
     return base;
@@ -137,6 +139,12 @@
     },
     setMode(mode) {
       patch({ mode: mode === "weak" ? "weak" : "full" });
+    },
+    getOrder() {
+      return read().order === "random" ? "random" : "sequential";
+    },
+    setOrder(order) {
+      patch({ order: order === "random" ? "random" : "sequential" });
     },
     getWeakList() {
       return parseWeak(read().weakProblems);

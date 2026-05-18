@@ -11,6 +11,7 @@
 
   const state = {
     mode: "full",
+    order: "sequential",
     current: null,
     choices: [],
     streak: 0,
@@ -70,6 +71,7 @@
     const data = store ? store.load() : null;
     if (!data) return;
     state.mode = store ? store.getMode() : "full";
+    state.order = store ? store.getOrder() : "sequential";
     state.highStreak = data.highStreak || 0;
     state.bestSessionScore = data.bestSessionScore || 0;
     state.masteredIds = store ? store.getMasteredIds() : [];
@@ -83,12 +85,21 @@
     state.weakCount = store ? store.getWeakList().length : 0;
   }
 
+  function sortIdsByPrefOrder(ids) {
+    const orderMap = new Map(PREFS.map((p, i) => [p.id, i]));
+    return [...ids].sort(
+      (a, b) => (orderMap.get(a) ?? 0) - (orderMap.get(b) ?? 0),
+    );
+  }
+
   function buildSessionQueue() {
     if (state.mode === "weak") {
       const list = store ? store.getWeakList() : [];
-      return shuffle(list.map((e) => e.id));
+      const ids = list.map((e) => e.id);
+      return state.order === "random" ? shuffle(ids) : sortIdsByPrefOrder(ids);
     }
-    return shuffle(PREFS.map((p) => p.id));
+    const ids = PREFS.map((p) => p.id);
+    return state.order === "random" ? shuffle(ids) : ids;
   }
 
   function persistHighStreak() {
@@ -272,9 +283,16 @@
         "ぜんぶ47問モードで学習して、まちがえた県がここにたまります。\nモードを「ぜんぶ47問」に変えて始めてみよう！",
         false,
       );
-      if (els.modeSelect) els.modeSelect.value = "full";
+      if (els.formatSelect && window.StudyParkQuizFormat) {
+        applyFormat(window.StudyParkQuizFormat.FORMAT.SEQUENTIAL);
+        syncFormatSelect();
+      }
       state.mode = "full";
-      if (store) store.setMode("full");
+      state.order = "sequential";
+      if (store) {
+        store.setMode("full");
+        store.setOrder("sequential");
+      }
       return startSession();
     }
 
@@ -302,10 +320,52 @@
     nextQuestion();
   }
 
-  function onModeChange(nextMode) {
-    state.mode = nextMode === "weak" ? "weak" : "full";
-    if (store) store.setMode(state.mode);
+  function syncFormatSelect() {
+    const fmt = window.StudyParkQuizFormat;
+    if (!els.formatSelect || !fmt) return;
+    fmt.fillSelect(
+      els.formatSelect,
+      TOTAL,
+      fmt.fromState(state.mode, state.order),
+    );
+  }
+
+  function applyFormat(value) {
+    const fmt = window.StudyParkQuizFormat;
+    if (!fmt) return;
+    const { mode, order } = fmt.parse(value);
+    state.mode = mode;
+    state.order = order;
+    if (store) {
+      store.setMode(state.mode);
+      store.setOrder(state.order);
+    }
+  }
+
+  function onFormatChange(value) {
+    applyFormat(value);
     startSession();
+  }
+
+  function resetWeakOnly() {
+    if (
+      !window.confirm(
+        "苦手問題の記録をすべて消しますか？\n（マスターやベスト記録はそのままです）",
+      )
+    ) {
+      return;
+    }
+    if (store) store.patch({ weakProblems: [] });
+    syncWeakCount();
+    if (state.mode === "weak") {
+      if (els.formatSelect && window.StudyParkQuizFormat) {
+        applyFormat(window.StudyParkQuizFormat.FORMAT.SEQUENTIAL);
+        syncFormatSelect();
+      }
+      startSession();
+    } else {
+      setSpeech("苦手問題をリセットしたよ");
+    }
   }
 
   function nextQuestion() {
@@ -546,7 +606,9 @@
     els.sessionFill = $("sessionFill");
     els.sessionTotal = $("sessionTotal");
     els.weakCount = $("weakCount");
-    els.modeSelect = $("modeSelect");
+    els.formatSelect = $("formatSelect");
+    els.btnResetWeak = $("btnResetWeak");
+    els.btnUpdate = $("btnUpdate");
     els.banner = $("celebrateBanner");
     els.modal = $("celebrateModal");
     els.modalCard = $("celebrateModalCard");
@@ -558,16 +620,24 @@
 
     loadProgress();
     renderSquadGrid();
+    syncFormatSelect();
 
-    if (els.modeSelect) {
-      els.modeSelect.value = state.mode;
-      els.modeSelect.addEventListener("change", () => {
-        onModeChange(els.modeSelect.value);
+    if (els.formatSelect) {
+      els.formatSelect.addEventListener("change", () => {
+        onFormatChange(els.formatSelect.value);
       });
     }
 
     startSession();
 
+    els.btnResetWeak?.addEventListener("click", resetWeakOnly);
+    els.btnUpdate?.addEventListener("click", () => {
+      if (window.StudyParkPwa?.forceRefresh) {
+        window.StudyParkPwa.forceRefresh();
+        return;
+      }
+      window.location.reload();
+    });
     $("btnQuit")?.addEventListener("click", quitSession);
 
     $("btnModalRestart")?.addEventListener("click", () => {

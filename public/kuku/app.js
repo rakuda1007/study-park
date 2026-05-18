@@ -6,6 +6,7 @@
   const TIMED_LIMIT_MS = 100000;
   const TIMED_TICK_MS = 100;
   const TIMED_TOTAL = 81;
+  const KUKU_TOTAL = 81;
 
   const CHARS = window.KUKU_CHARACTERS || [];
   const ROSTER_IDS = window.KUKU_CHAR_ROSTER_IDS || CHARS.map((c) => c.id);
@@ -77,9 +78,35 @@
     });
   }
 
+  function kukuFormatFromMode(mode) {
+    const fmt = window.StudyParkQuizFormat;
+    if (!fmt) return null;
+    if (mode === "weak") return fmt.FORMAT.WEAK;
+    if (mode === "random") return fmt.FORMAT.RANDOM;
+    return fmt.FORMAT.SEQUENTIAL;
+  }
+
+  function kukuModeFromFormat(value) {
+    const fmt = window.StudyParkQuizFormat;
+    if (!fmt) return "sequential";
+    if (value === fmt.FORMAT.WEAK) return "weak";
+    if (value === fmt.FORMAT.RANDOM) return "random";
+    return "sequential";
+  }
+
+  function syncFormatSelect() {
+    const fmt = window.StudyParkQuizFormat;
+    if (!els.formatSelect || !fmt) return;
+    fmt.fillSelect(
+      els.formatSelect,
+      KUKU_TOTAL,
+      kukuFormatFromMode(state.mode),
+    );
+  }
+
   function applySavedData(data) {
     if (!data) return;
-    state.mode = data.mode;
+    state.mode = data.mode === "timed" ? "sequential" : data.mode;
     state.seqIndex = data.seqIndex;
     state.totalCorrect = data.totalCorrect;
     state.streak = data.streak;
@@ -362,7 +389,7 @@
     state.quitKind = null;
     state.timed.ended = false;
     state.timed.lastResult = null;
-    if (els.modeSelect) els.modeSelect.value = nextMode;
+    syncFormatSelect();
     if (nextMode === "timed") {
       startTimedChallenge();
     } else {
@@ -373,6 +400,26 @@
     renderFooter();
     renderCharacter();
     setNumpadDisabled(false);
+  }
+
+  function onFormatChange(value) {
+    onModeChange(kukuModeFromFormat(value));
+  }
+
+  function resetWeakOnly() {
+    if (
+      !window.confirm(
+        "苦手問題の記録をすべて消しますか？\n（レベルやベスト記録はそのままです）",
+      )
+    ) {
+      return;
+    }
+    if (store) store.patch({ weakProblems: [] });
+    if (state.mode === "weak") {
+      onModeChange("sequential");
+    } else {
+      setSpeech("苦手問題をリセットしたよ");
+    }
   }
 
   function setNumpadDisabled(disabled) {
@@ -719,11 +766,16 @@
     els.btnTimedModalClose = $("btnTimedModalClose");
     els.btnTimedRetry = $("btnTimedRetry");
 
-    const modeSelect = $("modeSelect");
+    els.formatSelect = $("formatSelect");
+    els.btnResetWeak = $("btnResetWeak");
+    els.btnUpdate = $("btnUpdate");
 
     if (store) {
       const saved = store.load();
       applySavedData(saved);
+      if (saved.mode === "timed") {
+        store.patch({ mode: "sequential" });
+      }
       if (
         saved.manualCharacterId &&
         !CHARS.some((c) => c.id === saved.manualCharacterId)
@@ -735,12 +787,21 @@
 
     state.seqOrder = buildSequentialOrder();
 
-    if (modeSelect) {
-      modeSelect.value = state.mode;
-      modeSelect.addEventListener("change", () => {
-        onModeChange(modeSelect.value);
+    syncFormatSelect();
+    if (els.formatSelect) {
+      els.formatSelect.addEventListener("change", () => {
+        onFormatChange(els.formatSelect.value);
       });
     }
+
+    els.btnResetWeak?.addEventListener("click", resetWeakOnly);
+    els.btnUpdate?.addEventListener("click", () => {
+      if (window.StudyParkPwa?.forceRefresh) {
+        window.StudyParkPwa.forceRefresh();
+        return;
+      }
+      window.location.reload();
+    });
 
     $("btnTimedModalClose")?.addEventListener("click", () => {
       if (state.quitKind === "play") {
@@ -799,12 +860,8 @@
     $("btnClear")?.addEventListener("click", backspace);
     $("btnSubmit")?.addEventListener("click", submitAnswer);
 
-    if (state.mode === "timed") {
-      startTimedChallenge();
-    } else {
-      nextQuestion();
-      renderTimedBar();
-    }
+    nextQuestion();
+    renderTimedBar();
     renderCharacter();
     renderFooter();
     setNumpadDisabled(false);

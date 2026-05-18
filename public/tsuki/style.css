@@ -4,6 +4,8 @@
   --surface: #ffffff;
   --ink: #1a1f3a;
   --muted: #5c6282;
+  --header-border: #c5cae9;
+  --header-util-bg: #e8eaf6;
   --accent: #5c6bc0;
   --accent-dark: #3949ab;
   --danger: #e85a5a;
@@ -37,7 +39,7 @@ body {
   min-height: 100dvh;
 }
 
-.app-header {
+.app-header:not(.app-header--unified) {
   display: flex;
   align-items: center;
   justify-content: space-between;

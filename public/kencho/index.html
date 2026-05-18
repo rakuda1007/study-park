@@ -11,20 +11,32 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/icon-180.png" />
-    <link rel="stylesheet" href="/kencho/style.css?v=6" />
+    <link rel="stylesheet" href="/shared/quiz-header.css?v=8" />
+    <link rel="stylesheet" href="/kencho/style.css?v=7" />
   </head>
   <body>
-    <header class="app-header">
-      <h1 class="app-title">
-        <a href="/" class="app-title-link">県庁所在地クイズ</a>
-      </h1>
-      <div class="header-actions">
-        <select id="modeSelect" class="mode-select" aria-label="出題モード">
-          <option value="full">ぜんぶ47問</option>
-          <option value="weak">苦手問題</option>
-        </select>
-        <button type="button" id="btnQuit" class="btn-quit">やめる</button>
-        <a class="btn-home" href="/">トップ</a>
+            <header class="app-header app-header--unified">
+      <a href="/" class="app-header-logo-link" aria-label="トップへ">
+        <img
+          class="app-header-logo"
+          src="/study-park-logo.png"
+          alt=""
+          width="44"
+          height="44"
+        />
+      </a>
+      <h1 class="app-header-title">県庁所在地</h1>
+      <div class="app-header-toolbar">
+        <label class="format-field">
+          <span class="format-field-label">出題形式</span>
+          <select id="formatSelect" class="format-select" aria-label="出題形式"></select>
+        </label>
+        <div class="app-header-utils">
+          <button type="button" id="btnUpdate" class="btn-header-util btn-update">更新</button>
+          <button type="button" id="btnResetWeak" class="btn-header-util btn-reset-weak">
+            苦手をリセット
+          </button>
+        </div>
       </div>
     </header>
 
@@ -61,6 +73,9 @@
       </section>
 
       <div id="choices" class="choices" role="group" aria-label="選択肢"></div>
+      <div class="choices-footer">
+        <button type="button" id="btnQuit" class="btn-quit">やめる</button>
+      </div>
     </main>
 
     <div id="celebrateBanner" class="celebrate-banner" role="status" aria-live="assertive"></div>
@@ -83,11 +98,12 @@
       </div>
     </div>
 
-    <script src="/study-park-asset-version.js?v=6"></script>
-    <script src="/pwa-update.js?v=6"></script>
-    <script src="/kencho/data.js?v=6"></script>
-    <script src="/kencho/characters.js?v=6"></script>
-    <script src="/kencho/storage.js?v=6"></script>
-    <script src="/kencho/app.js?v=6"></script>
+    <script src="/study-park-asset-version.js?v=7"></script>
+    <script src="/shared/quiz-format.js?v=7"></script>
+    <script src="/pwa-update.js?v=7"></script>
+    <script src="/kencho/data.js?v=7"></script>
+    <script src="/kencho/characters.js?v=7"></script>
+    <script src="/kencho/storage.js?v=7"></script>
+    <script src="/kencho/app.js?v=7"></script>
   </body>
 </html>

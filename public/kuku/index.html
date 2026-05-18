@@ -11,27 +11,39 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/icon-180.png" />
-    <link rel="stylesheet" href="/kuku/style.css?v=6" />
+    <link rel="stylesheet" href="/shared/quiz-header.css?v=8" />
+    <link rel="stylesheet" href="/kuku/style.css?v=7" />
   </head>
   <body>
     <div class="zone-top">
-      <header class="app-header">
-        <h1 class="app-title">
-          <a href="/" class="app-title-link">九九パーク</a>
-        </h1>
-        <div class="header-actions">
+          <header class="app-header app-header--unified">
+      <a href="/" class="app-header-logo-link" aria-label="トップへ">
+        <img
+          class="app-header-logo"
+          src="/study-park-logo.png"
+          alt=""
+          width="44"
+          height="44"
+        />
+      </a>
+      <h1 class="app-header-title">九九パーク</h1>
+      <div class="app-header-toolbar">
+        <label class="format-field">
+          <span class="format-field-label">出題形式</span>
+          <select id="formatSelect" class="format-select" aria-label="出題形式"></select>
+        </label>
+        <div class="app-header-utils">
+          <button type="button" id="btnUpdate" class="btn-header-util btn-update">更新</button>
+          <button type="button" id="btnResetWeak" class="btn-header-util btn-reset-weak">
+            苦手をリセット
+          </button>
+        </div>
+        <div class="app-header-extra">
           <span id="levelPill" class="level-pill" aria-live="polite">Lv.1</span>
-          <select id="modeSelect" class="mode-select" aria-label="出題モード">
-            <option value="sequential">順番（1×1〜9×9）</option>
-            <option value="random">ランダム</option>
-            <option value="weak">苦手問題</option>
-            <option value="timed">タイムアタック（100秒・全81問）</option>
-          </select>
-          <a class="btn-home" href="/">トップ</a>
-          <button type="button" id="btnQuit" class="btn-quit">やめる</button>
           <button type="button" id="btnCharPick" class="btn-ghost">キャラ</button>
         </div>
-      </header>
+      </div>
+    </header>
 
       <div id="timedBar" class="timed-bar" hidden aria-live="polite">
         <div class="timed-bar-row">
@@ -82,6 +94,10 @@
         <button type="button" class="btn-wide btn-submit" id="btnSubmit">OK</button>
       </div>
 
+      <div class="kuku-input-footer">
+        <button type="button" id="btnQuit" class="btn-quit">やめる</button>
+      </div>
+
       <footer class="footer-stats">
         <span>連続せいかい <strong id="streak">0</strong></span>
         <span>のこり <strong id="remain">81 / 81</strong></span>
@@ -126,10 +142,11 @@
       </div>
     </div>
 
-    <script src="/study-park-asset-version.js?v=6"></script>
-    <script src="/pwa-update.js?v=6"></script>
-    <script src="/kuku/characters.js?v=6"></script>
-    <script src="/kuku/storage.js?v=6"></script>
-    <script src="/kuku/app.js?v=6"></script>
+    <script src="/study-park-asset-version.js?v=7"></script>
+    <script src="/pwa-update.js?v=7"></script>
+    <script src="/shared/quiz-format.js?v=7"></script>
+    <script src="/kuku/characters.js?v=7"></script>
+    <script src="/kuku/storage.js?v=7"></script>
+    <script src="/kuku/app.js?v=7"></script>
   </body>
 </html>

@@ -15,6 +15,13 @@
         "type": 302
       }
     ],
+    "rewrites": [
+      { "source": "/kuku", "destination": "/kuku/index.html" },
+      { "source": "/kencho", "destination": "/kencho/index.html" },
+      { "source": "/tsuki", "destination": "/tsuki/index.html" },
+      { "source": "/shokubutsu", "destination": "/shokubutsu/index.html" },
+      { "source": "/yukichiiki", "destination": "/yukichiiki/index.html" }
+    ],
     "headers": [
       {
         "source": "/sw.js",

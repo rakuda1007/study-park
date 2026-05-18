@@ -344,7 +344,10 @@
         `ぜんぶ${TOTAL}問モードで学習して、「できない」と答えた問題がここにたまります。\nモードを「ぜんぶ${TOTAL}問」に変えて始めてみよう！`,
         false,
       );
-      if (els.modeSelect) els.modeSelect.value = "full";
+      if (els.formatSelect && window.StudyParkQuizFormat) {
+        applyFormat(window.StudyParkQuizFormat.FORMAT.SEQUENTIAL);
+        syncFormatSelect();
+      }
       state.mode = "full";
       if (store) store.setMode("full");
       return startSession();
@@ -374,9 +377,37 @@
     nextQuestion();
   }
 
+  function syncFormatSelect() {
+    const fmt = window.StudyParkQuizFormat;
+    if (!els.formatSelect || !fmt) return;
+    fmt.fillSelect(
+      els.formatSelect,
+      TOTAL,
+      fmt.fromState(state.mode, state.order),
+    );
+  }
+
+  function applyFormat(value) {
+    const fmt = window.StudyParkQuizFormat;
+    if (!fmt) return;
+    const { mode, order } = fmt.parse(value);
+    state.mode = mode;
+    state.order = order;
+    if (store) {
+      store.setMode(state.mode);
+      store.setOrder(state.order);
+    }
+  }
+
+  function onFormatChange(value) {
+    applyFormat(value);
+    startSession();
+  }
+
   function onModeChange(nextMode) {
     state.mode = nextMode === "weak" ? "weak" : "full";
     if (store) store.setMode(state.mode);
+    syncFormatSelect();
     startSession();
   }
 
@@ -386,26 +417,25 @@
     startSession();
   }
 
-  function resetProgress() {
+  function resetWeakOnly() {
     if (
       !window.confirm(
-        "マスター・苦手・連続記録・ベスト記録をすべて消して、最初からやり直しますか？\n（この操作は取り消せません）",
+        "苦手問題の記録をすべて消しますか？\n（マスターやベスト記録はそのままです）",
       )
     ) {
       return;
     }
-    if (store) store.clearAll();
-    state.highStreak = 0;
-    state.bestSessionScore = 0;
-    state.masteredIds = [];
-    state.weakCount = 0;
-    state.shownMasterMilestones = new Set();
-    loadProgress();
-    if (els.modeSelect) els.modeSelect.value = state.mode;
-    if (els.orderSelect) els.orderSelect.value = state.order;
-    closeModal();
-    startSession();
-    setSpeech("リセットしたよ。もういちどがんばろう！");
+    if (store) store.patch({ weakProblems: [] });
+    syncWeakCount();
+    if (state.mode === "weak") {
+      if (els.formatSelect && window.StudyParkQuizFormat) {
+        applyFormat(window.StudyParkQuizFormat.FORMAT.SEQUENTIAL);
+        syncFormatSelect();
+      }
+      startSession();
+    } else {
+      setSpeech("苦手問題をリセットしたよ");
+    }
   }
 
   function nextQuestion() {
@@ -639,9 +669,8 @@
     els.sessionFill = $("sessionFill");
     els.sessionTotal = $("sessionTotal");
     els.weakCount = $("weakCount");
-    els.orderSelect = $("orderSelect");
-    els.modeSelect = $("modeSelect");
-    els.btnReset = $("btnReset");
+    els.formatSelect = $("formatSelect");
+    els.btnResetWeak = $("btnResetWeak");
     els.btnUpdate = $("btnUpdate");
     els.btnReveal = $("btnReveal");
     els.selfGrade = $("selfGrade");
@@ -658,24 +687,15 @@
 
     loadProgress();
     renderSquadGrid();
-
-    if (els.orderSelect) {
-      els.orderSelect.value = state.order;
-      els.orderSelect.addEventListener("change", () => {
-        onOrderChange(els.orderSelect.value);
-      });
-    }
-
-    if (els.modeSelect) {
-      els.modeSelect.value = state.mode;
-      els.modeSelect.addEventListener("change", () => {
-        onModeChange(els.modeSelect.value);
+    if (els.formatSelect) {
+      els.formatSelect.addEventListener("change", () => {
+        onFormatChange(els.formatSelect.value);
       });
     }
 
     startSession();
 
-    els.btnReset?.addEventListener("click", resetProgress);
+    els.btnResetWeak?.addEventListener("click", resetWeakOnly);
     els.btnUpdate?.addEventListener("click", () => {
       if (window.StudyParkPwa?.forceRefresh) {
         window.StudyParkPwa.forceRefresh();
