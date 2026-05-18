@@ -21,7 +21,7 @@ const subjectMenus: SubjectMenu[] = [
     subject: "社会",
     items: [
       { label: "県庁所在地", href: "/kencho/", ready: true },
-      { label: "雪の多い地域の特色", ready: false },
+      { label: "雪の多い地域の特色", href: "/yukichiiki/", ready: true },
     ],
   },
   {

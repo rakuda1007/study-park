@@ -26,6 +26,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (path === "/yukichiiki" || path === "/yukichiiki/") {
+    url.pathname = "/yukichiiki/index.html";
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
@@ -39,5 +44,7 @@ export const config = {
     "/tsuki/",
     "/shokubutsu",
     "/shokubutsu/",
+    "/yukichiiki",
+    "/yukichiiki/",
   ],
 };
