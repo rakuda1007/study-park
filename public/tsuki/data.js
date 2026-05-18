@@ -1,9 +1,10 @@
 /**
- * 月の動き — 問題データ（空欄は（①）形式）
+ * 月の動き — 問題データ（空欄は（①）形式、number が表示用の問題番号）
  */
 window.TSUKI_QUESTIONS = [
   {
     id: "q01",
+    number: 1,
     label: "問題1",
     template:
       "月は球の形をした星で、主に（①）でできています。月の表面には、明るく見える部分と暗く見える部分があります。",
@@ -11,24 +12,28 @@ window.TSUKI_QUESTIONS = [
   },
   {
     id: "q02",
+    number: 2,
     label: "問題2",
     template: "明るく見える部分は（②）と呼ばれます。",
     blanks: [{ marker: "②", answers: ["陸", "高地", "りく", "こうち"] }],
   },
   {
     id: "q03",
+    number: 3,
     label: "問題3",
     template: "月の表面にあるくぼみは（③）と呼ばれます。",
     blanks: [{ marker: "③", answers: ["クレーター", "くれーたー"] }],
   },
   {
     id: "q04",
+    number: 4,
     label: "問題4",
     template: "暗く見える部分は（④）と呼ばれます。",
     blanks: [{ marker: "④", answers: ["海", "うみ"] }],
   },
   {
     id: "q05",
+    number: 5,
     label: "問題5",
     template:
       "地球から見える月の形は、毎日少しずつ変わってきています。この月の形の変化を（⑤）といいます。",
@@ -36,7 +41,8 @@ window.TSUKI_QUESTIONS = [
   },
   {
     id: "q06",
-    label: "問題6〜8",
+    number: 6,
+    label: "問題6",
     template:
       "月は新月→三日月→（⑥）→（⑦）→（⑧）のように満ち欠けを繰り返します。",
     blanks: [
@@ -46,8 +52,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q09",
-    label: "問題9",
+    id: "q07",
+    number: 7,
+    label: "問題7",
     template: "月の満ち欠けの周期は約（⑨）日です。",
     blanks: [
       {
@@ -57,8 +64,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q10",
-    label: "問題10〜11",
+    id: "q08",
+    number: 8,
+    label: "問題8",
     template:
       "下げんの月は（⑩）側が光っている状態で（⑪）側からかけていきます。",
     blanks: [
@@ -67,8 +75,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q11",
-    label: "問題12〜13",
+    id: "q09",
+    number: 9,
+    label: "問題9",
     template:
       "上げんの月は（⑫）側が光っている状態で（⑬）側から満ちていきます。",
     blanks: [
@@ -77,8 +86,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q12",
-    label: "追加1",
+    id: "q10",
+    number: 10,
+    label: "問題10",
     template:
       "どのような形の月（三日月、上げんの月、満月、下げんの月）も（①）の地平線から出て、（②）の空の高いところを通り、（③）の地平線に沈みます。",
     blanks: [
@@ -88,8 +98,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q13",
-    label: "追加2",
+    id: "q11",
+    number: 11,
+    label: "問題11",
     template:
       "月の中心が地平線から出ることを（①）、月が真南の空にくることを月の（②）、月の中心が地平線に沈むことを（③）といいます。",
     blanks: [
@@ -99,8 +110,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q14",
-    label: "追加3",
+    id: "q12",
+    number: 12,
+    label: "問題12",
     template:
       "三日月は新月から（①）日目の月です。（②）側が光って見えます。三日月は（③）時頃に東の地平線を出て（④）時頃に南中し、（⑤）時ごろに西の地平線に沈みます。",
     blanks: [
@@ -112,8 +124,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q15",
-    label: "追加4",
+    id: "q13",
+    number: 13,
+    label: "問題13",
     template:
       "上げんの月は新月から（①）日目の月で、（②）側が光って見えます。（③）頃に東の地平線を出て（④）の頃に南中し、（⑤）に西の地平線にしずみます。",
     blanks: [
@@ -125,8 +138,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q16",
-    label: "追加5",
+    id: "q14",
+    number: 14,
+    label: "問題14",
     template:
       "満月は新月から（①）日目の月で、月が丸く光ってみます。（②）の頃に東の地平線から出て、（③）近くに南中し、（④）の頃に西の地平線に沈みます。",
     blanks: [
@@ -140,8 +154,9 @@ window.TSUKI_QUESTIONS = [
     ],
   },
   {
-    id: "q17",
-    label: "追加6",
+    id: "q15",
+    number: 15,
+    label: "問題15",
     template:
       "下げんの月は新月から（①）日目の月で、（②）側が光って見えます。（③）に東の地平線を出て、（④）の頃に南中し、（⑤）頃に西の地平線に沈みます。",
     blanks: [

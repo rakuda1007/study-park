@@ -50,8 +50,11 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
   flex-shrink: 0;
+  max-width: 72%;
 }
 
 .btn-quit {
@@ -71,13 +74,29 @@ body {
 
 select.mode-select {
   font: inherit;
-  font-size: 0.72rem;
-  padding: 5px 6px;
+  font-size: 0.68rem;
+  padding: 5px 4px;
   border-radius: 8px;
   border: 1px solid #d0d9e8;
   background: var(--surface);
   color: var(--ink);
-  max-width: 7.5rem;
+  max-width: 5.8rem;
+}
+
+.btn-reset {
+  font: inherit;
+  font-size: 0.68rem;
+  padding: 5px 7px;
+  border-radius: 8px;
+  border: 1px solid #ffe0b2;
+  background: #fff8e1;
+  color: #e65100;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-reset:active {
+  transform: scale(0.97);
 }
 
 .app-title {

@@ -2,7 +2,20 @@
   "use strict";
 
   const STORAGE_KEY = "tsukiAppData";
-  const DATA_VERSION = 1;
+  const DATA_VERSION = 2;
+
+  /** 旧 ID（q09〜q17）→ 新 ID（q07〜q15） */
+  const LEGACY_ID_MAP = {
+    q09: "q07",
+    q10: "q08",
+    q11: "q09",
+    q12: "q10",
+    q13: "q11",
+    q14: "q12",
+    q15: "q13",
+    q16: "q14",
+    q17: "q15",
+  };
 
   function canUseStorage() {
     try {
@@ -23,18 +36,40 @@
       masteredIds: [],
       totalCorrect: 0,
       mode: "full",
+      order: "sequential",
       weakProblems: [],
     };
   }
 
+  function migrateId(id) {
+    if (typeof id !== "string") return id;
+    return LEGACY_ID_MAP[id] || id;
+  }
+
+  function uniqueIds(ids) {
+    const seen = new Set();
+    const out = [];
+    ids.forEach((id) => {
+      const next = migrateId(id);
+      if (!next || seen.has(next)) return;
+      seen.add(next);
+      out.push(next);
+    });
+    return out;
+  }
+
   function parseWeak(raw) {
     if (!Array.isArray(raw)) return [];
-    return raw
+    const byId = new Map();
+    raw
       .filter((e) => e && typeof e.id === "string" && e.id.length > 0)
-      .map((e) => ({
-        id: e.id,
-        n: Math.max(1, Number(e.n) || 1),
-      }));
+      .forEach((e) => {
+        const id = migrateId(e.id);
+        const n = Math.max(1, Number(e.n) || 1);
+        const prev = byId.get(id);
+        byId.set(id, prev ? prev + n : n);
+      });
+    return [...byId.entries()].map(([id, n]) => ({ id, n }));
   }
 
   function normalize(input) {
@@ -54,12 +89,11 @@
       Number.isFinite(total) && total >= 0 ? Math.floor(total) : 0;
 
     if (Array.isArray(input.masteredIds)) {
-      base.masteredIds = input.masteredIds.filter(
-        (id) => typeof id === "string" && id.length > 0,
-      );
+      base.masteredIds = uniqueIds(input.masteredIds);
     }
 
     base.mode = input.mode === "weak" ? "weak" : "full";
+    base.order = input.order === "random" ? "random" : "sequential";
     base.weakProblems = parseWeak(input.weakProblems);
 
     return base;
@@ -70,7 +104,11 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultData();
-      return normalize(JSON.parse(raw));
+      const data = normalize(JSON.parse(raw));
+      if (data.version !== DATA_VERSION) {
+        write(data);
+      }
+      return data;
     } catch {
       return defaultData();
     }
@@ -120,9 +158,10 @@
       return [...read().masteredIds];
     },
     addMastered(id) {
+      const mid = migrateId(id);
       const ids = read().masteredIds;
-      if (ids.includes(id)) return ids.length;
-      return patch({ masteredIds: [...ids, id] }).masteredIds.length;
+      if (ids.includes(mid)) return ids.length;
+      return patch({ masteredIds: [...ids, mid] }).masteredIds.length;
     },
     getTotalCorrect() {
       return read().totalCorrect;
@@ -138,20 +177,28 @@
     setMode(mode) {
       patch({ mode: mode === "weak" ? "weak" : "full" });
     },
+    getOrder() {
+      return read().order === "random" ? "random" : "sequential";
+    },
+    setOrder(order) {
+      patch({ order: order === "random" ? "random" : "sequential" });
+    },
     getWeakList() {
       return parseWeak(read().weakProblems);
     },
     recordWeak(id) {
-      if (typeof id !== "string" || !id) return read().weakProblems;
+      const mid = migrateId(id);
+      if (!mid) return read().weakProblems;
       const list = parseWeak(read().weakProblems);
-      const found = list.find((e) => e.id === id);
+      const found = list.find((e) => e.id === mid);
       if (found) found.n += 1;
-      else list.push({ id, n: 1 });
+      else list.push({ id: mid, n: 1 });
       patch({ weakProblems: list });
       return list;
     },
     removeWeak(id) {
-      const list = parseWeak(read().weakProblems).filter((e) => e.id !== id);
+      const mid = migrateId(id);
+      const list = parseWeak(read().weakProblems).filter((e) => e.id !== mid);
       patch({ weakProblems: list });
       return list;
     },
@@ -159,5 +206,6 @@
       if (!canUseStorage()) return;
       localStorage.removeItem(STORAGE_KEY);
     },
+    migrateId,
   };
 })();

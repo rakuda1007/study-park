@@ -7,10 +7,11 @@
   const CHARS = window.TSUKI_CHARACTERS || [];
   const SQUAD_IDS = window.TSUKI_SQUAD_IDS || ["orange", "dog", "cat", "tofu"];
 
-  const MASTERED_MILESTONES = [3, 5, 7, 9, 12, 15];
+  const MASTERED_MILESTONES = [3, 5, 8, 10, 12, 15];
 
   const state = {
     mode: "full",
+    order: "sequential",
     current: null,
     phase: "think",
     streak: 0,
@@ -38,7 +39,27 @@
   }
 
   function questionById(id) {
-    return QUESTIONS.find((q) => q.id === id);
+    const mid = store?.migrateId ? store.migrateId(id) : id;
+    return QUESTIONS.find((q) => q.id === mid);
+  }
+
+  function questionNumber(q) {
+    const n = Number(q?.number);
+    if (Number.isFinite(n) && n >= 1) return Math.floor(n);
+    const idx = QUESTIONS.findIndex((item) => item.id === q?.id);
+    return idx >= 0 ? idx + 1 : 1;
+  }
+
+  function sequentialQuestionIds() {
+    return QUESTIONS.map((q) => q.id);
+  }
+
+  function sortIdsByQuestionNumber(ids) {
+    return [...ids].sort((a, b) => {
+      const qa = questionById(a);
+      const qb = questionById(b);
+      return questionNumber(qa) - questionNumber(qb);
+    });
   }
 
   function charById(id) {
@@ -59,7 +80,13 @@
   }
 
   function sessionTotal() {
-    return state.session.total || state.session.queue.length || TOTAL;
+    const n = state.session.total || state.session.queue.length || TOTAL;
+    return Math.max(0, Math.floor(n));
+  }
+
+  function intStat(n) {
+    const v = Math.floor(Number(n));
+    return Number.isFinite(v) && v >= 0 ? v : 0;
   }
 
   function formatCorrectAnswer(blank) {
@@ -76,6 +103,7 @@
     const data = store ? store.load() : null;
     if (!data) return;
     state.mode = store ? store.getMode() : "full";
+    state.order = store ? store.getOrder() : "sequential";
     state.highStreak = data.highStreak || 0;
     state.bestSessionScore = data.bestSessionScore || 0;
     state.masteredIds = store ? store.getMasteredIds() : [];
@@ -92,9 +120,11 @@
   function buildSessionQueue() {
     if (state.mode === "weak") {
       const list = store ? store.getWeakList() : [];
-      return shuffle(list.map((e) => e.id));
+      const ids = list.map((e) => e.id);
+      return state.order === "random" ? shuffle(ids) : sortIdsByQuestionNumber(ids);
     }
-    return shuffle(QUESTIONS.map((q) => q.id));
+    const ids = sequentialQuestionIds();
+    return state.order === "random" ? shuffle(ids) : ids;
   }
 
   function persistHighStreak() {
@@ -177,15 +207,18 @@
     const total = sessionTotal();
     const mastered = state.masteredIds.length;
 
-    if (els.questionNum) {
-      els.questionNum.textContent = String(Math.min(idx + 1, total));
-    }
+    const at = Math.min(idx + 1, total);
+    if (els.questionNum) els.questionNum.textContent = String(at);
     if (els.sessionTotal) els.sessionTotal.textContent = String(total);
-    if (els.sessionScore) els.sessionScore.textContent = String(state.session.correct);
-    if (els.streakEl) els.streakEl.textContent = String(state.streak);
-    if (els.highEl) els.highEl.textContent = String(state.highStreak);
-    if (els.masteredEl) els.masteredEl.textContent = `${mastered} / ${TOTAL}`;
-    if (els.weakCount) els.weakCount.textContent = String(state.weakCount);
+    if (els.sessionScore) {
+      els.sessionScore.textContent = String(intStat(state.session.correct));
+    }
+    if (els.streakEl) els.streakEl.textContent = String(intStat(state.streak));
+    if (els.highEl) els.highEl.textContent = String(intStat(state.highStreak));
+    if (els.masteredEl) {
+      els.masteredEl.textContent = `${intStat(mastered)} / ${TOTAL}`;
+    }
+    if (els.weakCount) els.weakCount.textContent = String(intStat(state.weakCount));
     if (els.sessionFill && total > 0) {
       els.sessionFill.style.width = `${(idx / total) * 100}%`;
     }
@@ -272,7 +305,9 @@
 
     state.phase = "think";
 
-    if (els.questionLabel) els.questionLabel.textContent = q.label;
+    if (els.questionLabel) {
+      els.questionLabel.textContent = q.label || `問題${questionNumber(q)}`;
+    }
     if (els.questionBody) els.questionBody.textContent = q.template;
 
     renderAnswerList(q);
@@ -310,7 +345,7 @@
       index: 0,
       correct: 0,
       finished: false,
-      total: queue.length,
+      total: Math.floor(queue.length),
     };
     state.streak = 0;
     state.sessionBestStreak = 0;
@@ -333,6 +368,34 @@
     state.mode = nextMode === "weak" ? "weak" : "full";
     if (store) store.setMode(state.mode);
     startSession();
+  }
+
+  function onOrderChange(nextOrder) {
+    state.order = nextOrder === "random" ? "random" : "sequential";
+    if (store) store.setOrder(state.order);
+    startSession();
+  }
+
+  function resetProgress() {
+    if (
+      !window.confirm(
+        "マスター・苦手・連続記録・ベスト記録をすべて消して、最初からやり直しますか？\n（この操作は取り消せません）",
+      )
+    ) {
+      return;
+    }
+    if (store) store.clearAll();
+    state.highStreak = 0;
+    state.bestSessionScore = 0;
+    state.masteredIds = [];
+    state.weakCount = 0;
+    state.shownMasterMilestones = new Set();
+    loadProgress();
+    if (els.modeSelect) els.modeSelect.value = state.mode;
+    if (els.orderSelect) els.orderSelect.value = state.order;
+    closeModal();
+    startSession();
+    setSpeech("リセットしたよ。もういちどがんばろう！");
   }
 
   function nextQuestion() {
@@ -416,10 +479,11 @@
   }
 
   function masteredMessage(n) {
-    if (n >= TOTAL) return "月の動きマスター！ ぜんぶおぼえたね！";
-    if (n >= 7) return `${n}問マスター！ すごい！`;
-    if (n >= 5) return `${n}問マスター！ いいペース！`;
-    return `${n}問マスター！`;
+    const count = intStat(n);
+    if (count >= TOTAL) return "月の動きマスター！ ぜんぶおぼえたね！";
+    if (count >= 10) return `${count}問マスター！ すごい！`;
+    if (count >= 5) return `${count}問マスター！ いいペース！`;
+    return `${count}問マスター！`;
   }
 
   function checkMasteredMilestones(count) {
@@ -436,19 +500,22 @@
 
     const total = sessionTotal();
     const score = state.session.correct;
-    const perfect = score === total && total > 0;
+    const scoreInt = intStat(score);
+    const totalInt = intStat(total);
+    const bestStreakInt = intStat(state.sessionBestStreak);
+    const perfect = scoreInt === totalInt && totalInt > 0;
     const isFull = state.mode === "full";
 
     if (store && isFull) {
-      store.setBestSessionScore(score);
-      state.bestSessionScore = Math.max(state.bestSessionScore, score);
+      store.setBestSessionScore(scoreInt);
+      state.bestSessionScore = Math.max(state.bestSessionScore, scoreInt);
     }
 
     renderStats();
     setPhaseControls();
 
-    let msg = `${score}問 できた / ${total}問\n`;
-    msg += `この回の連続ベスト ${state.sessionBestStreak}問\n`;
+    let msg = `${scoreInt}問 できた / ${totalInt}問\n`;
+    msg += `この回の連続ベスト ${bestStreakInt}問\n`;
     if (isFull) {
       msg += `ベスト記録 ${state.bestSessionScore}問 / ${TOTAL}問\n`;
     }
@@ -462,7 +529,7 @@
     let showImage = false;
 
     if (isFull) {
-      if (perfect && total === TOTAL) {
+      if (perfect && totalInt === TOTAL) {
         title = `🌙 ${TOTAL}問ぜんぶできた！`;
         msg += "\n\n🎉 ぜんぶ思い出せたね！ すごすぎる！";
         showImage = true;
@@ -471,7 +538,7 @@
         setSpeech("ぜんぶできた！ みんなも大喜び！");
       } else {
         title = "🌙 月の動きチャレンジおわり！";
-        showImage = score >= Math.ceil(TOTAL * 0.75);
+        showImage = scoreInt >= Math.ceil(TOTAL * 0.75);
         setSpeech("おつかれさま！ よくがんばったね！");
       }
     } else {
@@ -562,7 +629,9 @@
     els.sessionFill = $("sessionFill");
     els.sessionTotal = $("sessionTotal");
     els.weakCount = $("weakCount");
+    els.orderSelect = $("orderSelect");
     els.modeSelect = $("modeSelect");
+    els.btnReset = $("btnReset");
     els.btnReveal = $("btnReveal");
     els.selfGrade = $("selfGrade");
     els.btnOk = $("btnOk");
@@ -579,6 +648,13 @@
     loadProgress();
     renderSquadGrid();
 
+    if (els.orderSelect) {
+      els.orderSelect.value = state.order;
+      els.orderSelect.addEventListener("change", () => {
+        onOrderChange(els.orderSelect.value);
+      });
+    }
+
     if (els.modeSelect) {
       els.modeSelect.value = state.mode;
       els.modeSelect.addEventListener("change", () => {
@@ -588,6 +664,7 @@
 
     startSession();
 
+    els.btnReset?.addEventListener("click", resetProgress);
     $("btnQuit")?.addEventListener("click", quitSession);
     els.btnReveal?.addEventListener("click", onRevealAnswer);
     els.btnOk?.addEventListener("click", () => onSelfGrade(true));

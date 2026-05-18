@@ -19,10 +19,15 @@
         <a href="/" class="app-title-link">月の動き</a>
       </h1>
       <div class="header-actions">
+        <select id="orderSelect" class="mode-select" aria-label="出題順">
+          <option value="sequential">順番</option>
+          <option value="random">ランダム</option>
+        </select>
         <select id="modeSelect" class="mode-select" aria-label="出題モード">
           <option value="full">ぜんぶ15問</option>
           <option value="weak">苦手問題</option>
         </select>
+        <button type="button" id="btnReset" class="btn-reset">リセット</button>
         <button type="button" id="btnQuit" class="btn-quit">やめる</button>
         <a class="btn-home" href="/">トップ</a>
       </div>

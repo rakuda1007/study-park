@@ -1,5 +1,5 @@
 /* Study Park — Service Worker（PWA・更新反映用） */
-const SW_VERSION = "3";
+const SW_VERSION = "4";
 
 const NO_STORE_PATHS = ["/tsuki/", "/kuku/", "/kencho/", "/sw.js", "/pwa-update.js"];
 
