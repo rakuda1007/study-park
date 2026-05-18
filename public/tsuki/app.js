@@ -7,7 +7,7 @@
   const CHARS = window.TSUKI_CHARACTERS || [];
   const SQUAD_IDS = window.TSUKI_SQUAD_IDS || ["orange", "dog", "cat", "tofu"];
 
-  const MASTERED_MILESTONES = [3, 5, 7, 9];
+  const MASTERED_MILESTONES = [3, 5, 7, 9, 12, 15];
 
   const state = {
     mode: "full",
@@ -296,7 +296,7 @@
     if (state.mode === "weak" && queue.length === 0) {
       openModal(
         "苦手問題はまだありません",
-        "ぜんぶ9問モードで学習して、「できない」と答えた問題がここにたまります。\nモードを「ぜんぶ9問」に変えて始めてみよう！",
+        `ぜんぶ${TOTAL}問モードで学習して、「できない」と答えた問題がここにたまります。\nモードを「ぜんぶ${TOTAL}問」に変えて始めてみよう！`,
         false,
       );
       if (els.modeSelect) els.modeSelect.value = "full";
@@ -323,7 +323,7 @@
     if (state.mode === "weak") {
       setSpeech(`苦手${queue.length}問を復習しよう！`);
     } else {
-      setSpeech("9問チャレンジ！ がんばって！");
+      setSpeech(`${TOTAL}問チャレンジ！ がんばって！`);
     }
     renderStats();
     nextQuestion();
@@ -463,7 +463,7 @@
 
     if (isFull) {
       if (perfect && total === TOTAL) {
-        title = "🌙 9問ぜんぶできた！";
+        title = `🌙 ${TOTAL}問ぜんぶできた！`;
         msg += "\n\n🎉 ぜんぶ思い出せたね！ すごすぎる！";
         showImage = true;
         playRecordBurst();
@@ -471,7 +471,7 @@
         setSpeech("ぜんぶできた！ みんなも大喜び！");
       } else {
         title = "🌙 月の動きチャレンジおわり！";
-        showImage = score >= 7;
+        showImage = score >= Math.ceil(TOTAL * 0.75);
         setSpeech("おつかれさま！ よくがんばったね！");
       }
     } else {
