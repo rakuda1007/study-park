@@ -234,52 +234,27 @@
     }
   }
 
-  function streakFxKind(streak) {
-    const block = Math.floor(streak / 5) - 1;
-    return ((block % 4) + 4) % 4;
-  }
-
-  function streakFxMessage(streak, kind) {
-    if (kind === 2 || kind === 3) return `${streak}れんぱつ！ みんなで応援！`;
-    if (kind === 1) return `${streak}れんぱつ！ キャラが変わったよ！`;
-    return `${streak}れんぱつ！ いいちょうし！`;
-  }
-
   function applyStreakFx(streak) {
-    if (streak <= 0 || streak % 5 !== 0) return;
-
-    clearCharFx();
-    const kind = streakFxKind(streak);
-    const ch = currentChar();
-
-    if (kind === 0) {
-      showSingleChar();
-      els.charPanel?.classList.add("fx-bounce");
-      setSpeech(`やったね！ ${randomPhrase(ch)}`);
-    } else if (kind === 1) {
-      state.charIndex = (state.charIndex + 1) % CHARS.length;
-      showSingleChar();
-      renderCharacter();
-      els.charPanel?.classList.add("fx-swap");
-      const next = currentChar();
-      setSpeech(`${next.emoji} ${next.name}が応援にきたよ！`);
-    } else if (kind === 2) {
-      showSquad();
-      els.charPanel?.classList.add("fx-squad-pop");
-      setSpeech("4人が応援にきたよ！");
-    } else {
-      showSquad();
-      els.charPanel?.classList.add("fx-squad-glow");
-      setSpeech("みんなキラキラ！ その調子！");
-    }
-
-    showBanner(streakFxMessage(streak, kind));
-
-    window.setTimeout(() => {
-      clearCharFx();
-      showSingleChar();
-      renderCharacter();
-    }, 2200);
+    const fx = window.StudyParkStreakFx;
+    if (!fx) return;
+    fx.applyCelebration({
+      streak,
+      total: TOTAL,
+      panel: els.charPanel,
+      getChar: currentChar,
+      getCharIndex: () => state.charIndex,
+      setCharIndex: (idx) => {
+        state.charIndex = idx;
+      },
+      charCount: CHARS.length,
+      renderCharacter,
+      setSpeech,
+      showBanner,
+      showSingleChar,
+      showSquad,
+      randomPhrase,
+      clearCharFx,
+    });
   }
 
   function setPhaseControls() {

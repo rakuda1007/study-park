@@ -3,35 +3,45 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto auto;
+  grid-template-areas:
+    "logo title"
+    "logo tools";
   column-gap: 10px;
   row-gap: 6px;
   align-items: start;
   padding: 10px 12px;
+  overflow: visible;
   background: var(--surface);
   border-bottom: 2px solid var(--header-border, #d0d9e8);
 }
 
 .app-header-logo-link {
-  grid-column: 1;
-  grid-row: 1 / -1;
+  grid-area: logo;
   align-self: start;
-  display: block;
-  line-height: 0;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
+  min-height: 3rem;
+  overflow: visible;
+  background: transparent;
 }
 
 .app-header-logo {
   display: block;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
   object-fit: contain;
+  object-position: center;
 }
 
 .app-header-title {
-  grid-column: 2;
-  grid-row: 1;
+  grid-area: title;
   margin: 0;
   font-size: 0.92rem;
   font-weight: 700;
@@ -44,22 +54,21 @@
 }
 
 .app-header-toolbar {
-  grid-column: 2;
-  grid-row: 2;
+  grid-area: tools;
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 8px;
-  min-width: 0;
 }
 
-/* 出題形式ラベル＋プルダウン＋更新・リセットを1行に */
+/* 出題形式ラベル＋プルダウン＋更新・リセット */
 .app-header-format-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  flex: 0 1 auto;
+  flex: 1 1 100%;
   min-width: 0;
   max-width: 100%;
 }
@@ -68,9 +77,10 @@
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
+  gap: 4px;
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 100%;
 }
 
 .format-field-label {
@@ -86,12 +96,12 @@
   font: inherit;
   font-size: 0.72rem;
   font-weight: 600;
-  flex: 0 1 auto;
+  flex: 1 1 6.5rem;
   width: auto;
-  min-width: 9.5rem;
-  max-width: min(100%, 13.5rem);
+  min-width: 0;
+  max-width: 100%;
   min-height: 2rem;
-  padding: 5px 24px 5px 8px;
+  padding: 5px 22px 5px 6px;
   border-radius: 8px;
   border: 2px solid var(--header-border, #d0d9e8) !important;
   background-color: var(--surface) !important;
@@ -104,17 +114,20 @@
 
 .app-header-format-row .app-header-utils {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: 4px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .btn-header-util {
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 6px 10px;
+  padding: 5px 8px;
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
@@ -217,4 +230,24 @@
   background: #fff8f8;
   color: #c62828;
   cursor: pointer;
+}
+
+@media (max-width: 420px) {
+  .app-header-format-row {
+    gap: 4px;
+  }
+
+  .format-field-label {
+    font-size: 0.65rem;
+  }
+
+  .app-header--unified .format-select {
+    font-size: 0.68rem;
+    flex: 1 1 5.5rem;
+  }
+
+  .btn-header-util {
+    font-size: 0.62rem;
+    padding: 4px 6px;
+  }
 }

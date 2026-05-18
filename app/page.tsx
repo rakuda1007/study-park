@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 type MenuItem = {
@@ -113,13 +112,13 @@ export default function Home() {
         <header className="home-header">
           <div className="home-brand">
             <div className="home-logo-wrap">
-              <Image
-                src="/study-park-logo.png"
+              <img
+                src="/study-park-logo.png?v=8"
                 alt=""
-                width={72}
-                height={72}
+                width={68}
+                height={68}
                 className="home-logo"
-                priority
+                decoding="async"
               />
             </div>
             <div className="home-title-block">

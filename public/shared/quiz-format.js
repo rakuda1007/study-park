@@ -26,18 +26,17 @@
     return FORMAT.SEQUENTIAL;
   }
 
-  function optionLabels(total) {
-    const n = Math.max(0, Math.floor(Number(total)) || 0);
+  function optionLabels() {
     return [
-      { value: FORMAT.SEQUENTIAL, label: `順番にすべて出題（全${n}問）` },
-      { value: FORMAT.RANDOM, label: `ランダムにすべて出題（全${n}問）` },
-      { value: FORMAT.WEAK, label: `苦手問題を出題（全${n}問）` },
+      { value: FORMAT.SEQUENTIAL, label: "順番に出題" },
+      { value: FORMAT.RANDOM, label: "ランダムに出題" },
+      { value: FORMAT.WEAK, label: "苦手問題を出題" },
     ];
   }
 
   function fillSelect(select, total, selected) {
     if (!select) return;
-    const labels = optionLabels(total);
+    const labels = optionLabels();
     const want = selected ?? select.value;
     select.innerHTML = "";
     labels.forEach(({ value, label }) => {

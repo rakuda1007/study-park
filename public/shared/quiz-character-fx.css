@@ -1,0 +1,413 @@
+/* クイズ共通 — 連続正解キャラ演出（九九と同系） */
+.char-img-wrap,
+.char-stage-block {
+  position: relative;
+}
+
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.fx-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.fx-stars span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  font-size: 0;
+  background: linear-gradient(135deg, #ffe082, #ffb300);
+  clip-path: polygon(
+    50% 0%,
+    61% 38%,
+    100% 50%,
+    61% 62%,
+    50% 100%,
+    39% 62%,
+    0% 50%,
+    39% 38%
+  );
+  opacity: 0;
+  transform: scale(0.2);
+}
+
+.fx-stars span:nth-child(1) {
+  --fx-angle: 0deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(2) {
+  --fx-angle: 45deg;
+  --fx-dist: 50%;
+}
+.fx-stars span:nth-child(3) {
+  --fx-angle: 90deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(4) {
+  --fx-angle: 135deg;
+  --fx-dist: 50%;
+}
+.fx-stars span:nth-child(5) {
+  --fx-angle: 180deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(6) {
+  --fx-angle: 225deg;
+  --fx-dist: 50%;
+}
+.fx-stars span:nth-child(7) {
+  --fx-angle: 270deg;
+  --fx-dist: 46%;
+}
+.fx-stars span:nth-child(8) {
+  --fx-angle: 315deg;
+  --fx-dist: 50%;
+}
+
+@keyframes charJump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-18px) scale(1.03);
+  }
+  55% {
+    transform: translateY(-6px) scale(1.01);
+  }
+}
+
+@keyframes starBurst {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--fx-angle)) translateY(0) scale(0.2);
+  }
+  25% {
+    opacity: 1;
+    transform: rotate(var(--fx-angle)) translateY(calc(-1 * var(--fx-dist)))
+      scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--fx-angle))
+      translateY(calc(-1.1 * var(--fx-dist))) scale(0.6);
+  }
+}
+
+@keyframes charGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1)) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(255, 193, 7, 0.95))
+      drop-shadow(0 0 28px rgba(255, 152, 0, 0.55)) brightness(1.12);
+  }
+}
+
+@keyframes orbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes stampPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes peelHint {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes floatEmoji {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes tailWag {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes shakeSoft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px) rotate(-1deg);
+  }
+  40% {
+    transform: translateX(4px) rotate(1deg);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+.character-panel.fx-tier-3 .char-stage img,
+.character-panel.fx-tier-3 .char-img-wrap img {
+  transform-origin: center bottom;
+  animation: charJump 0.52s ease 3;
+}
+
+.character-panel.fx-tier-10 .fx-stars {
+  opacity: 1;
+}
+
+.character-panel.fx-tier-10 .fx-stars span {
+  animation: starBurst 1.4s ease-out infinite;
+}
+
+.character-panel.fx-tier-10 .fx-stars span:nth-child(1) {
+  animation-delay: 0s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(5) {
+  animation-delay: 0.32s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(6) {
+  animation-delay: 0.4s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(7) {
+  animation-delay: 0.48s;
+}
+.character-panel.fx-tier-10 .fx-stars span:nth-child(8) {
+  animation-delay: 0.56s;
+}
+
+.character-panel.fx-tier-20 .char-stage img,
+.character-panel.fx-tier-20 .char-img-wrap img {
+  animation: charGlow 0.85s ease-in-out infinite;
+}
+
+.character-panel.fx-tier-20 .fx-stars {
+  opacity: 1;
+}
+
+.character-panel.fx-tier-20 .fx-stars span {
+  background: linear-gradient(135deg, #fff9c4, #ffeb3b);
+  animation: starBurst 1.8s ease-in-out infinite;
+}
+
+.fx-panda-bamboo.fx-tier-10 .fx-layer::after {
+  content: "🎋";
+  position: absolute;
+  right: 6%;
+  bottom: 8%;
+  font-size: 1.75rem;
+  animation: floatEmoji 0.9s ease-in-out infinite;
+}
+
+.fx-panda-firework.fx-tier-20 .fx-layer::before {
+  content: "✨🎋✨";
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  font-size: 1.35rem;
+  animation: wiggle 0.7s ease-in-out infinite;
+}
+
+.fx-dog-tail.fx-tier-3 .char-stage img,
+.fx-dog-tail.fx-tier-3 .char-img-wrap img {
+  animation: tailWag 0.32s ease 8;
+}
+
+.fx-dog-bone.fx-tier-10 .fx-layer::after {
+  content: "🦴";
+  position: absolute;
+  left: 8%;
+  bottom: 10%;
+  font-size: 1.5rem;
+  animation: floatEmoji 0.75s ease-in-out infinite;
+}
+
+.fx-dog-stars.fx-tier-20 .fx-layer::before {
+  content: "🐾";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -0.6rem 0 0 -0.6rem;
+  font-size: 1.2rem;
+  animation: orbitSpin 2.5s linear infinite;
+}
+
+.fx-cat-heart-tail.fx-tier-3 .char-stage img,
+.fx-cat-heart-tail.fx-tier-3 .char-img-wrap img {
+  animation: wiggle 0.45s ease 5;
+}
+
+.fx-cat-heart-tail.fx-tier-3 .fx-layer::after {
+  content: "💕";
+  position: absolute;
+  right: 8%;
+  bottom: 12%;
+  font-size: 1.25rem;
+  animation: floatEmoji 0.8s ease-in-out infinite;
+}
+
+.fx-cat-paw.fx-tier-10 .fx-layer::before {
+  content: "🐾";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 2.5rem;
+  transform: translate(-50%, -50%) scale(0);
+  animation: stampPop 0.65s ease forwards;
+}
+
+.fx-cat-mega-heart.fx-tier-20 .fx-layer::before {
+  content: "💖";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  animation: stampPop 0.5s ease forwards, floatEmoji 1s ease-in-out 0.5s infinite;
+}
+
+.fx-tofu-shake.fx-tier-3 .char-stage img,
+.fx-tofu-shake.fx-tier-3 .char-img-wrap img {
+  animation: shakeSoft 0.4s ease 4;
+}
+
+.fx-tofu-negi.fx-tier-10 .fx-layer::after {
+  content: "🌿✨🌿";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4%;
+  text-align: center;
+  font-size: 1.1rem;
+  animation: wiggle 0.65s ease-in-out infinite;
+}
+
+.fx-tofu-gold.fx-tier-20 .char-stage img,
+.fx-tofu-gold.fx-tier-20 .char-img-wrap img {
+  animation: charGlow 0.75s ease-in-out infinite, shakeSoft 0.5s ease 2;
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.9)) brightness(1.15);
+}
+
+.fx-orange-peel.fx-tier-3 .char-stage img,
+.fx-orange-peel.fx-tier-3 .char-img-wrap img {
+  animation: peelHint 0.65s ease 3, charJump 0.52s ease 3;
+}
+
+.fx-orange-juice.fx-tier-10 .fx-layer::before {
+  content: "✨💧✨";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8%;
+  text-align: center;
+  font-size: 1rem;
+  animation: wiggle 0.6s ease-in-out infinite;
+}
+
+.fx-orange-sun.fx-tier-20 .fx-layer::after {
+  content: "☀️";
+  position: absolute;
+  right: 6%;
+  top: 6%;
+  font-size: 1.4rem;
+  animation: orbitSpin 3s linear infinite;
+}
+
+.fx-apple-leaf.fx-tier-3 .char-stage img,
+.fx-apple-leaf.fx-tier-3 .char-img-wrap img {
+  animation: wiggle 0.5s ease 6;
+}
+
+.fx-apple-scent.fx-tier-10 .fx-layer::before {
+  content: "～♪～";
+  position: absolute;
+  left: 10%;
+  top: 10%;
+  font-size: 0.95rem;
+  color: #8d6e63;
+  animation: floatEmoji 1s ease-in-out infinite;
+}
+
+.fx-apple-gold.fx-tier-20 .char-stage img,
+.fx-apple-gold.fx-tier-20 .char-img-wrap img {
+  filter: drop-shadow(0 0 16px rgba(255, 193, 7, 0.85)) brightness(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-panel.fx-playing .char-stage img,
+  .character-panel.fx-playing .char-img-wrap img,
+  .character-panel.fx-playing .fx-stars span,
+  .character-panel.fx-playing .fx-layer::before,
+  .character-panel.fx-playing .fx-layer::after {
+    animation: none !important;
+  }
+  .character-panel.fx-tier-10 .fx-stars,
+  .character-panel.fx-tier-20 .fx-stars {
+    opacity: 0;
+  }
+}

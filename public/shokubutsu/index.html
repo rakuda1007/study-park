@@ -11,7 +11,8 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/icon-180.png" />
-    <link rel="stylesheet" href="/shared/quiz-header.css?v=9" />
+    <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
+    <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
     <link rel="stylesheet" href="/shokubutsu/style.css?v=7" />
   </head>
   <body>
@@ -19,10 +20,10 @@
       <a href="/" class="app-header-logo-link" aria-label="トップへ">
         <img
           class="app-header-logo"
-          src="/study-park-logo.png"
+          src="/study-park-logo.png?v=8"
           alt=""
-          width="44"
-          height="44"
+          width="48"
+          height="48"
         />
       </a>
       <h1 class="app-header-title">植物の育ち方</h1>
@@ -31,9 +32,9 @@
           <label class="format-field">
             <span class="format-field-label">出題形式</span>
             <select id="formatSelect" class="format-select" aria-label="出題形式">
-            <option value="sequential-full">順番にすべて出題（全10問）</option>
-            <option value="random-full">ランダムにすべて出題（全10問）</option>
-            <option value="weak">苦手問題を出題（全10問）</option>
+            <option value="sequential-full">順番に出題</option>
+            <option value="random-full">ランダムに出題</option>
+            <option value="weak">苦手問題を出題</option>
           </select>
           </label>
           <div class="app-header-utils">
@@ -60,6 +61,12 @@
       <p id="speech" class="speech-bubble">10問チャレンジ！ がんばって！</p>
       <div id="charSingle" class="char-single">
         <div class="char-img-wrap">
+          <div class="fx-layer" aria-hidden="true">
+            <div class="fx-stars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
           <img id="charImg" src="/orange.png" alt="みかんぼうや" />
         </div>
         <p id="charLabel" class="char-label">🍊 みかんぼうや</p>
@@ -122,11 +129,12 @@
     </div>
 
     <script src="/study-park-asset-version.js?v=7"></script>
-    <script src="/shared/quiz-format.js?v=8"></script>
+    <script src="/shared/quiz-format.js?v=11"></script>
+    <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=7"></script>
     <script src="/shokubutsu/data.js?v=7"></script>
-    <script src="/shokubutsu/characters.js?v=7"></script>
+    <script src="/shokubutsu/characters.js?v=9"></script>
     <script src="/shokubutsu/storage.js?v=7"></script>
-    <script src="/shokubutsu/app.js?v=8"></script>
+    <script src="/shokubutsu/app.js?v=9"></script>
   </body>
 </html>
