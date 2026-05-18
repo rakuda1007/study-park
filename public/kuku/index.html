@@ -129,10 +129,6 @@
     <script src="/kuku/characters.js"></script>
     <script src="/kuku/storage.js"></script>
     <script src="/kuku/app.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/sw.js").catch(function () {});
-      }
-    </script>
+    <script src="/pwa-update.js"></script>
   </body>
 </html>

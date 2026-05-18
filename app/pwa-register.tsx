@@ -2,22 +2,19 @@
 
 import { useEffect } from "react";
 
-/** 静的書き出しでも動くようルートの Service Worker を登録 */
+/** 静的書き出しでも動くようルートの Service Worker を登録（更新検知付き） */
 export function PwaRegister() {
   useEffect(() => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    if (typeof window === "undefined") return;
 
-    const register = () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        /* オフラインや非対応環境は無視 */
-      });
+    const script = document.createElement("script");
+    script.src = "/pwa-update.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      script.remove();
     };
-
-    if (document.readyState === "complete") {
-      register();
-    } else {
-      window.addEventListener("load", register, { once: true });
-    }
   }, []);
 
   return null;
