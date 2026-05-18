@@ -53,14 +53,24 @@
   min-width: 0;
 }
 
-.format-field {
-  display: inline-flex;
-  flex-direction: row;
+/* 出題形式ラベル＋プルダウン＋更新・リセットを1行に */
+.app-header-format-row {
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
   flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
+}
+
+.format-field {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .format-field-label {
@@ -92,12 +102,12 @@
   box-sizing: border-box;
 }
 
-.app-header-utils {
-  display: flex;
+.app-header-format-row .app-header-utils {
+  display: inline-flex;
   flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .btn-header-util {

@@ -687,6 +687,7 @@
 
     loadProgress();
     renderSquadGrid();
+    syncFormatSelect();
     if (els.formatSelect) {
       els.formatSelect.addEventListener("change", () => {
         onFormatChange(els.formatSelect.value);
