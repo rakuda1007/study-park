@@ -20,7 +20,8 @@
       { "source": "/kencho", "destination": "/kencho/index.html" },
       { "source": "/tsuki", "destination": "/tsuki/index.html" },
       { "source": "/shokubutsu", "destination": "/shokubutsu/index.html" },
-      { "source": "/yukichiiki", "destination": "/yukichiiki/index.html" }
+      { "source": "/yukichiiki", "destination": "/yukichiiki/index.html" },
+      { "source": "/sankaku", "destination": "/sankaku/index.html" }
     ],
     "headers": [
       {
@@ -106,6 +107,15 @@
       },
       {
         "source": "/yukichiiki/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/sankaku/**",
         "headers": [
           {
             "key": "Cache-Control",

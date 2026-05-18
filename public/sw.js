@@ -7,6 +7,7 @@ const NO_STORE_PREFIXES = [
   "/kencho/",
   "/shokubutsu/",
   "/yukichiiki/",
+  "/sankaku/",
   "/shared/",
 ];
 const NO_STORE_FILES = ["/sw.js", "/pwa-update.js", "/study-park-asset-version.js"];

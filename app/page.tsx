@@ -14,7 +14,14 @@ type SubjectMenu = {
 const subjectMenus: SubjectMenu[] = [
   {
     subject: "算数",
-    items: [{ label: "九九", href: "/kuku/", ready: true }],
+    items: [
+      { label: "九九", href: "/kuku/", ready: true },
+      {
+        label: "いろいろな三角形の性質",
+        href: "/sankaku/",
+        ready: true,
+      },
+    ],
   },
   {
     subject: "社会",
