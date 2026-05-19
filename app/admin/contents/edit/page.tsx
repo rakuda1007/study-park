@@ -190,6 +190,15 @@ function EditContentInner() {
     );
   }
 
+  function removeBlank(qIndex: number, bIndex: number) {
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIndex || q.blanks.length <= 1) return q;
+        return { ...q, blanks: q.blanks.filter((_, j) => j !== bIndex) };
+      }),
+    );
+  }
+
   function addQuestion() {
     const n = questions.length + 1;
     const id = `q${String(n).padStart(2, "0")}`;
@@ -348,7 +357,7 @@ function EditContentInner() {
                     />
                   </div>
                   {q.blanks.map((b, bi) => (
-                    <div key={`${q.id}-${b.marker}`} className="admin-row">
+                    <div key={`${q.id}-blank-${bi}`} className="admin-row admin-row--blank">
                       <div className="admin-field" style={{ flex: "0 0 4rem" }}>
                         <label>記号</label>
                         <input
@@ -370,6 +379,15 @@ function EditContentInner() {
                           }
                         />
                       </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--danger admin-btn--compact"
+                        onClick={() => removeBlank(qi, bi)}
+                        disabled={q.blanks.length <= 1}
+                        aria-label={`空欄 ${b.marker || bi + 1} を削除`}
+                      >
+                        削除
+                      </button>
                     </div>
                   ))}
                   <button
