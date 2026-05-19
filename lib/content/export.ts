@@ -153,7 +153,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <script src="/${slug}/data.js?v=1"></script>
     <script src="/shared/quiz-blank-characters.js?v=1"></script>
     <script src="/shared/quiz-blank-storage.js?v=1"></script>
-    <script src="/shared/quiz-blank-app.js?v=1"></script>
+    <script src="/shared/quiz-blank-app.js?v=2"></script>
   </body>
 </html>
 `;

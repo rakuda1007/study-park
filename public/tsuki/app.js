@@ -95,7 +95,7 @@
 
   function allCorrectSummary(question) {
     return question.blanks
-      .map((b) => `（${b.marker}）${formatCorrectAnswer(b)}`)
+      .map((b) => `${b.marker}${formatCorrectAnswer(b)}`)
       .join("、");
   }
 
@@ -269,7 +269,7 @@
     els.answerList.innerHTML = "";
     question.blanks.forEach((blank) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="answer-marker">（${blank.marker}）</span><span class="answer-text">${formatCorrectAnswer(blank)}</span>`;
+      li.innerHTML = `<span class="answer-marker">${blank.marker}</span><span class="answer-text">${formatCorrectAnswer(blank)}</span>`;
       els.answerList.appendChild(li);
     });
   }
