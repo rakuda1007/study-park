@@ -2,9 +2,28 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 開発初期はすべて拒否。コレクション設計と認証ルールを決めてから match を追加してください。
-    match /{document=**} {
-      allow read, write: if false;
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /subjects/{subjectId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /contents/{contentId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
   }
 }

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-19T00:00:00.000Z",
+  "subjects": [
+    {
+      "id": "math",
+      "name": "算数",
+      "order": 1,
+      "items": [
+        { "label": "九九", "href": "/kuku/", "ready": true },
+        {
+          "label": "いろいろな三角形の性質",
+          "href": "/sankaku/",
+          "ready": true
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "name": "社会",
+      "order": 2,
+      "items": [
+        { "label": "県庁所在地", "href": "/kencho/", "ready": true },
+        { "label": "雪の多い地域の特色", "href": "/yukichiiki/", "ready": true }
+      ]
+    },
+    {
+      "id": "science",
+      "name": "理科",
+      "order": 3,
+      "items": [
+        { "label": "月の動き", "href": "/tsuki/", "ready": true },
+        { "label": "植物の育ち方", "href": "/shokubutsu/", "ready": true }
+      ]
+    }
+  ]
+}

@@ -14,9 +14,11 @@
     "format:check": "prettier --check .",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "logo:home": "node scripts/generate-home-logo.mjs",
-    "firebase:deploy:rules": "firebase deploy --only firestore:rules"
+    "firebase:deploy:rules": "firebase deploy --only firestore:rules",
+    "firebase:deploy:indexes": "firebase deploy --only firestore:indexes"
   },
   "dependencies": {
+    "firebase": "^12.12.0",
     "next": "15.5.15",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -30,7 +32,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.15",
     "eslint-config-prettier": "^10.1.8",
-    "firebase": "^12.12.0",
     "firebase-tools": "^15.15.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",

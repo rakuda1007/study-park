@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { manifestToHomeMenus } from "@/lib/content/manifest-home";
+import type { ContentManifest } from "@/lib/content/types";
+import contentManifest from "@/public/content-manifest.json";
 
 type MenuItem = {
   label: string;
@@ -11,33 +14,9 @@ type SubjectMenu = {
   items: MenuItem[];
 };
 
-const subjectMenus: SubjectMenu[] = [
-  {
-    subject: "算数",
-    items: [
-      { label: "九九", href: "/kuku/", ready: true },
-      {
-        label: "いろいろな三角形の性質",
-        href: "/sankaku/",
-        ready: true,
-      },
-    ],
-  },
-  {
-    subject: "社会",
-    items: [
-      { label: "県庁所在地", href: "/kencho/", ready: true },
-      { label: "雪の多い地域の特色", href: "/yukichiiki/", ready: true },
-    ],
-  },
-  {
-    subject: "理科",
-    items: [
-      { label: "月の動き", href: "/tsuki/", ready: true },
-      { label: "植物の育ち方", href: "/shokubutsu/", ready: true },
-    ],
-  },
-];
+const subjectMenus: SubjectMenu[] = manifestToHomeMenus(
+  contentManifest as ContentManifest,
+);
 
 function MenuItemButton({ item }: { item: MenuItem }) {
   const inner = (
