@@ -118,14 +118,24 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
     void refresh();
   }, [refresh]);
 
+  const isRefreshing = loadState === "loading";
+
   return (
     <nav className="home-nav" aria-label="学習メニュー">
+      <div className="home-nav-toolbar">
+        <button
+          type="button"
+          className="home-refresh-btn"
+          onClick={() => void refresh()}
+          disabled={isRefreshing}
+          aria-busy={isRefreshing}
+        >
+          {isRefreshing ? "更新中…" : "更新"}
+        </button>
+      </div>
       {loadState === "error" && loadError ? (
         <p className="home-menu-notice home-menu-notice--error" role="status">
           {loadError}
-          <button type="button" className="home-menu-retry" onClick={() => void refresh()}>
-            再読み込み
-          </button>
         </p>
       ) : null}
       <div className="home-subject-list">

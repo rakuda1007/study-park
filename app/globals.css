@@ -143,6 +143,36 @@ body {
   margin: 0;
 }
 
+.home-nav-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 0.75rem;
+}
+
+.home-refresh-btn {
+  padding: 0.4rem 0.85rem;
+  border: 2px solid var(--home-amber);
+  border-radius: 999px;
+  background: rgba(245, 185, 66, 0.12);
+  color: var(--home-amber);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.home-refresh-btn:hover:not(:disabled) {
+  background: rgba(245, 185, 66, 0.22);
+}
+
+.home-refresh-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
 .home-subject-list,
 .home-item-list {
   margin: 0;
