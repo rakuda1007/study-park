@@ -61,6 +61,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
               <option value="sequential-full">順番に出題</option>
               <option value="random-full">ランダムに出題</option>
               <option value="weak">苦手問題を出題</option>
+              <option value="review-all">まとめて確認</option>
             </select>
           </label>
           <div class="app-header-utils">
@@ -109,6 +110,12 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
         <p class="intro-body">${intro}</p>
       </section>
 
+      <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
+        <h2 class="review-panel-heading">まとめて確認</h2>
+        <p class="review-panel-lead">全問の問題と答えを一覧で見ながら、スクロールして復習できます。</p>
+        <div id="reviewList" class="review-list"></div>
+      </section>
+
       <section id="questionCard" class="question-card">
         <p id="questionLabel" class="question-label">問1</p>
         <div id="questionBody" class="question-body" aria-live="polite"></div>
@@ -120,7 +127,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
         </div>
       </section>
 
-      <div class="answer-actions">
+      <div id="answerActions" class="answer-actions">
         <div class="answer-actions-row">
           <button type="button" id="btnReveal" class="btn-primary">答えを見る</button>
           <button type="button" id="btnQuit" class="btn-quit">やめる</button>
@@ -147,13 +154,14 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </div>
 
     <script src="/study-park-asset-version.js?v=${ASSET_V}"></script>
-    <script src="/shared/quiz-format.js?v=11"></script>
+    <script src="/shared/quiz-format.js?v=12"></script>
+    <script src="/shared/quiz-review-mode.js?v=1"></script>
     <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=${ASSET_V}"></script>
     <script src="/${slug}/data.js?v=1"></script>
     <script src="/shared/quiz-blank-characters.js?v=1"></script>
     <script src="/shared/quiz-blank-storage.js?v=1"></script>
-    <script src="/shared/quiz-blank-app.js?v=3"></script>
+    <script src="/shared/quiz-blank-app.js?v=4"></script>
   </body>
 </html>
 `;

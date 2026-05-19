@@ -54,6 +54,7 @@ export function QuizShell({ content }: Props) {
                 <option value="sequential-full">順番に出題</option>
                 <option value="random-full">ランダムに出題</option>
                 <option value="weak">苦手問題を出題</option>
+                <option value="review-all">まとめて確認</option>
               </select>
             </label>
             <div className="app-header-utils">
@@ -135,6 +136,14 @@ export function QuizShell({ content }: Props) {
           <p className="intro-body">{intro}</p>
         </section>
 
+        <section id="reviewPanel" className="review-panel" hidden aria-label="まとめて確認">
+          <h2 className="review-panel-heading">まとめて確認</h2>
+          <p className="review-panel-lead">
+            全問の問題と答えを一覧で見ながら、スクロールして復習できます。
+          </p>
+          <div id="reviewList" className="review-list" />
+        </section>
+
         <section id="questionCard" className="question-card">
           <p id="questionLabel" className="question-label">
             問1
@@ -150,7 +159,7 @@ export function QuizShell({ content }: Props) {
           </div>
         </section>
 
-        <div className="answer-actions">
+        <div id="answerActions" className="answer-actions">
           <div className="answer-actions-row">
             <button type="button" id="btnReveal" className="btn-primary">
               答えを見る
@@ -205,13 +214,14 @@ export function QuizShell({ content }: Props) {
       </div>
 
       <Script src={`/study-park-asset-version.js?v=${ASSET_V}`} strategy="afterInteractive" />
-      <Script src="/shared/quiz-format.js?v=11" strategy="afterInteractive" />
+      <Script src="/shared/quiz-format.js?v=12" strategy="afterInteractive" />
+      <Script src="/shared/quiz-review-mode.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-streak-fx.js?v=10" strategy="afterInteractive" />
       <Script src={`/pwa-update.js?v=${ASSET_V}`} strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=3"
+        src="/shared/quiz-blank-app.js?v=4"
         strategy="afterInteractive"
         key={content.slug}
       />

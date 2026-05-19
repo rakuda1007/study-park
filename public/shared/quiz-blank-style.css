@@ -424,6 +424,66 @@ select.mode-select {
   white-space: pre-line;
 }
 
+.review-panel {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 2px solid #d0dce8;
+  box-shadow: 0 4px 16px rgba(26, 36, 51, 0.08);
+}
+
+.review-panel-heading {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  color: var(--accent-dark);
+}
+
+.review-panel-lead {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-item {
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  background: #f7f9fc;
+  border: 1px solid #dce4ef;
+}
+
+.review-item-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  color: var(--accent-dark);
+}
+
+.review-item-question {
+  margin: 0 0 0.75rem;
+}
+
+.review-item-answers {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: #eef4ff;
+  border: 1px solid #d4e2f4;
+}
+
+.review-item-answers-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  letter-spacing: 0.04em;
+}
+
 .think-hint {
   margin: 0;
   font-size: 0.82rem;

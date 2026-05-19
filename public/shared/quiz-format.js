@@ -8,9 +8,13 @@
     SEQUENTIAL: "sequential-full",
     RANDOM: "random-full",
     WEAK: "weak",
+    REVIEW_ALL: "review-all",
   };
 
   function parse(value) {
+    if (value === FORMAT.REVIEW_ALL) {
+      return { mode: "review", order: "sequential" };
+    }
     if (value === FORMAT.WEAK) {
       return { mode: "weak", order: "sequential" };
     }
@@ -21,17 +25,22 @@
   }
 
   function fromState(mode, order) {
+    if (mode === "review") return FORMAT.REVIEW_ALL;
     if (mode === "weak") return FORMAT.WEAK;
     if (order === "random") return FORMAT.RANDOM;
     return FORMAT.SEQUENTIAL;
   }
 
   function optionLabels() {
-    return [
+    const opts = [
       { value: FORMAT.SEQUENTIAL, label: "順番に出題" },
       { value: FORMAT.RANDOM, label: "ランダムに出題" },
       { value: FORMAT.WEAK, label: "苦手問題を出題" },
     ];
+    if (window.__STUDY_PARK_QUIZ_REVIEW_ENABLED__) {
+      opts.push({ value: FORMAT.REVIEW_ALL, label: "まとめて確認" });
+    }
+    return opts;
   }
 
   function fillSelect(select, total, selected) {

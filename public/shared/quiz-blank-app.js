@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  window.__STUDY_PARK_QUIZ_REVIEW_ENABLED__ = true;
+
   const CFG = window.__STUDY_PARK_QUIZ__;
   if (!CFG || !CFG.slug) {
     console.error("Study Park: __STUDY_PARK_QUIZ__ が読み込まれていません。");
@@ -28,6 +30,7 @@
     weakCount: 0,
     charIndex: 0,
     locked: false,
+    inReview: false,
     shownMasterMilestones: new Set(),
     session: {
       queue: [],
@@ -411,13 +414,55 @@
     const { mode, order } = fmt.parse(value);
     state.mode = mode;
     state.order = order;
+    if (mode === "review") return;
     if (store) {
       store.setMode(state.mode);
       store.setOrder(state.order);
     }
   }
 
+  function setPlayUiVisible(visible) {
+    const hide = !visible;
+    if (els.statsBar) els.statsBar.hidden = hide;
+    if (els.charPanel) els.charPanel.hidden = hide;
+    if (els.questionCard) els.questionCard.hidden = hide;
+    if (els.answerActions) els.answerActions.hidden = hide;
+    if (els.reviewPanel) els.reviewPanel.hidden = visible;
+  }
+
+  function startReviewMode() {
+    state.inReview = true;
+    state.session.finished = true;
+    state.locked = true;
+    closeModal();
+    setPlayUiVisible(false);
+
+    if (els.reviewList && window.StudyParkQuizReview) {
+      window.StudyParkQuizReview.renderAll(els.reviewList, QUESTIONS, {
+        questionNumber,
+        answerEntries,
+      });
+    }
+
+    if (els.questionNum) els.questionNum.textContent = String(TOTAL);
+    if (els.sessionTotal) els.sessionTotal.textContent = String(TOTAL);
+    renderStats();
+  }
+
+  function exitReviewMode() {
+    state.inReview = false;
+    state.locked = false;
+    setPlayUiVisible(true);
+  }
+
   function onFormatChange(value) {
+    const fmt = window.StudyParkQuizFormat;
+    if (fmt && value === fmt.FORMAT.REVIEW_ALL) {
+      applyFormat(value);
+      startReviewMode();
+      return;
+    }
+    if (state.inReview) exitReviewMode();
     applyFormat(value);
     startSession();
   }
@@ -702,6 +747,10 @@
     els.modalImg = $("celebrateModalImg");
     els.btnModalClose = $("btnModalClose");
     els.btnModalRestart = $("btnModalRestart");
+    els.reviewPanel = $("reviewPanel");
+    els.reviewList = $("reviewList");
+    els.statsBar = document.querySelector(".stats-bar");
+    els.answerActions = $("answerActions");
 
     loadProgress();
     renderSquadGrid();
@@ -712,7 +761,11 @@
       });
     }
 
-    startSession();
+    if (state.mode === "review") {
+      startReviewMode();
+    } else {
+      startSession();
+    }
 
     els.btnResetWeak?.addEventListener("click", resetWeakOnly);
     els.btnUpdate?.addEventListener("click", () => {
@@ -729,7 +782,8 @@
 
     $("btnModalRestart")?.addEventListener("click", () => {
       closeModal();
-      startSession();
+      if (state.mode === "review") startReviewMode();
+      else startSession();
     });
     $("btnModalClose")?.addEventListener("click", closeModal);
     els.modal?.addEventListener("click", (ev) => {
