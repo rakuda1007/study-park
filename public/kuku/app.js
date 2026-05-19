@@ -25,6 +25,7 @@
     useAutoChar: true,
     /** 順番・ランダム・苦手で「やめる」後、つづけるまで操作停止 */
     sessionStopped: false,
+    inReview: false,
     /** timedModal の主ボタン挙動分岐: null | "timed" | "play" */
     quitKind: null,
     timed: {

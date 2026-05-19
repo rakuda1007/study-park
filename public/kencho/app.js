@@ -22,6 +22,7 @@
     weakCount: 0,
     charIndex: 0,
     locked: false,
+    inReview: false,
     shownMasterMilestones: new Set(),
     session: {
       queue: [],
@@ -311,15 +312,27 @@
     const { mode, order } = fmt.parse(value);
     state.mode = mode;
     state.order = order;
+    if (mode === "review") return;
     if (store) {
       store.setMode(state.mode);
       store.setOrder(state.order);
     }
   }
 
-  function onFormatChange(value) {
-    applyFormat(value);
-    startSession();
+  function renderReviewList() {
+    if (!els.reviewList || !window.StudyParkQuizReview) return;
+    const questions = PREFS.map((p, i) => ({
+      id: p.id,
+      number: i + 1,
+      label: `問${i + 1}`,
+      template: `${p.name}の県庁所在地は？`,
+      blanks: [{ marker: "答", answers: [p.capital] }],
+    }));
+    window.StudyParkQuizReview.renderAll(els.reviewList, questions, {
+      questionNumber: (q) => q.number,
+      answerEntries: (q) =>
+        q.blanks.map((b) => ({ marker: b.marker, text: b.answers[0] })),
+    });
   }
 
   function resetWeakOnly() {
@@ -592,18 +605,40 @@
     els.modalImg = $("celebrateModalImg");
     els.btnModalClose = $("btnModalClose");
     els.btnModalRestart = $("btnModalRestart");
+    els.reviewPanel = $("reviewPanel");
+    els.reviewList = $("reviewList");
+    els.statsBar = document.querySelector(".stats-bar");
+    els.choices = $("choices");
+    els.choicesFooter = $("choicesFooter");
 
     loadProgress();
     renderSquadGrid();
+
+    const reviewCtl = window.StudyParkQuizReviewController.integrate({
+      state,
+      els,
+      playUiKeys: ["statsBar", "charPanel", "questionCard", "choices", "choicesFooter"],
+      closeModal,
+      renderStats,
+      renderReviewList,
+      getTotal: () => TOTAL,
+      applyFormat,
+      startSession,
+    });
+
     syncFormatSelect();
 
     if (els.formatSelect) {
       els.formatSelect.addEventListener("change", () => {
-        onFormatChange(els.formatSelect.value);
+        reviewCtl.onFormatChange(els.formatSelect.value);
       });
     }
 
-    startSession();
+    if (state.mode === "review") {
+      reviewCtl.startReviewMode();
+    } else {
+      startSession();
+    }
 
     els.btnResetWeak?.addEventListener("click", resetWeakOnly);
     els.btnUpdate?.addEventListener("click", () => {

@@ -12,6 +12,7 @@
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/icon-180.png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
+    <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
     <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
     <link rel="stylesheet" href="/shokubutsu/style.css?v=7" />
   </head>
@@ -84,6 +85,15 @@
           ここでは種をまく植物と球根を植えて育てる植物を学びます。種をまく植物を「春に種をまく植物」と「秋に種をまく植物」に分けて学びます。
         </p>
       </section>
+      <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
+        <h2 class="review-panel-heading">まとめて確認</h2>
+        <p class="review-panel-lead">
+          全問の問題と答えを一覧で見ながら、スクロールして復習できます。
+        </p>
+        <div id="reviewList" class="review-list"></div>
+      </section>
+
+
 
       <section id="questionCard" class="question-card">
         <p id="questionLabel" class="question-label">問1</p>
@@ -96,7 +106,7 @@
         </div>
       </section>
 
-            <div class="answer-actions">
+            <div id="answerActions" class="answer-actions">
         <div class="answer-actions-row">
           <button type="button" id="btnReveal" class="btn-primary">答えを見る</button>
           <button type="button" id="btnQuit" class="btn-quit">やめる</button>
@@ -129,12 +139,14 @@
     </div>
 
     <script src="/study-park-asset-version.js?v=7"></script>
-    <script src="/shared/quiz-format.js?v=11"></script>
+    <script src="/shared/quiz-format.js?v=13"></script>
+    <script src="/shared/quiz-review-mode.js?v=2"></script>
+    <script src="/shared/quiz-review-controller.js?v=1"></script>
     <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=7"></script>
     <script src="/shokubutsu/data.js?v=7"></script>
     <script src="/shokubutsu/characters.js?v=9"></script>
     <script src="/shokubutsu/storage.js?v=7"></script>
-    <script src="/shokubutsu/app.js?v=9"></script>
+    <script src="/shokubutsu/app.js?v=10"></script>
   </body>
 </html>

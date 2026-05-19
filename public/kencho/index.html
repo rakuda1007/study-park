@@ -13,6 +13,7 @@
     <link rel="apple-touch-icon" href="/icon-180.png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=15" />
     <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
+    <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
     <link rel="stylesheet" href="/kencho/style.css?v=7" />
   </head>
   <body>
@@ -78,13 +79,22 @@
     </section>
 
     <main class="quiz-main">
+      <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
+        <h2 class="review-panel-heading">まとめて確認</h2>
+        <p class="review-panel-lead">
+          全問の問題と答えを一覧で見ながら、スクロールして復習できます。
+        </p>
+        <div id="reviewList" class="review-list"></div>
+      </section>
+
+
       <section id="questionCard" class="question-card">
         <p class="question-label">この都道府県の県庁所在地は？</p>
         <p id="prefName" class="prefecture-name">北海道</p>
       </section>
 
       <div id="choices" class="choices" role="group" aria-label="選択肢"></div>
-      <div class="choices-footer">
+      <div id="choicesFooter" class="choices-footer">
         <button type="button" id="btnQuit" class="btn-quit">やめる</button>
       </div>
     </main>
@@ -110,12 +120,14 @@
     </div>
 
     <script src="/study-park-asset-version.js?v=7"></script>
-    <script src="/shared/quiz-format.js?v=11"></script>
+    <script src="/shared/quiz-format.js?v=13"></script>
+    <script src="/shared/quiz-review-mode.js?v=2"></script>
+    <script src="/shared/quiz-review-controller.js?v=1"></script>
     <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=7"></script>
     <script src="/kencho/data.js?v=7"></script>
     <script src="/kencho/characters.js?v=9"></script>
     <script src="/kencho/storage.js?v=7"></script>
-    <script src="/kencho/app.js?v=9"></script>
+    <script src="/kencho/app.js?v=10"></script>
   </body>
 </html>

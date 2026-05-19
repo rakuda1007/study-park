@@ -1,8 +1,6 @@
 (function () {
   "use strict";
 
-  window.__STUDY_PARK_QUIZ_REVIEW_ENABLED__ = true;
-
   const CFG = window.__STUDY_PARK_QUIZ__;
   if (!CFG || !CFG.slug) {
     console.error("Study Park: __STUDY_PARK_QUIZ__ が読み込まれていません。");

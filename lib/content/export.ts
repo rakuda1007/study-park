@@ -46,6 +46,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
     <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
     <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
+    <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
   </head>
   <body>
     <header class="app-header app-header--unified">
@@ -154,8 +155,9 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </div>
 
     <script src="/study-park-asset-version.js?v=${ASSET_V}"></script>
-    <script src="/shared/quiz-format.js?v=12"></script>
-    <script src="/shared/quiz-review-mode.js?v=1"></script>
+    <script src="/shared/quiz-format.js?v=13"></script>
+    <script src="/shared/quiz-review-mode.js?v=2"></script>
+    <script src="/shared/quiz-review-controller.js?v=1"></script>
     <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=${ASSET_V}"></script>
     <script src="/${slug}/data.js?v=1"></script>

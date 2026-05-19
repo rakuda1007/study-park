@@ -22,6 +22,7 @@
     weakCount: 0,
     charIndex: 0,
     locked: false,
+    inReview: false,
     shownMasterMilestones: new Set(),
     session: {
       queue: [],
@@ -342,6 +343,18 @@
     nextQuestion();
   }
 
+  
+  let reviewCtl;
+
+  function renderReviewList() {
+    if (els.reviewList && window.StudyParkQuizReview) {
+      window.StudyParkQuizReview.renderAll(els.reviewList, QUESTIONS, {
+        questionNumber,
+        answerEntries,
+      });
+    }
+  }
+
   function syncFormatSelect() {
     const fmt = window.StudyParkQuizFormat;
     if (!els.formatSelect || !fmt) return;
@@ -358,16 +371,14 @@
     const { mode, order } = fmt.parse(value);
     state.mode = mode;
     state.order = order;
+    if (mode === "review") return;
     if (store) {
       store.setMode(state.mode);
       store.setOrder(state.order);
     }
   }
 
-  function onFormatChange(value) {
-    applyFormat(value);
-    startSession();
-  }
+  
 
   function onModeChange(nextMode) {
     state.mode = nextMode === "weak" ? "weak" : "full";
@@ -649,17 +660,37 @@
     els.modalImg = $("celebrateModalImg");
     els.btnModalClose = $("btnModalClose");
     els.btnModalRestart = $("btnModalRestart");
+    els.reviewPanel = $("reviewPanel");
+    els.reviewList = $("reviewList");
+    els.statsBar = document.querySelector(".stats-bar");
+    els.answerActions = $("answerActions");
 
     loadProgress();
     renderSquadGrid();
+    reviewCtl = window.StudyParkQuizReviewController.integrate({
+      state,
+      els,
+      playUiKeys: ["statsBar", "charPanel", "questionCard", "answerActions"],
+      closeModal,
+      renderStats,
+      renderReviewList,
+      getTotal: () => TOTAL,
+      applyFormat,
+      startSession,
+    });
+
     syncFormatSelect();
     if (els.formatSelect) {
       els.formatSelect.addEventListener("change", () => {
-        onFormatChange(els.formatSelect.value);
+        reviewCtl.onFormatChange(els.formatSelect.value);
       });
     }
 
-    startSession();
+    if (state.mode === "review") {
+      reviewCtl.startReviewMode();
+    } else {
+      startSession();
+    }
 
     els.btnResetWeak?.addEventListener("click", resetWeakOnly);
     els.btnUpdate?.addEventListener("click", () => {
@@ -674,9 +705,8 @@
     els.btnOk?.addEventListener("click", () => onSelfGrade(true));
     els.btnNg?.addEventListener("click", () => onSelfGrade(false));
 
-    $("btnModalRestart")?.addEventListener("click", () => {
-      closeModal();
-      startSession();
+    els.btnModalRestart?.addEventListener("click", () => {
+      reviewCtl.onModalRestart();
     });
     $("btnModalClose")?.addEventListener("click", closeModal);
     els.modal?.addEventListener("click", (ev) => {

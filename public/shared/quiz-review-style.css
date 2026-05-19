@@ -1,0 +1,77 @@
+/* まとめて確認パネル（全クイズ共通） */
+.review-panel {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border-radius: var(--radius, 16px);
+  background: var(--surface, #ffffff);
+  border: 2px solid #d0dce8;
+  box-shadow: 0 4px 16px rgba(26, 36, 51, 0.08);
+}
+
+.review-panel-heading {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  color: var(--accent-dark, #4a6fa5);
+}
+
+.review-panel-lead {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--muted, #4a5f7a);
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-item {
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  background: #f7f9fc;
+  border: 1px solid #dce4ef;
+}
+
+.review-item-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  color: var(--accent-dark, #4a6fa5);
+}
+
+.review-item-question {
+  margin: 0 0 0.75rem;
+}
+
+.review-item-question .question-paragraph {
+  margin: 0;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.review-item-answers {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: #eef4ff;
+  border: 1px solid #d4e2f4;
+}
+
+.review-item-answers-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-dark, #4a6fa5);
+  letter-spacing: 0.04em;
+}
+
+.review-item-answers .answer-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-item-answers .answer-marker {
+  font-weight: 700;
+  margin-right: 0.25rem;
+}

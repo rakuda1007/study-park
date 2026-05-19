@@ -37,7 +37,7 @@
       { value: FORMAT.RANDOM, label: "ランダムに出題" },
       { value: FORMAT.WEAK, label: "苦手問題を出題" },
     ];
-    if (window.__STUDY_PARK_QUIZ_REVIEW_ENABLED__) {
+    if (!window.__STUDY_PARK_QUIZ_REVIEW_DISABLED__) {
       opts.push({ value: FORMAT.REVIEW_ALL, label: "まとめて確認" });
     }
     return opts;
