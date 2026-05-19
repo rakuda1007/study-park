@@ -44,6 +44,17 @@ npm run dev
 
 ブラウザで `http://localhost:3000/admin/login` を開き、管理者アカウントでログインします。
 
+### 本番サイト（Hosting）でログインする場合
+
+`NEXT_PUBLIC_*` は **ビルド時に** JavaScript に埋め込まれます。GitHub Actions でデプロイする場合は次を満たす必要があります。
+
+1. GitHub の **Settings → Secrets and variables → Actions** で、**.env.local と同じキー名**の **Repository secrets** を用意する  
+   （例: `NEXT_PUBLIC_FIREBASE_API_KEY`。`FirebaseApiKey` など別名だとワークフローから参照できません）
+2. `main`（またはワークフロー対象ブランチ）に **ワークフロー修正後の** `.github/workflows/firebase-hosting.yml` が入ったうえで、push によりビルドが走るようにする
+3. デプロイ完了後にブラウザの **強制リロード**（キャッシュ）を試す
+
+Variables だけに登録している場合、`firebase-hosting.yml` は **`secrets.NAME`** で読むため、dash 側は **Secrets** に同じ名前で登録し直してください（またはワークフローを `vars` に合わせて書き換える）。
+
 ## 6. コンテンツの公開フロー（Phase 1）
 
 1. 管理画面でクイズ / レッスンを作成・編集して **保存**
@@ -59,3 +70,4 @@ npm run dev
 - **ログインできるが一覧が空 / 権限エラー** → `admins/{uid}` が無い、またはルール未デプロイ
 - **教科別一覧でエラー** → `firestore.indexes.json` をデプロイ（`subjectId` + `order`）
 - **ビルド時 Firebase エラー** → `.env.local` の `NEXT_PUBLIC_*` を確認
+- **本番ログイン画面に `Missing env: NEXT_PUBLIC_...`** → CI の Build ステップに `NEXT_PUBLIC_*` が渡っていない、または Secrets の名前がキーと一致していない。**Actions のログで該当 secret が「空」のビルドになっていないか**も確認する
