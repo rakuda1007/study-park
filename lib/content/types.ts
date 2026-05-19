@@ -16,6 +16,8 @@ export type QuizQuestion = {
   id: string;
   number: number;
   label: string;
+  /** 表示用ブロック（段落・画像）。未設定時は template のみ */
+  blocks?: LessonBlock[];
   template: string;
   blanks: BlankAnswer[];
 };

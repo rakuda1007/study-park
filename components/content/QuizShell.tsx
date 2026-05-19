@@ -139,7 +139,7 @@ export function QuizShell({ content }: Props) {
           <p id="questionLabel" className="question-label">
             問1
           </p>
-          <p id="questionBody" className="question-body" aria-live="polite" />
+          <div id="questionBody" className="question-body" aria-live="polite" />
           <p id="thinkHint" className="think-hint">
             心のなかで答えをかんがえてね
           </p>
@@ -211,7 +211,7 @@ export function QuizShell({ content }: Props) {
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=2"
+        src="/shared/quiz-blank-app.js?v=3"
         strategy="afterInteractive"
         key={content.slug}
       />

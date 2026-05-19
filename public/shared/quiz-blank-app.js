@@ -290,6 +290,43 @@
     });
   }
 
+  function renderQuestionBody(q) {
+    if (!els.questionBody) return;
+    els.questionBody.replaceChildren();
+    const blocks = q.blocks;
+    if (Array.isArray(blocks) && blocks.length > 0) {
+      blocks.forEach((block) => {
+        if (block.kind === "paragraph") {
+          const p = document.createElement("p");
+          p.className = "question-paragraph";
+          p.textContent = block.text;
+          els.questionBody.appendChild(p);
+        } else if (block.kind === "image" && block.src) {
+          const fig = document.createElement("figure");
+          fig.className = "question-figure";
+          const img = document.createElement("img");
+          img.src = block.src;
+          img.alt = block.alt || "";
+          img.className = "question-figure-img";
+          img.loading = "lazy";
+          fig.appendChild(img);
+          if (block.caption) {
+            const cap = document.createElement("figcaption");
+            cap.className = "question-figure-caption";
+            cap.textContent = block.caption;
+            fig.appendChild(cap);
+          }
+          els.questionBody.appendChild(fig);
+        }
+      });
+      return;
+    }
+    const p = document.createElement("p");
+    p.className = "question-paragraph";
+    p.textContent = q.template || "";
+    els.questionBody.appendChild(p);
+  }
+
   function renderQuestion() {
     const q = state.current;
     if (!q) return;
@@ -299,7 +336,7 @@
     if (els.questionLabel) {
       els.questionLabel.textContent = q.label || `問${questionNumber(q)}`;
     }
-    if (els.questionBody) els.questionBody.textContent = q.template;
+    renderQuestionBody(q);
 
     renderAnswerList(q);
     els.questionCard?.classList.remove("flash-ok", "flash-ng");

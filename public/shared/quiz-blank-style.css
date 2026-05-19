@@ -392,6 +392,38 @@ select.mode-select {
   text-align: left;
 }
 
+.question-body .question-paragraph {
+  margin: 0 0 0.75rem;
+  white-space: pre-line;
+}
+
+.question-body .question-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.question-figure {
+  margin: 0 0 1rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+}
+
+.question-figure-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.question-figure-caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+  white-space: pre-line;
+}
+
 .think-hint {
   margin: 0;
   font-size: 0.82rem;

@@ -111,7 +111,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
 
       <section id="questionCard" class="question-card">
         <p id="questionLabel" class="question-label">問1</p>
-        <p id="questionBody" class="question-body" aria-live="polite"></p>
+        <div id="questionBody" class="question-body" aria-live="polite"></div>
         <p id="thinkHint" class="think-hint">心のなかで答えをかんがえてね</p>
         <div id="answerReveal" class="answer-reveal" hidden>
           <p class="answer-reveal-title">答え</p>
@@ -153,7 +153,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <script src="/${slug}/data.js?v=1"></script>
     <script src="/shared/quiz-blank-characters.js?v=1"></script>
     <script src="/shared/quiz-blank-storage.js?v=1"></script>
-    <script src="/shared/quiz-blank-app.js?v=2"></script>
+    <script src="/shared/quiz-blank-app.js?v=3"></script>
   </body>
 </html>
 `;

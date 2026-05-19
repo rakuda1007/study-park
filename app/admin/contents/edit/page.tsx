@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { LessonSectionEditor } from "@/components/admin/LessonSectionEditor";
+import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEditor";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   buildManifest,
@@ -20,6 +21,10 @@ import {
   updateContent,
 } from "@/lib/content/firestore";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
+import {
+  normalizeQuizQuestion,
+  prepareQuizQuestionForSave,
+} from "@/lib/content/quiz-question";
 import type {
   BlankAnswer,
   ContentDoc,
@@ -76,7 +81,7 @@ function EditContentInner() {
     setSubjectId(c.subjectId);
     setStatus(c.status);
     setReady(c.ready);
-    setQuestions(c.quiz?.questions ?? []);
+    setQuestions((c.quiz?.questions ?? []).map(normalizeQuizQuestion));
     setSections(c.lesson?.sections ?? []);
   }, [id]);
 
@@ -118,7 +123,11 @@ function EditContentInner() {
         updatedBy: uid,
       });
       if (doc.type === "quiz") {
-        await saveQuizQuestions(doc.id, questions, uid);
+        await saveQuizQuestions(
+          doc.id,
+          questions.map(prepareQuizQuestionForSave),
+          uid,
+        );
       } else {
         await saveLessonSections(doc.id, sections, uid);
       }
@@ -202,13 +211,15 @@ function EditContentInner() {
   function addQuestion() {
     const n = questions.length + 1;
     const id = `q${String(n).padStart(2, "0")}`;
+    const defaultText = "問題文。「（①）」のように空欄を入れてください。";
     setQuestions((prev) => [
       ...prev,
       {
         id,
         number: n,
         label: `問${n}`,
-        template: "問題文。「（①）」のように空欄を入れてください。",
+        blocks: [{ kind: "paragraph", text: defaultText }],
+        template: defaultText,
         blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
       },
     ]);
@@ -348,14 +359,15 @@ function EditContentInner() {
                       削除
                     </button>
                   </div>
-                  <div className="admin-field">
-                    <label>問題文（「（①）」で空欄）</label>
-                    <textarea
-                      value={q.template}
-                      onChange={(e) => updateQuestion(qi, { template: e.target.value })}
-                      rows={4}
+                  {doc ? (
+                    <QuizQuestionBodyEditor
+                      contentId={doc.id}
+                      blocks={q.blocks ?? [{ kind: "paragraph", text: q.template }]}
+                      onChange={(blocks, template) =>
+                        updateQuestion(qi, { blocks, template })
+                      }
                     />
-                  </div>
+                  ) : null}
                   {q.blanks.map((b, bi) => (
                     <div key={`${q.id}-blank-${bi}`} className="admin-row admin-row--blank">
                       <div className="admin-field" style={{ flex: "0 0 4rem" }}>

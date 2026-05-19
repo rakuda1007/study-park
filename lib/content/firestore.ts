@@ -139,6 +139,12 @@ export async function createContent(input: CreateContentInput): Promise<string> 
           id: "q01",
           number: 1,
           label: "問1",
+          blocks: [
+            {
+              kind: "paragraph",
+              text: "ここに問題文を書きます。「（①）」のように空欄を入れてください。",
+            },
+          ],
           template: "ここに問題文を書きます。「（①）」のように空欄を入れてください。",
           blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
         },

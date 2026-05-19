@@ -1,58 +1,46 @@
 "use client";
 
 import { ImageBlockEditor } from "@/components/admin/ImageBlockEditor";
-import type { LessonBlock, LessonSection } from "@/lib/content/types";
+import type { LessonBlock } from "@/lib/content/types";
+import { templateFromBlocks } from "@/lib/content/quiz-question";
 
 type Props = {
   contentId: string;
-  section: LessonSection;
-  onChange: (section: LessonSection) => void;
+  blocks: LessonBlock[];
+  onChange: (blocks: LessonBlock[], template: string) => void;
 };
 
-export function LessonSectionEditor({ contentId, section, onChange }: Props) {
-  const updateBlocks = (blocks: LessonBlock[]) => {
-    onChange({ ...section, blocks });
+export function QuizQuestionBodyEditor({ contentId, blocks, onChange }: Props) {
+  const sync = (next: LessonBlock[]) => {
+    onChange(next, templateFromBlocks(next));
   };
 
   const updateBlock = (index: number, next: LessonBlock) => {
-    const blocks = [...section.blocks];
-    blocks[index] = next;
-    updateBlocks(blocks);
+    const copy = [...blocks];
+    copy[index] = next;
+    sync(copy);
   };
 
   const removeBlock = (index: number) => {
-    updateBlocks(section.blocks.filter((_, i) => i !== index));
+    if (blocks.length <= 1) return;
+    sync(blocks.filter((_, i) => i !== index));
   };
 
   const moveBlock = (index: number, dir: -1 | 1) => {
     const j = index + dir;
-    if (j < 0 || j >= section.blocks.length) return;
-    const blocks = [...section.blocks];
-    [blocks[index], blocks[j]] = [blocks[j], blocks[index]];
-    updateBlocks(blocks);
-  };
-
-  const addParagraph = () => {
-    updateBlocks([...section.blocks, { kind: "paragraph", text: "" }]);
-  };
-
-  const addImage = () => {
-    updateBlocks([
-      ...section.blocks,
-      { kind: "image", src: "", alt: "", caption: "" },
-    ]);
+    if (j < 0 || j >= blocks.length) return;
+    const copy = [...blocks];
+    [copy[index], copy[j]] = [copy[j], copy[index]];
+    sync(copy);
   };
 
   return (
     <div className="admin-lesson-blocks">
-      {section.blocks.length === 0 ? (
-        <p style={{ color: "var(--admin-muted)", fontSize: "0.85rem" }}>
-          段落または画像ブロックを追加してください。
-        </p>
-      ) : null}
-
-      {section.blocks.map((block, bi) => (
-        <div key={`${section.id}-block-${bi}`} className="admin-block-wrap">
+      <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
+        問題文（「（①）」で空欄）。段落のほか「＋ 画像」で図を挿入できます。
+      </p>
+      {blocks.map((block, bi) => (
+        <div key={`quiz-block-${bi}`} className="admin-block-wrap">
           <div className="admin-block-toolbar">
             <button
               type="button"
@@ -66,7 +54,7 @@ export function LessonSectionEditor({ contentId, section, onChange }: Props) {
             <button
               type="button"
               className="admin-btn"
-              disabled={bi === section.blocks.length - 1}
+              disabled={bi === blocks.length - 1}
               onClick={() => moveBlock(bi, 1)}
               aria-label="下へ"
             >
@@ -82,16 +70,17 @@ export function LessonSectionEditor({ contentId, section, onChange }: Props) {
                   type="button"
                   className="admin-btn admin-btn--danger"
                   onClick={() => removeBlock(bi)}
+                  disabled={blocks.length <= 1}
                 >
                   削除
                 </button>
               </div>
               <div className="admin-field">
-                <label>本文（**太字** が使えます）</label>
+                <label>本文</label>
                 <textarea
                   value={block.text}
                   onChange={(e) => updateBlock(bi, { kind: "paragraph", text: e.target.value })}
-                  rows={3}
+                  rows={4}
                 />
               </div>
             </div>
@@ -106,23 +95,24 @@ export function LessonSectionEditor({ contentId, section, onChange }: Props) {
               onRemove={() => removeBlock(bi)}
             />
           ) : null}
-
-          {block.kind === "html" ? (
-            <div className="admin-block">
-              <p className="admin-block-label">HTML ブロック（読み取り専用）</p>
-              <p style={{ fontSize: "0.8rem", color: "var(--admin-muted)" }}>
-                静的ページ由来の HTML です。管理画面では編集できません。
-              </p>
-            </div>
-          ) : null}
         </div>
       ))}
 
       <div className="admin-row">
-        <button type="button" className="admin-btn" onClick={addParagraph}>
+        <button
+          type="button"
+          className="admin-btn"
+          onClick={() => sync([...blocks, { kind: "paragraph", text: "" }])}
+        >
           ＋ 段落
         </button>
-        <button type="button" className="admin-btn" onClick={addImage}>
+        <button
+          type="button"
+          className="admin-btn"
+          onClick={() =>
+            sync([...blocks, { kind: "image", src: "", alt: "", caption: "" }])
+          }
+        >
           ＋ 画像
         </button>
       </div>
