@@ -1,4 +1,5 @@
 import type { ContentDoc, ContentManifest, SubjectDoc } from "./types";
+import { contentPlayHref } from "./urls";
 
 const ASSET_V = "7";
 
@@ -279,7 +280,7 @@ export function buildManifest(
       .sort((a, b) => a.order - b.order)
       .map((c) => ({
         label: c.title,
-        href: `/${c.slug}/`,
+        href: contentPlayHref(c.slug),
         ready: true,
         contentId: c.id,
       }));

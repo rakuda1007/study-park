@@ -11,18 +11,22 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    function isPublishedContent() {
+      return resource.data.status == 'published';
+    }
+
     match /admins/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
       allow write: if false;
     }
 
     match /subjects/{subjectId} {
-      allow read: if isAdmin();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     match /contents/{contentId} {
-      allow read: if isAdmin();
+      allow read: if isPublishedContent() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
   }

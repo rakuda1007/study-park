@@ -27,6 +27,7 @@ import type {
   SubjectDoc,
 } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
+import { contentPlayHref } from "@/lib/content/urls";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifestBase from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
@@ -103,6 +104,7 @@ function EditContentInner() {
       return;
     }
     setSaving(true);
+    const readyForSite = status === "published" ? true : ready;
     try {
       await updateContent(doc.id, {
         title: title.trim(),
@@ -110,7 +112,7 @@ function EditContentInner() {
         intro: intro.trim(),
         subjectId,
         status,
-        ready,
+        ready: readyForSite,
         updatedBy: uid,
       });
       if (doc.type === "quiz") {
@@ -118,7 +120,12 @@ function EditContentInner() {
       } else {
         await saveLessonSections(doc.id, sections, uid);
       }
-      setMsg("保存しました。");
+      const live = status === "published" && readyForSite;
+      setMsg(
+        live
+          ? "保存しました。トップメニューとプレイ画面に反映されます（再読み込みで確認）。"
+          : "保存しました。公開するには「公開」＋「メニューに表示」にしてください。",
+      );
       await load();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "保存に失敗しました。");
@@ -268,10 +275,14 @@ function EditContentInner() {
                 <select
                   id="status"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as ContentStatus)}
+                  onChange={(e) => {
+                    const next = e.target.value as ContentStatus;
+                    setStatus(next);
+                    if (next === "published") setReady(true);
+                  }}
                 >
-                  <option value="draft">下書き</option>
-                  <option value="published">公開</option>
+                  <option value="draft">下書き（サイトに出さない）</option>
+                  <option value="published">公開（サイトに出す）</option>
                   <option value="archived">アーカイブ</option>
                 </select>
               </div>
@@ -281,9 +292,14 @@ function EditContentInner() {
                   checked={ready}
                   onChange={(e) => setReady(e.target.checked)}
                 />
-                メニューに表示（ready）
+                トップメニュー・プレイ画面に表示
               </label>
             </div>
+            {status === "published" && !ready ? (
+              <p className="admin-msg admin-msg--error" style={{ marginTop: "0.5rem" }}>
+                「公開」だけでは本番に出ません。上のチェックをオンにして保存してください。
+              </p>
+            ) : null}
             <p style={{ fontSize: "0.8rem", color: "var(--admin-muted)" }}>
               種別: {doc.type} · ID: {doc.id}
             </p>
@@ -413,7 +429,11 @@ function EditContentInner() {
           )}
 
           <section className="admin-card">
-            <h2>操作</h2>
+            <h2>公開・操作</h2>
+            <p style={{ fontSize: "0.85rem", color: "var(--admin-muted)", margin: "0 0 0.75rem" }}>
+              保存後、ステータスを「公開」かつ「メニューに表示」にすると、エクスポートなしでサイトに載ります（URL:{" "}
+              <code>{contentPlayHref(slug.trim().toLowerCase() || "your-slug")}</code>）。
+            </p>
             <div className="admin-row">
               <button
                 type="button"
@@ -423,16 +443,33 @@ function EditContentInner() {
               >
                 {saving ? "保存中…" : "保存"}
               </button>
-              <button type="button" className="admin-btn" onClick={() => void onExport()}>
-                エクスポート（txt）
-              </button>
-              <button type="button" className="admin-btn" onClick={onDownloadManifest}>
-                manifest.json
-              </button>
+              {status === "published" && ready && slug.trim() ? (
+                <a
+                  href={contentPlayHref(slug.trim().toLowerCase())}
+                  className="admin-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  プレビュー
+                </a>
+              ) : null}
               <button type="button" className="admin-btn admin-btn--danger" onClick={() => void onDelete()}>
                 削除
               </button>
             </div>
+            <details style={{ marginTop: "1rem" }}>
+              <summary style={{ cursor: "pointer", color: "var(--admin-muted)" }}>
+                静的ファイル用（上級・オプション）
+              </summary>
+              <div className="admin-row" style={{ marginTop: "0.5rem" }}>
+                <button type="button" className="admin-btn" onClick={() => void onExport()}>
+                  エクスポート（txt）
+                </button>
+                <button type="button" className="admin-btn" onClick={onDownloadManifest}>
+                  manifest.json
+                </button>
+              </div>
+            </details>
           </section>
         </>
       ) : null}

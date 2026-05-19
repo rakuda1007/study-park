@@ -170,6 +170,11 @@
   color: #7dcea0;
 }
 
+.admin-badge--pending {
+  background: #3a2e1e;
+  color: #f5c842;
+}
+
 .admin-msg {
   margin: 0 0 1rem;
   padding: 0.65rem 0.85rem;

@@ -1,96 +1,10 @@
-import Link from "next/link";
-import { manifestToHomeMenus } from "@/lib/content/manifest-home";
+import { HomeNav } from "@/components/home/HomeNav";
 import type { ContentManifest } from "@/lib/content/types";
 import contentManifest from "@/public/content-manifest.json";
 
-type MenuItem = {
-  label: string;
-  href?: string;
-  ready: boolean;
-};
-
-type SubjectMenu = {
-  subject: string;
-  items: MenuItem[];
-};
-
-const subjectMenus: SubjectMenu[] = manifestToHomeMenus(
-  contentManifest as ContentManifest,
-);
-
-function MenuItemButton({ item }: { item: MenuItem }) {
-  const inner = (
-    <>
-      <span className="menu-item-label">{item.label}</span>
-      {item.ready ? (
-        <span className="menu-item-arrow" aria-hidden="true">
-          →
-        </span>
-      ) : (
-        <span className="menu-item-badge">工事中</span>
-      )}
-    </>
-  );
-
-  if (item.ready && item.href) {
-    return (
-      <Link href={item.href} className="menu-item menu-item--active">
-        {inner}
-      </Link>
-    );
-  }
-
-  return (
-    <span className="menu-item menu-item--disabled" aria-disabled="true">
-      {inner}
-    </span>
-  );
-}
-
-function SubjectSection({ group }: { group: SubjectMenu }) {
-  const readyCount = group.items.filter((item) => item.ready).length;
-
-  if (group.items.length === 1) {
-    return (
-      <section className="home-subject" aria-labelledby={`subject-${group.subject}`}>
-        <h2 id={`subject-${group.subject}`} className="home-subject-name">
-          {group.subject}
-        </h2>
-        <ul className="home-item-list">
-          <li>
-            <MenuItemButton item={group.items[0]} />
-          </li>
-        </ul>
-      </section>
-    );
-  }
-
-  return (
-    <details className="home-subject home-subject-dropdown">
-      <summary className="home-subject-dropdown-trigger">
-        <span id={`subject-${group.subject}`} className="home-subject-name">
-          {group.subject}
-        </span>
-        <span className="home-subject-dropdown-meta">
-          <span className="home-subject-dropdown-count">{readyCount}件</span>
-          <span className="home-subject-dropdown-chevron" aria-hidden="true" />
-        </span>
-      </summary>
-      <ul
-        className="home-item-list home-subject-dropdown-panel"
-        aria-labelledby={`subject-${group.subject}`}
-      >
-        {group.items.map((item) => (
-          <li key={`${group.subject}-${item.label}`}>
-            <MenuItemButton item={item} />
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
-
 export default function Home() {
+  const manifest = contentManifest as ContentManifest;
+
   return (
     <main className="home">
       <div className="home-caution" aria-hidden="true" />
@@ -119,13 +33,7 @@ export default function Home() {
           </div>
         </header>
 
-        <nav className="home-nav" aria-label="学習メニュー">
-          <div className="home-subject-list">
-            {subjectMenus.map((group) => (
-              <SubjectSection key={group.subject} group={group} />
-            ))}
-          </div>
-        </nav>
+        <HomeNav manifest={manifest} />
       </div>
     </main>
   );

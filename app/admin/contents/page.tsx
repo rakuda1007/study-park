@@ -174,10 +174,15 @@ export default function AdminContentsPage() {
                   </small>
                 </span>
                 <span
-                  className={`admin-badge ${c.status === "published" ? "admin-badge--published" : ""}`}
+                  className={`admin-badge ${
+                    c.status === "published" && c.ready
+                      ? "admin-badge--published"
+                      : c.status === "published"
+                        ? "admin-badge--pending"
+                        : ""
+                  }`}
                 >
-                  {c.status}
-                  {!c.ready ? " · 未準備" : ""}
+                  {c.status === "published" ? "サイト公開中" : c.status}
                 </span>
               </Link>
             </li>
