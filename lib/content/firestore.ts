@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { DEFAULT_QUIZ_QUESTION_BODY } from "./quiz-question";
 import { defaultQuizBlankMarker } from "./quiz-markers";
 import type {
   ContentDoc,
@@ -142,10 +143,10 @@ export async function createContent(input: CreateContentInput): Promise<string> 
           blocks: [
             {
               kind: "paragraph",
-              text: "ここに問題文を書きます。「（①）」のように空欄を入れてください。",
+              text: DEFAULT_QUIZ_QUESTION_BODY,
             },
           ],
-          template: "ここに問題文を書きます。「（①）」のように空欄を入れてください。",
+          template: DEFAULT_QUIZ_QUESTION_BODY,
           blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
         },
       ],

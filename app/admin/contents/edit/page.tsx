@@ -22,6 +22,7 @@ import {
 } from "@/lib/content/firestore";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
 import {
+  DEFAULT_QUIZ_QUESTION_BODY,
   normalizeQuizQuestion,
   prepareQuizQuestionForSave,
 } from "@/lib/content/quiz-question";
@@ -211,7 +212,7 @@ function EditContentInner() {
   function addQuestion() {
     const n = questions.length + 1;
     const id = `q${String(n).padStart(2, "0")}`;
-    const defaultText = "問題文。「（①）」のように空欄を入れてください。";
+    const defaultText = DEFAULT_QUIZ_QUESTION_BODY;
     setQuestions((prev) => [
       ...prev,
       {

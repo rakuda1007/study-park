@@ -1,5 +1,8 @@
 import type { LessonBlock, QuizQuestion } from "./types";
 
+/** 新規クイズ問題の本文デフォルト */
+export const DEFAULT_QUIZ_QUESTION_BODY = "①②③④⑤⑥⑦⑧";
+
 /** 段落ブロックから template 文字列を生成（空欄記号は段落内に含める） */
 export function templateFromBlocks(blocks: LessonBlock[]): string {
   return blocks
