@@ -192,7 +192,7 @@ ${blocks}
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
-    <link rel="stylesheet" href="/shared/lesson-theme.css?v=1" />
+    <link rel="stylesheet" href="/shared/lesson-theme.css?v=2" />
   </head>
   <body class="lesson-page">
     <header class="app-header app-header--unified">
