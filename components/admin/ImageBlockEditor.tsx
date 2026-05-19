@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { LessonBlock } from "@/lib/content/types";
 import { uploadLessonImage } from "@/lib/firebase/storage";
 
@@ -25,21 +25,38 @@ export function ImageBlockEditor({
   const pasteRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState("");
+  const onChangeRef = useRef(onChange);
+  const uploadSeqRef = useRef(0);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const uploadFile = useCallback(
     async (file: File | Blob, mime: string) => {
+      if (!contentId.trim()) {
+        setUploadErr("コンテンツ ID がありません。ページを再読み込みしてください。");
+        return;
+      }
+
+      const seq = ++uploadSeqRef.current;
       setUploadErr("");
       setUploading(true);
+
       try {
         const url = await uploadLessonImage(contentId, file, mime);
-        onChange({ src: url });
+        if (seq !== uploadSeqRef.current) return;
+        onChangeRef.current({ src: url });
       } catch (e) {
+        if (seq !== uploadSeqRef.current) return;
         setUploadErr(e instanceof Error ? e.message : "アップロードに失敗しました。");
       } finally {
-        setUploading(false);
+        if (seq === uploadSeqRef.current) {
+          setUploading(false);
+        }
       }
     },
-    [contentId, onChange],
+    [contentId],
   );
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,13 +88,16 @@ export function ImageBlockEditor({
       </div>
       <div
         ref={pasteRef}
-        className="admin-image-paste"
+        className={`admin-image-paste${uploading ? " admin-image-paste--busy" : ""}`}
         tabIndex={0}
         onPaste={onPaste}
         role="button"
         aria-label="ここに画像を貼り付け"
+        aria-busy={uploading}
       >
-        {block.src ? (
+        {uploading ? (
+          <p className="admin-image-uploading">アップロード中…</p>
+        ) : block.src ? (
           <img src={block.src} alt="" className="admin-image-preview" />
         ) : (
           <p className="admin-image-paste-hint">
@@ -86,7 +106,6 @@ export function ImageBlockEditor({
             または下のボタンでファイルを選択
           </p>
         )}
-        {uploading ? <p className="admin-image-uploading">アップロード中…</p> : null}
       </div>
       {uploadErr ? <p className="admin-msg admin-msg--error">{uploadErr}</p> : null}
       <div className="admin-row">
@@ -100,22 +119,6 @@ export function ImageBlockEditor({
           className="admin-sr-only"
           onChange={onFileChange}
           disabled={uploading}
-        />
-      </div>
-      <div className="admin-field">
-        <label>代替テキスト（任意）</label>
-        <input
-          value={block.alt ?? ""}
-          onChange={(e) => onChange({ alt: e.target.value })}
-          placeholder="図の説明（読み上げ用）"
-        />
-      </div>
-      <div className="admin-field">
-        <label>キャプション（図の下の説明・任意）</label>
-        <input
-          value={block.caption ?? ""}
-          onChange={(e) => onChange({ caption: e.target.value })}
-          placeholder="例: 高知県の地図"
         />
       </div>
     </div>

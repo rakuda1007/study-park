@@ -20,5 +20,11 @@ export function getFirestoreClient(): Firestore {
 }
 
 export function getStorageClient(): FirebaseStorage {
-  return getStorage(getFirebaseApp());
+  const app = getFirebaseApp();
+  const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim();
+  if (bucket) {
+    const gsUrl = bucket.startsWith("gs://") ? bucket : `gs://${bucket}`;
+    return getStorage(app, gsUrl);
+  }
+  return getStorage(app);
 }
