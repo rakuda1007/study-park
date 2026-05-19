@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { LessonBlock } from "@/lib/content/types";
+import { readClipboardImageFile } from "@/lib/firebase/prepare-image-upload";
 import { uploadLessonImage } from "@/lib/firebase/storage";
 
 type ImageBlock = Extract<LessonBlock, { kind: "image" }>;
@@ -67,15 +68,22 @@ export function ImageBlockEditor({
   };
 
   const onPaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-      if (!item.type.startsWith("image/")) continue;
-      e.preventDefault();
-      const file = item.getAsFile();
-      if (file) void uploadFile(file, item.type);
-      return;
-    }
+    e.preventDefault();
+    const dt = e.clipboardData;
+    if (!dt) return;
+
+    void (async () => {
+      try {
+        const file = await readClipboardImageFile(dt);
+        if (!file) {
+          setUploadErr("クリップボードに画像がありませんでした。");
+          return;
+        }
+        void uploadFile(file, file.type);
+      } catch (err) {
+        setUploadErr(err instanceof Error ? err.message : "貼り付けに失敗しました。");
+      }
+    })();
   };
 
   return (

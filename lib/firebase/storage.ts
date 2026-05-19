@@ -3,9 +3,9 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getFirebaseAuth } from "./auth-client";
 import { getStorageClient } from "./client";
+import { prepareImageForUpload } from "./prepare-image-upload";
 
-const MAX_BYTES = 5 * 1024 * 1024;
-const UPLOAD_TIMEOUT_MS = 120_000;
+const UPLOAD_TIMEOUT_MS = 180_000;
 const URL_TIMEOUT_MS = 30_000;
 
 function extFromMime(mime: string): string {
@@ -15,15 +15,6 @@ function extFromMime(mime: string): string {
   if (mime === "image/gif") return "gif";
   if (mime === "image/svg+xml") return "svg";
   return "png";
-}
-
-function normalizeMime(mimeType: string, file: File | Blob): string {
-  const m = mimeType?.trim().toLowerCase();
-  if (m && m.startsWith("image/")) return m === "image/jpg" ? "image/jpeg" : m;
-  if (file instanceof File && file.type.startsWith("image/")) {
-    return file.type === "image/jpg" ? "image/jpeg" : file.type;
-  }
-  return "image/png";
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
@@ -70,7 +61,7 @@ async function assertAdminAuth(): Promise<void> {
   if (!user) {
     throw new Error("ログインし直してください（管理者として）。");
   }
-  await user.getIdToken();
+  await user.getIdToken(true);
 }
 
 /** レッスン・クイズ用画像を Storage にアップロードし、公開 URL を返す */
@@ -82,14 +73,12 @@ export async function uploadLessonImage(
   if (!contentId.trim()) {
     throw new Error("コンテンツ ID がありません。ページを再読み込みしてください。");
   }
-  if (file.size > MAX_BYTES) {
-    throw new Error("画像は 5MB 以下にしてください。");
-  }
 
   assertStorageConfigured();
   await assertAdminAuth();
 
-  const mime = normalizeMime(mimeType, file);
+  const prepared = await prepareImageForUpload(file, mimeType);
+  const mime = prepared.type;
   const ext = extFromMime(mime);
   const name = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
   const path = `lesson-images/${contentId}/${name}`;
@@ -97,9 +86,9 @@ export async function uploadLessonImage(
 
   try {
     await withTimeout(
-      uploadBytes(storageRef, file, { contentType: mime }),
+      uploadBytes(storageRef, prepared, { contentType: mime }),
       UPLOAD_TIMEOUT_MS,
-      "アップロードがタイムアウトしました。Storage が有効か、ネットワークを確認してください。",
+      "アップロードがタイムアウトしました。Firebase Storage が有効か、.env.local の STORAGE_BUCKET を確認してください。",
     );
     return await withTimeout(
       getDownloadURL(storageRef),
