@@ -1,4 +1,5 @@
 import type { ContentDoc, ContentManifest, SubjectDoc } from "./types";
+import { lessonBlockToHtml } from "./lesson-html";
 import { contentPlayHref } from "./urls";
 
 const ASSET_V = "7";
@@ -172,12 +173,7 @@ export function buildLessonIndexHtml(content: ContentDoc): string {
 
   const sectionHtml = sections
     .map((s) => {
-      const blocks = s.blocks
-        .map((b) => {
-          if (b.kind === "html") return `        ${b.html}`;
-          return `        <p class="lesson-body">${escHtml(b.text)}</p>`;
-        })
-        .join("\n");
+      const blocks = s.blocks.map((b) => lessonBlockToHtml(b)).join("\n");
       return `      <article id="${escHtml(s.id)}" class="lesson-section" aria-labelledby="heading-${escHtml(s.id)}">
         <h2 id="heading-${escHtml(s.id)}">${escHtml(s.heading)}</h2>
 ${blocks}
@@ -258,6 +254,28 @@ export function buildLessonStyleCss(): string {
 .lesson-body {
   margin: 0 0 0.75rem;
   line-height: 1.75;
+}
+.lesson-body + .lesson-body {
+  margin-top: 0.75rem;
+}
+.lesson-figure {
+  margin: 0 0 1rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+}
+.lesson-figure-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.lesson-figure-caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #666;
+  text-align: center;
 }
 `;
 }

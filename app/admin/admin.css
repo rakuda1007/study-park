@@ -204,6 +204,93 @@
   margin-bottom: 0.75rem;
 }
 
+.admin-lesson-blocks {
+  margin-top: 0.5rem;
+}
+
+.admin-block-wrap {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-block-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.admin-block-wrap .admin-block,
+.admin-block-wrap .admin-block--image {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-block-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.admin-block {
+  padding: 0.65rem;
+  border-radius: 8px;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-image-paste {
+  min-height: 8rem;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border: 2px dashed var(--admin-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.admin-image-paste:focus {
+  border-color: var(--admin-accent);
+}
+
+.admin-image-paste-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.admin-image-preview {
+  max-width: 100%;
+  max-height: 14rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.admin-image-uploading {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--admin-accent);
+  text-align: center;
+}
+
+.admin-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .admin-login {
   max-width: 22rem;
   margin: 4rem auto;

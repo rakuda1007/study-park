@@ -32,13 +32,45 @@
   margin: 0 0 0.75rem;
   font-size: 1.15rem;
 }
+.lesson-section h2 {
+  color: #4a3f8c;
+}
+
 .lesson-body {
   margin: 0 0 0.75rem;
   line-height: 1.75;
+  font-size: 0.95rem;
 }
+
+.lesson-body + .lesson-body {
+  margin-top: 0.75rem;
+}
+
 .lesson-html {
   margin: 0 0 0.75rem;
   line-height: 1.75;
+}
+
+.lesson-figure {
+  margin: 0 0 1rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+}
+
+.lesson-figure-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lesson-figure-caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #666;
+  text-align: center;
 }
 
 .play-status {

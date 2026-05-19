@@ -15,7 +15,8 @@
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "logo:home": "node scripts/generate-home-logo.mjs",
     "firebase:deploy:rules": "firebase deploy --only firestore:rules",
-    "firebase:deploy:indexes": "firebase deploy --only firestore:indexes"
+    "firebase:deploy:indexes": "firebase deploy --only firestore:indexes",
+    "firebase:deploy:storage": "firebase deploy --only storage"
   },
   "dependencies": {
     "firebase": "^12.12.0",

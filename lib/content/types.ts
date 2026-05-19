@@ -23,6 +23,7 @@ export type QuizQuestion = {
 /** レッスンの1ブロック */
 export type LessonBlock =
   | { kind: "paragraph"; text: string }
+  | { kind: "image"; src: string; alt?: string; caption?: string }
   | { kind: "html"; html: string };
 
 /** レッスンの1セクション */

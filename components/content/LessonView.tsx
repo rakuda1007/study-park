@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LessonBlocks } from "@/components/content/LessonBlocks";
 import type { ContentDoc } from "@/lib/content/types";
 
 type Props = {
@@ -47,22 +48,7 @@ export function LessonView({ content }: Props) {
             aria-labelledby={`heading-${s.id}`}
           >
             <h2 id={`heading-${s.id}`}>{s.heading}</h2>
-            {s.blocks.map((b, i) => {
-              if (b.kind === "html") {
-                return (
-                  <div
-                    key={`${s.id}-html-${i}`}
-                    className="lesson-html"
-                    dangerouslySetInnerHTML={{ __html: b.html }}
-                  />
-                );
-              }
-              return (
-                <p key={`${s.id}-p-${i}`} className="lesson-body">
-                  {b.text}
-                </p>
-              );
-            })}
+            <LessonBlocks sectionId={s.id} blocks={s.blocks} />
           </article>
         ))}
       </main>

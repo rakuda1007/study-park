@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { LessonSectionEditor } from "@/components/admin/LessonSectionEditor";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   buildManifest,
@@ -393,6 +394,9 @@ function EditContentInner() {
           ) : (
             <section className="admin-card">
               <h2>レッスン（{sections.length}セクション）</h2>
+              <p style={{ fontSize: "0.85rem", color: "var(--admin-muted)", margin: "0 0 1rem" }}>
+                段落のほか「＋ 画像」で図を追加できます。画像エリアをクリックして Ctrl+V で貼り付け、またはファイルを選択してください。
+              </p>
               {sections.map((sec, si) => (
                 <div key={sec.id} className="admin-question">
                   <div className="admin-field">
@@ -402,24 +406,13 @@ function EditContentInner() {
                       onChange={(e) => updateSection(si, { heading: e.target.value })}
                     />
                   </div>
-                  <div className="admin-field">
-                    <label>段落（1行＝1段落）</label>
-                    <textarea
-                      value={sec.blocks
-                        .filter((b) => b.kind === "paragraph")
-                        .map((b) => (b.kind === "paragraph" ? b.text : ""))
-                        .join("\n")}
-                      onChange={(e) =>
-                        updateSection(si, {
-                          blocks: e.target.value
-                            .split("\n")
-                            .filter((line) => line.trim())
-                            .map((text) => ({ kind: "paragraph" as const, text })),
-                        })
-                      }
-                      rows={5}
+                  {doc ? (
+                    <LessonSectionEditor
+                      contentId={doc.id}
+                      section={sec}
+                      onChange={(next) => updateSection(si, next)}
                     />
-                  </div>
+                  ) : null}
                 </div>
               ))}
               <button type="button" className="admin-btn" onClick={addSection}>

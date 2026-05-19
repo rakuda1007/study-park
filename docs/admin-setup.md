@@ -34,7 +34,10 @@ Firestore に `admins/{uid}` ドキュメントを **手動で** 1 件作成し�
 ```bash
 npm run firebase:deploy:rules
 npm run firebase:deploy:indexes
+npm run firebase:deploy:storage
 ```
+
+レッスンに画像を入れる機能は **Firebase Storage** を使います。初回は Storage を有効化し、上記 `storage` のデプロイが必要です。
 
 ## 5. 開発サーバー
 

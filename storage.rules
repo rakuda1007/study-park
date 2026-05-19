@@ -2,9 +2,17 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // 開発初期はすべて拒否。パス設計と認証ルールを決めてから match を細かく分けてください。
-    match /{allPaths=**} {
-      allow read, write: if false;
+    function isAdmin() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    match /lesson-images/{contentId}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin();
     }
   }
 }
