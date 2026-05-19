@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { defaultQuizBlankMarker } from "./quiz-markers";
 import type {
   ContentDoc,
   ContentStatus,
@@ -139,7 +140,7 @@ export async function createContent(input: CreateContentInput): Promise<string> 
           number: 1,
           label: "問1",
           template: "ここに問題文を書きます。「（①）」のように空欄を入れてください。",
-          blanks: [{ marker: "①", answers: ["答え"] }],
+          blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
         },
       ],
     },

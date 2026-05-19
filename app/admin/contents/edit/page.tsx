@@ -19,6 +19,7 @@ import {
   saveQuizQuestions,
   updateContent,
 } from "@/lib/content/firestore";
+import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
 import type {
   BlankAnswer,
   ContentDoc,
@@ -199,7 +200,7 @@ function EditContentInner() {
         number: n,
         label: `問${n}`,
         template: "問題文。「（①）」のように空欄を入れてください。",
-        blanks: [{ marker: "①", answers: ["答え"] }],
+        blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
       },
     ]);
   }
@@ -378,7 +379,7 @@ function EditContentInner() {
                       updateQuestion(qi, {
                         blanks: [
                           ...q.blanks,
-                          { marker: `（${q.blanks.length + 1}）`, answers: [""] },
+                          { marker: defaultQuizBlankMarker(q.blanks.length), answers: [""] },
                         ],
                       })
                     }
