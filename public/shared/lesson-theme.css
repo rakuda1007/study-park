@@ -1,0 +1,132 @@
+/* Study Park まとめページ共通テーマ（sankaku と /play レッスンで共有） */
+.lesson-page {
+  --lesson-bg: #f7f4ff;
+  --lesson-surface: #ffffff;
+  --lesson-ink: #2b2622;
+  --lesson-muted: #6b6560;
+  --lesson-header-border: #d4c8f5;
+  --lesson-accent: #6d4fc7;
+  --lesson-radius: 16px;
+  --lesson-shadow: 0 8px 24px rgba(43, 38, 34, 0.1);
+  min-height: 100dvh;
+  background: var(--lesson-bg);
+  color: var(--lesson-ink);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui,
+    sans-serif;
+}
+
+.lesson-page .app-header--unified {
+  --surface: #ffffff;
+  --ink: #2b2622;
+  --header-border: #d4c8f5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--lesson-surface);
+  border-bottom: 2px solid var(--lesson-header-border);
+}
+
+.lesson-page .lesson-main {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 2.5rem;
+}
+
+.lesson-page .lesson-intro {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--lesson-radius);
+  background: var(--lesson-surface);
+  border: 2px solid #e8e0ff;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  box-shadow: var(--lesson-shadow);
+}
+
+.lesson-page .lesson-toc {
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--lesson-radius);
+  background: #efeaff;
+  border: 1px solid #d4c8f5;
+}
+
+.lesson-page .lesson-toc-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--lesson-accent);
+  letter-spacing: 0.04em;
+}
+
+.lesson-page .lesson-toc-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.lesson-page .lesson-toc-list a {
+  color: var(--lesson-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-page .lesson-toc-list a:hover {
+  text-decoration: underline;
+}
+
+.lesson-page .lesson-section {
+  margin: 0 0 2rem;
+  padding: 1.1rem 1rem 1.25rem;
+  border-radius: var(--lesson-radius);
+  background: var(--lesson-surface);
+  border: 2px solid #ece6ff;
+  box-shadow: var(--lesson-shadow);
+}
+
+.lesson-page .lesson-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--lesson-accent);
+}
+
+.lesson-page .lesson-figure {
+  margin: 0 0 1rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+}
+
+.lesson-page .lesson-figure-img,
+.lesson-page .lesson-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lesson-page .lesson-figure-caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--lesson-muted);
+  text-align: center;
+}
+
+.lesson-page .lesson-body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.lesson-page .lesson-body + .lesson-body {
+  margin-top: 0.75rem;
+}
+
+.lesson-page .lesson-html {
+  margin: 0 0 0.75rem;
+  line-height: 1.75;
+  font-size: 0.95rem;
+}

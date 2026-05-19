@@ -13,7 +13,7 @@ export function LessonView({ content }: Props) {
   const sections = content.lesson?.sections ?? [];
 
   return (
-    <>
+    <div className="lesson-page">
       <header className="app-header app-header--unified">
         <Link href="/" className="app-header-logo-link" aria-label="トップへ">
           <img
@@ -52,6 +52,6 @@ export function LessonView({ content }: Props) {
           </article>
         ))}
       </main>
-    </>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4a6fa5",
+  themeColor: "#6d4fc7",
 };
 
 export default function PlayLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +19,7 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
       <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
+      <link rel="stylesheet" href="/shared/lesson-theme.css?v=1" />
       {children}
     </>
   );

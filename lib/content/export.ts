@@ -192,9 +192,9 @@ ${blocks}
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
-    <link rel="stylesheet" href="/${content.slug}/style.css?v=1" />
+    <link rel="stylesheet" href="/shared/lesson-theme.css?v=1" />
   </head>
-  <body>
+  <body class="lesson-page">
     <header class="app-header app-header--unified">
       <a href="/" class="app-header-logo-link" aria-label="トップへ">
         <img class="app-header-logo" src="/study-park-logo.png?v=8" alt="" width="48" height="48" />
@@ -218,65 +218,9 @@ ${sectionHtml}
 `;
 }
 
+/** 静的エクスポート用（共通見た目は /shared/lesson-theme.css） */
 export function buildLessonStyleCss(): string {
-  return `/* Study Park まとめページ（管理画面エクスポート用） */
-.lesson-main {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: 1rem 1.25rem 2.5rem;
-}
-.lesson-intro {
-  margin: 0 0 1.25rem;
-  line-height: 1.7;
-}
-.lesson-toc {
-  margin: 0 0 2rem;
-  padding: 1rem;
-  border-radius: 12px;
-  background: #faf8ff;
-  border: 1px solid #e8e4f4;
-}
-.lesson-toc-title {
-  margin: 0 0 0.5rem;
-  font-weight: 700;
-}
-.lesson-toc-list {
-  margin: 0;
-  padding-left: 1.25rem;
-}
-.lesson-section {
-  margin-bottom: 2.5rem;
-}
-.lesson-section h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.15rem;
-}
-.lesson-body {
-  margin: 0 0 0.75rem;
-  line-height: 1.75;
-}
-.lesson-body + .lesson-body {
-  margin-top: 0.75rem;
-}
-.lesson-figure {
-  margin: 0 0 1rem;
-  padding: 0.5rem;
-  border-radius: 12px;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-}
-.lesson-figure-img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.lesson-figure-caption {
-  margin: 0.5rem 0 0;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: #666;
-  text-align: center;
-}
+  return `/* レッスン見た目は public/shared/lesson-theme.css を HTML から読み込みます */
 `;
 }
 
@@ -332,10 +276,7 @@ export function buildExportBundle(content: ContentDoc): ExportFile[] {
       { path: `${content.slug}/index.html`, content: buildQuizIndexHtml(content) },
     ];
   }
-  return [
-    { path: `${content.slug}/index.html`, content: buildLessonIndexHtml(content) },
-    { path: `${content.slug}/style.css`, content: buildLessonStyleCss() },
-  ];
+  return [{ path: `${content.slug}/index.html`, content: buildLessonIndexHtml(content) }];
 }
 
 export function downloadTextFile(filename: string, text: string, mime = "text/plain") {
