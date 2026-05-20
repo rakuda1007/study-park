@@ -5,7 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { HomeSubjectMenu } from "@/lib/content/manifest-home";
 import { manifestToHomeMenus } from "@/lib/content/manifest-home";
 import { mergeHomeMenus } from "@/lib/content/merge-menus";
-import { listPublicSubjects, listPublishedContents } from "@/lib/content/public-firestore";
+import {
+  listPublicSubjects,
+  listPublishedContents,
+  listPublishedLegacyContents,
+} from "@/lib/content/public-firestore";
 import type { ContentManifest } from "@/lib/content/types";
 
 type MenuItem = {
@@ -96,11 +100,12 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
     setLoadState("loading");
     setLoadError(null);
     try {
-      const [subjects, published] = await Promise.all([
+      const [subjects, published, legacy] = await Promise.all([
         listPublicSubjects(),
         listPublishedContents(),
+        listPublishedLegacyContents(),
       ]);
-      setMenus(mergeHomeMenus(manifest, subjects, published));
+      setMenus(mergeHomeMenus(manifest, subjects, published, legacy));
       setLoadState("ok");
     } catch (e) {
       console.error("HomeNav: Firestore メニュー取得失敗", e);

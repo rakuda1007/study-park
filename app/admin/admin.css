@@ -248,6 +248,11 @@
   color: #f5c842;
 }
 
+.admin-badge--legacy {
+  background: #2a3148;
+  color: #9eb4e8;
+}
+
 .admin-msg {
   margin: 0 0 1rem;
   padding: 0.65rem 0.85rem;

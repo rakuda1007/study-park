@@ -29,5 +29,10 @@ service cloud.firestore {
       allow read: if isPublishedContent() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
+
+    match /legacyContents/{legacyId} {
+      allow read: if resource.data.ready == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

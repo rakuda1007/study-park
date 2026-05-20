@@ -36,6 +36,7 @@ import type {
 } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { contentPlayHref } from "@/lib/content/urls";
+import { listLegacyContents } from "@/lib/content/legacy-contents";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifestBase from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
@@ -154,9 +155,11 @@ function EditContentInner() {
     if (merged.type === "quiz") merged.quiz = { quizKind: "blank", questions };
     else merged.lesson = { sections };
 
+    const legacy = await listLegacyContents();
     const manifest = buildManifest(
       allSubjects,
       allContents.map((c) => (c.id === doc.id ? merged : c)),
+      legacy,
       contentManifestBase as ContentManifest,
     );
     await downloadExportZip(merged, JSON.stringify(manifest, null, 2));
@@ -167,9 +170,11 @@ function EditContentInner() {
     void (async () => {
       const allContents = await listContents();
       const allSubjects = await listSubjects();
+      const legacy = await listLegacyContents();
       const manifest = buildManifest(
         allSubjects,
         allContents,
+        legacy,
         contentManifestBase as ContentManifest,
       );
       downloadTextFile(

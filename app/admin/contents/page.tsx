@@ -9,16 +9,31 @@ import {
   isSlugTaken,
   listContents,
   listSubjects,
-  moveContentInSubject,
-  type ContentReorderAction,
 } from "@/lib/content/firestore";
-import type { ContentDoc, ContentType, SubjectDoc } from "@/lib/content/types";
+import {
+  ensureLegacyContentsFromManifest,
+  listLegacyContents,
+  moveMenuEntryInSubject,
+  type MenuEntryRef,
+} from "@/lib/content/legacy-contents";
+import type { ContentDoc, ContentType, LegacyContentDoc, SubjectDoc } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import contentManifestBase from "@/public/content-manifest.json";
+import type { ContentManifest } from "@/lib/content/types";
+
+type AdminMenuRow =
+  | { kind: "content"; doc: ContentDoc }
+  | { kind: "legacy"; doc: LegacyContentDoc };
+
+function rowKey(row: AdminMenuRow): string {
+  return `${row.kind}:${row.doc.id}`;
+}
 
 export default function AdminContentsPage() {
   const [subjects, setSubjects] = useState<SubjectDoc[]>([]);
   const [contents, setContents] = useState<ContentDoc[]>([]);
+  const [legacyContents, setLegacyContents] = useState<LegacyContentDoc[]>([]);
   const [uid, setUid] = useState("");
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
@@ -29,13 +44,19 @@ export default function AdminContentsPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newSubjectId, setNewSubjectId] = useState("math");
   const [creating, setCreating] = useState(false);
-  const [reorderingId, setReorderingId] = useState<string | null>(null);
+  const [reorderingKey, setReorderingKey] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     await ensureDefaultSubjects();
-    const [s, c] = await Promise.all([listSubjects(), listContents()]);
+    await ensureLegacyContentsFromManifest(contentManifestBase as ContentManifest);
+    const [s, c, l] = await Promise.all([
+      listSubjects(),
+      listContents(),
+      listLegacyContents(),
+    ]);
     setSubjects(s);
     setContents(c);
+    setLegacyContents(l);
     if (s.length && !s.some((x) => x.id === newSubjectId)) {
       setNewSubjectId(s[0].id);
     }
@@ -99,19 +120,26 @@ export default function AdminContentsPage() {
     }
   }
 
-  const groupedContents = subjects
-    .map((subject) => ({
-      subject,
-      items: contents
-        .filter((c) => c.subjectId === subject.id)
-        .sort((a, b) => a.order - b.order),
-    }))
-    .filter((g) => g.items.length > 0);
+  const totalCount = contents.length + legacyContents.length;
+
+  const groupedRows = subjects
+    .map((subject) => {
+      const rows: AdminMenuRow[] = [
+        ...contents
+          .filter((c) => c.subjectId === subject.id)
+          .map((doc) => ({ kind: "content" as const, doc })),
+        ...legacyContents
+          .filter((l) => l.subjectId === subject.id)
+          .map((doc) => ({ kind: "legacy" as const, doc })),
+      ].sort((a, b) => a.doc.order - b.doc.order);
+      return { subject, rows };
+    })
+    .filter((g) => g.rows.length > 0);
 
   async function onReorder(
     subjectId: string,
-    contentId: string,
-    action: ContentReorderAction,
+    ref: MenuEntryRef,
+    action: "up" | "down" | "top",
   ) {
     if (!uid) {
       setErr("ログイン情報がありません。");
@@ -119,15 +147,15 @@ export default function AdminContentsPage() {
     }
     setErr("");
     setMsg("");
-    setReorderingId(contentId);
+    setReorderingKey(`${ref.kind}:${ref.id}`);
     try {
-      await moveContentInSubject(subjectId, contentId, action, uid);
+      await moveMenuEntryInSubject(subjectId, ref, action, uid);
       await reload();
       setMsg("並び順を更新しました。");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "並び替えに失敗しました。");
     } finally {
-      setReorderingId(null);
+      setReorderingKey(null);
     }
   }
 
@@ -194,23 +222,81 @@ export default function AdminContentsPage() {
       </section>
 
       <section className="admin-card">
-        <h2>一覧（{contents.length}件）</h2>
+        <h2>一覧（{totalCount}件）</h2>
         <p className="admin-hint">
-          教科ごとに並び順を変えられます。トップページのメニューは、上にあるほど先に表示されます。
+          トップに出るコンテンツを教科ごとに並べ替えできます。初回表示時に、これまで
+          content-manifest.json にあった静的アプリ（県庁所在地・雪の多い地域など）を自動登録します。
+          静的アプリの問題文・HTML は public フォルダ内のファイルを編集してください。
         </p>
-        {groupedContents.length === 0 ? (
+        {groupedRows.length === 0 ? (
           <p className="admin-hint">コンテンツがまだありません。</p>
         ) : (
-          groupedContents.map(({ subject, items }) => (
+          groupedRows.map(({ subject, rows }) => (
             <div key={subject.id} className="admin-subject-group">
               <h3>{subject.name}</h3>
               <ul className="admin-list">
-                {items.map((c, index) => {
-                  const busy = reorderingId === c.id;
+                {rows.map((row, index) => {
+                  const key = rowKey(row);
+                  const busy = reorderingKey === key;
                   const isFirst = index === 0;
-                  const isLast = index === items.length - 1;
+                  const isLast = index === rows.length - 1;
+                  const ref: MenuEntryRef = { kind: row.kind, id: row.doc.id };
+
+                  const title =
+                    row.kind === "content" ? row.doc.title : row.doc.label;
+                  const meta =
+                    row.kind === "content"
+                      ? `${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}`
+                      : `静的アプリ · ${row.doc.href} · 順序 ${index + 1}`;
+
+                  const badge =
+                    row.kind === "legacy" ? (
+                      <span className="admin-badge admin-badge--legacy">静的</span>
+                    ) : (
+                      <span
+                        className={`admin-badge ${
+                          row.doc.status === "published" && row.doc.ready
+                            ? "admin-badge--published"
+                            : row.doc.status === "published"
+                              ? "admin-badge--pending"
+                              : ""
+                        }`}
+                      >
+                        {row.doc.status === "published" ? "サイト公開中" : row.doc.status}
+                      </span>
+                    );
+
+                  const mainLink =
+                    row.kind === "content" ? (
+                      <Link
+                        href={`/admin/contents/edit?id=${encodeURIComponent(row.doc.id)}`}
+                        className="admin-list-item__link"
+                      >
+                        <span>
+                          {title}
+                          <br />
+                          <small style={{ color: "var(--admin-muted)" }}>{meta}</small>
+                        </span>
+                        {badge}
+                      </Link>
+                    ) : (
+                      <a
+                        href={row.doc.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="admin-list-item__link"
+                      >
+                        <span>
+                          {title}
+                          <br />
+                          <small style={{ color: "var(--admin-muted)" }}>{meta}</small>
+                        </span>
+                        {badge}
+                      </a>
+                    );
+
                   return (
-                    <li key={c.id}>
+                    <li key={key}>
                       <div className="admin-list-item">
                         <div className="admin-list-order" aria-label="並び替え">
                           <button
@@ -218,7 +304,7 @@ export default function AdminContentsPage() {
                             className="admin-btn admin-btn--compact"
                             title="いちばん上へ"
                             disabled={busy || isFirst}
-                            onClick={() => void onReorder(subject.id, c.id, "top")}
+                            onClick={() => void onReorder(subject.id, ref, "top")}
                           >
                             ⤒
                           </button>
@@ -227,7 +313,7 @@ export default function AdminContentsPage() {
                             className="admin-btn admin-btn--compact"
                             title="上へ"
                             disabled={busy || isFirst}
-                            onClick={() => void onReorder(subject.id, c.id, "up")}
+                            onClick={() => void onReorder(subject.id, ref, "up")}
                           >
                             ↑
                           </button>
@@ -236,34 +322,12 @@ export default function AdminContentsPage() {
                             className="admin-btn admin-btn--compact"
                             title="下へ"
                             disabled={busy || isLast}
-                            onClick={() => void onReorder(subject.id, c.id, "down")}
+                            onClick={() => void onReorder(subject.id, ref, "down")}
                           >
                             ↓
                           </button>
                         </div>
-                        <Link
-                          href={`/admin/contents/edit?id=${encodeURIComponent(c.id)}`}
-                          className="admin-list-item__link"
-                        >
-                          <span>
-                            {c.title}
-                            <br />
-                            <small style={{ color: "var(--admin-muted)" }}>
-                              {c.type} · /{c.slug}/ · 順序 {index + 1}
-                            </small>
-                          </span>
-                          <span
-                            className={`admin-badge ${
-                              c.status === "published" && c.ready
-                                ? "admin-badge--published"
-                                : c.status === "published"
-                                  ? "admin-badge--pending"
-                                  : ""
-                            }`}
-                          >
-                            {c.status === "published" ? "サイト公開中" : c.status}
-                          </span>
-                        </Link>
+                        {mainLink}
                       </div>
                     </li>
                   );

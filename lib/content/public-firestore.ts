@@ -9,7 +9,7 @@ import {
   where,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
-import type { ContentDoc, SubjectDoc } from "./types";
+import type { ContentDoc, LegacyContentDoc, SubjectDoc } from "./types";
 
 function mapSubject(id: string, data: Record<string, unknown>): SubjectDoc {
   return {
@@ -71,4 +71,32 @@ export async function getPublishedContentBySlug(slug: string): Promise<ContentDo
 export async function listPublicSubjects(): Promise<SubjectDoc[]> {
   const snap = await getDocs(collection(getFirestoreClient(), "subjects"));
   return snap.docs.map((d) => mapSubject(d.id, d.data())).sort((a, b) => a.order - b.order);
+}
+
+function mapLegacy(id: string, data: Record<string, unknown>): LegacyContentDoc {
+  return {
+    id,
+    subjectId: String(data.subjectId ?? ""),
+    label: String(data.label ?? ""),
+    href: String(data.href ?? ""),
+    slug: String(data.slug ?? ""),
+    order: Number(data.order ?? 0),
+    ready: Boolean(data.ready ?? true),
+  };
+}
+
+/** トップメニュー用の静的コンテンツ（公開＝ready） */
+export async function listPublishedLegacyContents(): Promise<LegacyContentDoc[]> {
+  const col = collection(getFirestoreClient(), "legacyContents");
+  try {
+    const snap = await getDocs(
+      query(col, where("ready", "==", true), orderBy("order", "asc")),
+    );
+    return snap.docs.map((d) => mapLegacy(d.id, d.data()));
+  } catch {
+    const snap = await getDocs(query(col, where("ready", "==", true)));
+    return snap.docs
+      .map((d) => mapLegacy(d.id, d.data()))
+      .sort((a, b) => a.order - b.order);
+  }
 }

@@ -41,6 +41,17 @@ export type SubjectDoc = {
   order: number;
 };
 
+/** public/ 配下の静的クイズ・レッスン（従来の content-manifest 登録分） */
+export type LegacyContentDoc = {
+  id: string;
+  subjectId: string;
+  label: string;
+  href: string;
+  slug: string;
+  order: number;
+  ready: boolean;
+};
+
 export type ContentDoc = {
   id: string;
   subjectId: string;

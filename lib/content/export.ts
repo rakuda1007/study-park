@@ -1,4 +1,4 @@
-import type { ContentDoc, ContentManifest, SubjectDoc } from "./types";
+import type { ContentDoc, ContentManifest, LegacyContentDoc, SubjectDoc } from "./types";
 import { lessonBlockToHtml } from "./lesson-html";
 import { contentPlayHref } from "./urls";
 
@@ -237,6 +237,7 @@ export function buildLessonStyleCss(): string {
 export function buildManifest(
   subjects: SubjectDoc[],
   contents: ContentDoc[],
+  legacyItems: LegacyContentDoc[],
   base: ContentManifest,
 ): ContentManifest {
   const published = contents.filter((c) => c.status === "published" && c.ready);
@@ -247,26 +248,39 @@ export function buildManifest(
     bySubject.set(c.subjectId, list);
   }
 
-  const subjectsOut = subjects.map((s) => {
-    const fromFirestore = (bySubject.get(s.id) ?? [])
-      .sort((a, b) => a.order - b.order)
-      .map((c) => ({
-        label: c.title,
-        href: contentPlayHref(c.slug),
-        ready: true,
-        contentId: c.id,
-      }));
+  const legacyBySubject = new Map<string, LegacyContentDoc[]>();
+  for (const l of legacyItems.filter((x) => x.ready)) {
+    const list = legacyBySubject.get(l.subjectId) ?? [];
+    list.push(l);
+    legacyBySubject.set(l.subjectId, list);
+  }
 
-    const baseSubject = base.subjects.find((b) => b.id === s.id);
-    const legacy = (baseSubject?.items ?? []).filter(
-      (item) => !fromFirestore.some((f) => f.href === item.href),
-    );
+  const subjectsOut = subjects.map((s) => {
+    const unified: {
+      order: number;
+      item: { label: string; href: string; ready: boolean; contentId?: string };
+    }[] = [
+      ...(legacyBySubject.get(s.id) ?? []).map((l) => ({
+        order: l.order,
+        item: { label: l.label, href: l.href, ready: l.ready },
+      })),
+      ...(bySubject.get(s.id) ?? []).map((c) => ({
+        order: c.order,
+        item: {
+          label: c.title,
+          href: contentPlayHref(c.slug),
+          ready: true,
+          contentId: c.id,
+        },
+      })),
+    ];
+    unified.sort((a, b) => a.order - b.order);
 
     return {
       id: s.id,
       name: s.name,
       order: s.order,
-      items: [...legacy, ...fromFirestore],
+      items: unified.map((u) => u.item),
     };
   });
 
