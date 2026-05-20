@@ -9,6 +9,8 @@ import {
   isSlugTaken,
   listContents,
   listSubjects,
+  moveContentInSubject,
+  type ContentReorderAction,
 } from "@/lib/content/firestore";
 import type { ContentDoc, ContentType, SubjectDoc } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
@@ -27,6 +29,7 @@ export default function AdminContentsPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newSubjectId, setNewSubjectId] = useState("math");
   const [creating, setCreating] = useState(false);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     await ensureDefaultSubjects();
@@ -96,7 +99,37 @@ export default function AdminContentsPage() {
     }
   }
 
-  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? id;
+  const groupedContents = subjects
+    .map((subject) => ({
+      subject,
+      items: contents
+        .filter((c) => c.subjectId === subject.id)
+        .sort((a, b) => a.order - b.order),
+    }))
+    .filter((g) => g.items.length > 0);
+
+  async function onReorder(
+    subjectId: string,
+    contentId: string,
+    action: ContentReorderAction,
+  ) {
+    if (!uid) {
+      setErr("ログイン情報がありません。");
+      return;
+    }
+    setErr("");
+    setMsg("");
+    setReorderingId(contentId);
+    try {
+      await moveContentInSubject(subjectId, contentId, action, uid);
+      await reload();
+      setMsg("並び順を更新しました。");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "並び替えに失敗しました。");
+    } finally {
+      setReorderingId(null);
+    }
+  }
 
   return (
     <AdminShell title="コンテンツ管理">
@@ -162,32 +195,83 @@ export default function AdminContentsPage() {
 
       <section className="admin-card">
         <h2>一覧（{contents.length}件）</h2>
-        <ul className="admin-list">
-          {contents.map((c) => (
-            <li key={c.id}>
-              <Link href={`/admin/contents/edit?id=${encodeURIComponent(c.id)}`}>
-                <span>
-                  {c.title}
-                  <br />
-                  <small style={{ color: "var(--admin-muted)" }}>
-                    {subjectName(c.subjectId)} · {c.type} · /{c.slug}/
-                  </small>
-                </span>
-                <span
-                  className={`admin-badge ${
-                    c.status === "published" && c.ready
-                      ? "admin-badge--published"
-                      : c.status === "published"
-                        ? "admin-badge--pending"
-                        : ""
-                  }`}
-                >
-                  {c.status === "published" ? "サイト公開中" : c.status}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <p className="admin-hint">
+          教科ごとに並び順を変えられます。トップページのメニューは、上にあるほど先に表示されます。
+        </p>
+        {groupedContents.length === 0 ? (
+          <p className="admin-hint">コンテンツがまだありません。</p>
+        ) : (
+          groupedContents.map(({ subject, items }) => (
+            <div key={subject.id} className="admin-subject-group">
+              <h3>{subject.name}</h3>
+              <ul className="admin-list">
+                {items.map((c, index) => {
+                  const busy = reorderingId === c.id;
+                  const isFirst = index === 0;
+                  const isLast = index === items.length - 1;
+                  return (
+                    <li key={c.id}>
+                      <div className="admin-list-item">
+                        <div className="admin-list-order" aria-label="並び替え">
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--compact"
+                            title="いちばん上へ"
+                            disabled={busy || isFirst}
+                            onClick={() => void onReorder(subject.id, c.id, "top")}
+                          >
+                            ⤒
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--compact"
+                            title="上へ"
+                            disabled={busy || isFirst}
+                            onClick={() => void onReorder(subject.id, c.id, "up")}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--compact"
+                            title="下へ"
+                            disabled={busy || isLast}
+                            onClick={() => void onReorder(subject.id, c.id, "down")}
+                          >
+                            ↓
+                          </button>
+                        </div>
+                        <Link
+                          href={`/admin/contents/edit?id=${encodeURIComponent(c.id)}`}
+                          className="admin-list-item__link"
+                        >
+                          <span>
+                            {c.title}
+                            <br />
+                            <small style={{ color: "var(--admin-muted)" }}>
+                              {c.type} · /{c.slug}/ · 順序 {index + 1}
+                            </small>
+                          </span>
+                          <span
+                            className={`admin-badge ${
+                              c.status === "published" && c.ready
+                                ? "admin-badge--published"
+                                : c.status === "published"
+                                  ? "admin-badge--pending"
+                                  : ""
+                            }`}
+                          >
+                            {c.status === "published" ? "サイト公開中" : c.status}
+                          </span>
+                        </Link>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))
+        )}
       </section>
     </AdminShell>
   );

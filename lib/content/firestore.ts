@@ -185,6 +185,49 @@ export async function deleteContent(id: string): Promise<void> {
   await deleteDoc(doc(getFirestoreClient(), "contents", id));
 }
 
+const CONTENT_ORDER_STEP = 100;
+
+/** 教科内の表示順を一括更新（トップメニュー・一覧の並びに反映） */
+export async function reorderContentsInSubject(
+  subjectId: string,
+  orderedIds: string[],
+  updatedBy: string,
+): Promise<void> {
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      updateContent(id, { order: (index + 1) * CONTENT_ORDER_STEP, updatedBy }),
+    ),
+  );
+}
+
+export type ContentReorderAction = "up" | "down" | "top";
+
+/** 教科内で1件のコンテンツを並び替え */
+export async function moveContentInSubject(
+  subjectId: string,
+  contentId: string,
+  action: ContentReorderAction,
+  updatedBy: string,
+): Promise<void> {
+  const items = await listContents(subjectId);
+  const ids = items.map((c) => c.id);
+  const idx = ids.indexOf(contentId);
+  if (idx < 0) return;
+
+  if (action === "up" && idx > 0) {
+    [ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]];
+  } else if (action === "down" && idx < ids.length - 1) {
+    [ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]];
+  } else if (action === "top" && idx > 0) {
+    ids.splice(idx, 1);
+    ids.unshift(contentId);
+  } else {
+    return;
+  }
+
+  await reorderContentsInSubject(subjectId, ids, updatedBy);
+}
+
 export async function saveLessonSections(
   id: string,
   sections: LessonSection[],
