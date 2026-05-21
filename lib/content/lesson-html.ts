@@ -1,4 +1,5 @@
 import type { LessonBlock } from "./types";
+import { richTextToHtml } from "./rich-text";
 
 function escHtml(s: string): string {
   return s
@@ -8,17 +9,7 @@ function escHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export function paragraphToHtml(text: string): string {
-  return text
-    .split(/(\*\*[^*]+\*\*)/g)
-    .map((part) => {
-      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-        return `<strong>${escHtml(part.slice(2, -2))}</strong>`;
-      }
-      return escHtml(part);
-    })
-    .join("");
-}
+export { paragraphToHtml, richTextToHtml, inlineTextToHtml } from "./rich-text";
 
 export function lessonBlockToHtml(b: LessonBlock): string {
   if (b.kind === "html") return `        ${b.html}`;
@@ -32,5 +23,5 @@ export function lessonBlockToHtml(b: LessonBlock): string {
           <img src="${escHtml(b.src)}" alt="${alt}" class="lesson-figure-img" loading="lazy" />${cap}
         </figure>`;
   }
-  return `        <p class="lesson-body">${paragraphToHtml(b.text)}</p>`;
+  return `        ${richTextToHtml(b.text, "lesson-body")}`;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { ImageBlockEditor } from "@/components/admin/ImageBlockEditor";
+import { RichTextArea } from "@/components/admin/RichTextArea";
 import type { LessonBlock } from "@/lib/content/types";
 import { templateFromBlocks } from "@/lib/content/quiz-question";
 
@@ -37,7 +38,7 @@ export function QuizQuestionBodyEditor({ contentId, blocks, onChange }: Props) {
   return (
     <div className="admin-lesson-blocks">
       <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-        問題文（「（①）」で空欄）。段落のほか「＋ 画像」で図を挿入できます。
+        問題文（「（①）」で空欄）。太字・サイズ・箇条書きが使えます。段落のほか「＋ 画像」で図を挿入できます。
       </p>
       {blocks.map((block, bi) => (
         <div key={`quiz-block-${bi}`} className="admin-block-wrap">
@@ -75,14 +76,13 @@ export function QuizQuestionBodyEditor({ contentId, blocks, onChange }: Props) {
                   削除
                 </button>
               </div>
-              <div className="admin-field">
-                <label>本文</label>
-                <textarea
-                  value={block.text}
-                  onChange={(e) => updateBlock(bi, { kind: "paragraph", text: e.target.value })}
-                  rows={4}
-                />
-              </div>
+              <RichTextArea
+                label="本文"
+                value={block.text}
+                onChange={(text) => updateBlock(bi, { kind: "paragraph", text })}
+                rows={5}
+                previewClass="question-paragraph"
+              />
             </div>
           ) : null}
 

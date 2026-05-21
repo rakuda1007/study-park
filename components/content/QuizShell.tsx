@@ -4,6 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { useEffect } from "react";
 import type { ContentDoc } from "@/lib/content/types";
+import { richTextToHtml } from "@/lib/content/rich-text";
 
 declare global {
   interface Window {
@@ -133,7 +134,12 @@ export function QuizShell({ content }: Props) {
           <h2 id="intro-heading" className="intro-heading">
             はじめに
           </h2>
-          <p className="intro-body">{intro}</p>
+          <div
+            className="intro-body"
+            dangerouslySetInnerHTML={{
+              __html: richTextToHtml(intro, "intro-body"),
+            }}
+          />
         </section>
 
         <section id="reviewPanel" className="review-panel" hidden aria-label="まとめて確認">
@@ -214,6 +220,7 @@ export function QuizShell({ content }: Props) {
       </div>
 
       <Script src={`/study-park-asset-version.js?v=${ASSET_V}`} strategy="afterInteractive" />
+      <Script src="/shared/rich-text.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-format.js?v=13" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-mode.js?v=2" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-controller.js?v=1" strategy="afterInteractive" />
@@ -222,7 +229,7 @@ export function QuizShell({ content }: Props) {
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=4"
+        src="/shared/quiz-blank-app.js?v=5"
         strategy="afterInteractive"
         key={content.slug}
       />

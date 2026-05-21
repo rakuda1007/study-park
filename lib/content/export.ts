@@ -1,5 +1,6 @@
 import type { ContentDoc, ContentManifest, LegacyContentDoc, SubjectDoc } from "./types";
 import { lessonBlockToHtml } from "./lesson-html";
+import { richTextToHtml } from "./rich-text";
 import { contentPlayHref } from "./urls";
 
 const ASSET_V = "7";
@@ -29,7 +30,7 @@ window.__STUDY_PARK_QUIZ__ = ${JSON.stringify(payload, null, 2)};
 export function buildQuizIndexHtml(content: ContentDoc): string {
   const slug = content.slug;
   const title = escHtml(content.title);
-  const intro = escHtml(content.intro ?? "問題に挑戦してみましょう。");
+  const intro = richTextToHtml(content.intro ?? "問題に挑戦してみましょう。", "intro-body");
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -47,6 +48,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
     <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
     <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
+    <link rel="stylesheet" href="/shared/rich-text.css?v=1" />
   </head>
   <body>
     <header class="app-header app-header--unified">
@@ -108,7 +110,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <main class="quiz-main">
       <section class="intro-card" aria-labelledby="intro-heading">
         <h2 id="intro-heading" class="intro-heading">はじめに</h2>
-        <p class="intro-body">${intro}</p>
+        <div class="intro-body">${intro}</div>
       </section>
 
       <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
@@ -155,6 +157,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </div>
 
     <script src="/study-park-asset-version.js?v=${ASSET_V}"></script>
+    <script src="/shared/rich-text.js?v=1"></script>
     <script src="/shared/quiz-format.js?v=13"></script>
     <script src="/shared/quiz-review-mode.js?v=2"></script>
     <script src="/shared/quiz-review-controller.js?v=1"></script>
@@ -171,7 +174,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
 
 export function buildLessonIndexHtml(content: ContentDoc): string {
   const title = escHtml(content.title);
-  const intro = escHtml(content.intro ?? "");
+  const intro = richTextToHtml(content.intro ?? "", "lesson-intro");
   const sections = content.lesson?.sections ?? [];
 
   const tocItems = sections
@@ -203,6 +206,7 @@ ${blocks}
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
     <link rel="stylesheet" href="/shared/lesson-theme.css?v=2" />
+    <link rel="stylesheet" href="/shared/rich-text.css?v=1" />
   </head>
   <body class="lesson-page">
     <header class="app-header app-header--unified">
@@ -212,7 +216,7 @@ ${blocks}
       <h1 class="app-header-title">${title}</h1>
     </header>
     <main class="lesson-main">
-      <p class="lesson-intro">${intro}</p>
+      <div class="lesson-intro">${intro}</div>
       <nav class="lesson-toc" aria-label="このページの目次">
         <p class="lesson-toc-title">もくじ</p>
         <ol class="lesson-toc-list">

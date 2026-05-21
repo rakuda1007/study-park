@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LessonBlocks } from "@/components/content/LessonBlocks";
+import { RichTextContent } from "@/lib/content/rich-text-react";
 import type { ContentDoc } from "@/lib/content/types";
 
 type Props = {
@@ -27,7 +28,11 @@ export function LessonView({ content }: Props) {
         <h1 className="app-header-title">{content.title}</h1>
       </header>
       <main className="lesson-main">
-        {intro ? <p className="lesson-intro">{intro}</p> : null}
+        {intro ? (
+          <div className="lesson-intro">
+            <RichTextContent text={intro} paragraphClass="lesson-intro" />
+          </div>
+        ) : null}
         {sections.length > 0 ? (
           <nav className="lesson-toc" aria-label="このページの目次">
             <p className="lesson-toc-title">もくじ</p>

@@ -379,3 +379,56 @@
   margin: 4rem auto;
   padding: 0 1.25rem;
 }
+
+/* リッチテキスト編集 */
+.admin-rich-text {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .admin-rich-text:has(.admin-rich-preview) {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.admin-rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.admin-rich-preview {
+  padding: 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.admin-rich-preview-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.admin-rich-preview-body {
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.admin-rich-preview-body .rich-text-large {
+  font-size: 1.12em;
+  font-weight: 600;
+}
+
+.admin-rich-preview-body .rich-text-small {
+  font-size: 0.88em;
+}
+
+.admin-rich-preview-body .rich-list {
+  margin: 0.35rem 0 0.5rem;
+  padding-left: 1.25rem;
+}

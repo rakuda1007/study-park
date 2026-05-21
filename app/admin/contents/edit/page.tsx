@@ -37,6 +37,7 @@ import type {
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { contentPlayHref } from "@/lib/content/urls";
 import { listLegacyContents } from "@/lib/content/legacy-contents";
+import { RichTextArea } from "@/components/admin/RichTextArea";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifestBase from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
@@ -293,10 +294,14 @@ function EditContentInner() {
                 </select>
               </div>
             </div>
-            <div className="admin-field">
-              <label htmlFor="intro">はじめに / リード文</label>
-              <textarea id="intro" value={intro} onChange={(e) => setIntro(e.target.value)} rows={3} />
-            </div>
+            <RichTextArea
+              id="intro"
+              label="はじめに / リード文"
+              value={intro}
+              onChange={setIntro}
+              rows={3}
+              previewClass="intro-body"
+            />
             <div className="admin-row">
               <div className="admin-field" style={{ flex: "1 1 8rem" }}>
                 <label htmlFor="status">公開状態</label>

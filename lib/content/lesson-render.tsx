@@ -1,15 +1,10 @@
 import type { ReactNode } from "react";
 import type { LessonBlock } from "./types";
+import { RichTextContent } from "./rich-text-react";
 
-/** 段落内の **太字** を React ノードに展開 */
-export function renderParagraphText(text: string): ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
-    }
-    return part;
-  });
+/** @deprecated RichTextContent を使用 */
+export function renderParagraphText(text: string): ReactNode {
+  return <RichTextContent text={text} />;
 }
 
 export function lessonBlockKey(sectionId: string, index: number, block: LessonBlock): string {

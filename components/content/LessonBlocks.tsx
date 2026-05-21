@@ -1,5 +1,6 @@
 import type { LessonBlock } from "@/lib/content/types";
-import { lessonBlockKey, renderParagraphText } from "@/lib/content/lesson-render";
+import { lessonBlockKey } from "@/lib/content/lesson-render";
+import { RichTextContent } from "@/lib/content/rich-text-react";
 
 type Props = {
   sectionId: string;
@@ -30,11 +31,7 @@ export function LessonBlocks({ sectionId, blocks }: Props) {
             </figure>
           );
         }
-        return (
-          <p key={key} className="lesson-body">
-            {renderParagraphText(b.text)}
-          </p>
-        );
+        return <RichTextContent key={key} text={b.text} paragraphClass="lesson-body" />;
       })}
     </>
   );

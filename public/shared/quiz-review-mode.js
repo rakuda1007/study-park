@@ -4,15 +4,24 @@
 (function () {
   "use strict";
 
+  function appendRichParagraph(container, text, className) {
+    const rt = window.StudyParkRichText;
+    if (rt && typeof rt.appendRichText === "function") {
+      rt.appendRichText(container, text, className || "question-paragraph");
+      return;
+    }
+    const p = document.createElement("p");
+    p.className = className || "question-paragraph";
+    p.textContent = text;
+    container.appendChild(p);
+  }
+
   function appendQuestionBody(container, q) {
     const blocks = q.blocks;
     if (Array.isArray(blocks) && blocks.length > 0) {
       blocks.forEach((block) => {
         if (block.kind === "paragraph") {
-          const p = document.createElement("p");
-          p.className = "question-paragraph";
-          p.textContent = block.text;
-          container.appendChild(p);
+          appendRichParagraph(container, block.text || "", "question-paragraph");
         } else if (block.kind === "image" && block.src) {
           const fig = document.createElement("figure");
           fig.className = "question-figure";
@@ -33,10 +42,7 @@
       });
       return;
     }
-    const p = document.createElement("p");
-    p.className = "question-paragraph";
-    p.textContent = q.template || "";
-    container.appendChild(p);
+    appendRichParagraph(container, q.template || "", "question-paragraph");
   }
 
   function renderAnswerList(ul, entries) {

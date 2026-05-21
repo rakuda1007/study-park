@@ -1,6 +1,7 @@
 "use client";
 
 import { ImageBlockEditor } from "@/components/admin/ImageBlockEditor";
+import { RichTextArea } from "@/components/admin/RichTextArea";
 import type { LessonBlock, LessonSection } from "@/lib/content/types";
 
 type Props = {
@@ -86,14 +87,12 @@ export function LessonSectionEditor({ contentId, section, onChange }: Props) {
                   削除
                 </button>
               </div>
-              <div className="admin-field">
-                <label>本文（**太字** が使えます）</label>
-                <textarea
-                  value={block.text}
-                  onChange={(e) => updateBlock(bi, { kind: "paragraph", text: e.target.value })}
-                  rows={3}
-                />
-              </div>
+              <RichTextArea
+                label="本文"
+                value={block.text}
+                onChange={(text) => updateBlock(bi, { kind: "paragraph", text })}
+                rows={4}
+              />
             </div>
           ) : null}
 
