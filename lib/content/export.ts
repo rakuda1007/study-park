@@ -48,7 +48,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
     <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
     <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
-    <link rel="stylesheet" href="/shared/rich-text.css?v=1" />
+    <link rel="stylesheet" href="/shared/rich-text.css?v=2" />
   </head>
   <body>
     <header class="app-header app-header--unified">
@@ -206,7 +206,7 @@ ${blocks}
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
     <link rel="stylesheet" href="/shared/lesson-theme.css?v=2" />
-    <link rel="stylesheet" href="/shared/rich-text.css?v=1" />
+    <link rel="stylesheet" href="/shared/rich-text.css?v=2" />
   </head>
   <body class="lesson-page">
     <header class="app-header app-header--unified">

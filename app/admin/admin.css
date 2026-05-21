@@ -441,5 +441,8 @@
 
 .admin-rich-preview-body .rich-list {
   margin: 0.35rem 0 0.5rem;
-  padding-left: 1.25rem;
+}
+
+.admin-rich-preview-body .rich-list li::before {
+  color: var(--admin-text);
 }

@@ -10,8 +10,21 @@
 
 .rich-list {
   margin: 0.5rem 0 0.75rem;
-  padding-left: 1.35rem;
+  padding: 0;
+  list-style: none;
   line-height: 1.65;
+}
+
+.rich-list li {
+  position: relative;
+  padding-left: 1.15em;
+}
+
+.rich-list li::before {
+  content: "・";
+  position: absolute;
+  left: 0;
+  font-weight: 700;
 }
 
 .rich-list li + li {
