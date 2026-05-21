@@ -70,11 +70,12 @@ export async function listSubjects(): Promise<SubjectDoc[]> {
 
 export async function listContents(subjectId?: string): Promise<ContentDoc[]> {
   const col = collection(getFirestoreClient(), "contents");
-  const q = subjectId
-    ? query(col, where("subjectId", "==", subjectId), orderBy("order", "asc"))
-    : query(col, orderBy("order", "asc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => mapContent(d.id, d.data()));
+  const snap = await getDocs(query(col, orderBy("order", "asc")));
+  const items = snap.docs.map((d) => mapContent(d.id, d.data()));
+  const filtered = subjectId
+    ? items.filter((c) => c.subjectId === subjectId)
+    : items;
+  return filtered.sort((a, b) => a.order - b.order);
 }
 
 export async function getContent(id: string): Promise<ContentDoc | null> {
@@ -212,7 +213,11 @@ export async function moveContentInSubject(
   const items = await listContents(subjectId);
   const ids = items.map((c) => c.id);
   const idx = ids.indexOf(contentId);
-  if (idx < 0) return;
+  if (idx < 0) {
+    throw new Error(
+      "並び替え対象が見つかりません。ページを再読み込みしてからもう一度お試しください。",
+    );
+  }
 
   if (action === "up" && idx > 0) {
     [ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]];
@@ -222,7 +227,7 @@ export async function moveContentInSubject(
     ids.splice(idx, 1);
     ids.unshift(contentId);
   } else {
-    return;
+    throw new Error("これ以上その方向には移動できません。");
   }
 
   await reorderContentsInSubject(subjectId, ids, updatedBy);

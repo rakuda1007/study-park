@@ -304,7 +304,11 @@ export default function AdminContentsPage() {
                             className="admin-btn admin-btn--compact"
                             title="いちばん上へ"
                             disabled={busy || isFirst}
-                            onClick={() => void onReorder(subject.id, ref, "top")}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void onReorder(subject.id, ref, "top");
+                            }}
                           >
                             ⤒
                           </button>
@@ -313,7 +317,11 @@ export default function AdminContentsPage() {
                             className="admin-btn admin-btn--compact"
                             title="上へ"
                             disabled={busy || isFirst}
-                            onClick={() => void onReorder(subject.id, ref, "up")}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void onReorder(subject.id, ref, "up");
+                            }}
                           >
                             ↑
                           </button>
@@ -322,7 +330,11 @@ export default function AdminContentsPage() {
                             className="admin-btn admin-btn--compact"
                             title="下へ"
                             disabled={busy || isLast}
-                            onClick={() => void onReorder(subject.id, ref, "down")}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void onReorder(subject.id, ref, "down");
+                            }}
                           >
                             ↓
                           </button>

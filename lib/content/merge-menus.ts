@@ -84,22 +84,26 @@ export function mergeHomeMenus(
 
   for (const ms of subjectOrder) {
     seenSubjects.add(ms.id);
-    const legacyMenu = (legacyBySubject.get(ms.id) ?? []).map((l) => ({
-      label: l.label,
-      href: l.href,
-      ready: l.ready,
-    }));
-    const extra = (firestoreBySubject.get(ms.id) ?? [])
-      .sort((a, b) => a.order - b.order)
-      .map((c) => ({
+    type MenuRow = { label: string; href: string; ready: boolean; order: number };
+    const rows: MenuRow[] = [
+      ...(legacyBySubject.get(ms.id) ?? []).map((l) => ({
+        label: l.label,
+        href: l.href,
+        ready: l.ready,
+        order: l.order,
+      })),
+      ...(firestoreBySubject.get(ms.id) ?? []).map((c) => ({
         label: c.title,
         href: contentPlayHref(c.slug),
         ready: true,
-      }));
+        order: c.order,
+      })),
+    ];
+    rows.sort((a, b) => a.order - b.order);
+    const items = rows.map(({ label, href, ready }) => ({ label, href, ready }));
 
     firestoreBySubject.delete(ms.id);
 
-    const items = [...legacyMenu, ...extra];
     if (items.length === 0) continue;
 
     result.push({
@@ -111,23 +115,25 @@ export function mergeHomeMenus(
   for (const [subjectId, docs] of firestoreBySubject) {
     const name = subjectIdToName.get(subjectId) ?? subjectId;
     if (result.some((r) => r.subject === name)) continue;
-    const legacyMenu = (legacyBySubject.get(subjectId) ?? []).map((l) => ({
-      label: l.label,
-      href: l.href,
-      ready: l.ready,
-    }));
+    type MenuRow = { label: string; href: string; ready: boolean; order: number };
+    const rows: MenuRow[] = [
+      ...(legacyBySubject.get(subjectId) ?? []).map((l) => ({
+        label: l.label,
+        href: l.href,
+        ready: l.ready,
+        order: l.order,
+      })),
+      ...docs.map((c) => ({
+        label: c.title,
+        href: contentPlayHref(c.slug),
+        ready: true,
+        order: c.order,
+      })),
+    ];
+    rows.sort((a, b) => a.order - b.order);
     result.push({
       subject: name,
-      items: [
-        ...legacyMenu,
-        ...docs
-          .sort((a, b) => a.order - b.order)
-          .map((c) => ({
-            label: c.title,
-            href: contentPlayHref(c.slug),
-            ready: true,
-          })),
-      ],
+      items: rows.map(({ label, href, ready }) => ({ label, href, ready })),
     });
   }
 

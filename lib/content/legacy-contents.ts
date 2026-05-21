@@ -9,7 +9,6 @@ import {
   query,
   serverTimestamp,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentManifest, LegacyContentDoc } from "./types";
@@ -31,11 +30,12 @@ function mapLegacy(id: string, data: Record<string, unknown>): LegacyContentDoc 
 
 export async function listLegacyContents(subjectId?: string): Promise<LegacyContentDoc[]> {
   const col = collection(getFirestoreClient(), "legacyContents");
-  const q = subjectId
-    ? query(col, where("subjectId", "==", subjectId), orderBy("order", "asc"))
-    : query(col, orderBy("order", "asc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => mapLegacy(d.id, d.data()));
+  const snap = await getDocs(query(col, orderBy("order", "asc")));
+  const items = snap.docs.map((d) => mapLegacy(d.id, d.data()));
+  const filtered = subjectId
+    ? items.filter((l) => l.subjectId === subjectId)
+    : items;
+  return filtered.sort((a, b) => a.order - b.order);
 }
 
 /** content-manifest.json の項目を Firestore に未登録なら取り込む（既存の order は維持） */
@@ -119,7 +119,11 @@ export async function moveMenuEntryInSubject(
 ): Promise<void> {
   const ordered = await listMenuEntryRefs(subjectId);
   const idx = ordered.findIndex((e) => e.kind === ref.kind && e.id === ref.id);
-  if (idx < 0) return;
+  if (idx < 0) {
+    throw new Error(
+      "並び替え対象が見つかりません。ページを再読み込みしてからもう一度お試しください。",
+    );
+  }
 
   if (action === "up" && idx > 0) {
     [ordered[idx - 1], ordered[idx]] = [ordered[idx], ordered[idx - 1]];
@@ -129,7 +133,7 @@ export async function moveMenuEntryInSubject(
     const [item] = ordered.splice(idx, 1);
     ordered.unshift(item);
   } else {
-    return;
+    throw new Error("これ以上その方向には移動できません。");
   }
 
   await reorderMenuEntriesInSubject(subjectId, ordered, updatedBy);
