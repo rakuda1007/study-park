@@ -7,7 +7,7 @@
  */
 
 export const RICH_TEXT_HELP =
-  "**太字**、^^大きい^^、<<小さい>>。箇条書きは行頭に「- 」または「・ 」。";
+  "**太字**、^^大きい^^、<<小さい>>。箇条書きは行頭に「- 」または「・ 」。空行で段落の間隔をあけられます。";
 
 function escHtml(s: string): string {
   return s
@@ -39,7 +39,10 @@ export function inlineTextToHtml(text: string): string {
     .join("");
 }
 
-type LineBlock = { kind: "p"; line: string } | { kind: "ul"; items: string[] };
+type LineBlock =
+  | { kind: "p"; line: string }
+  | { kind: "ul"; items: string[] }
+  | { kind: "gap" };
 
 function isBulletLine(line: string): boolean {
   return /^[-・]\s/.test(line.trim());
@@ -68,7 +71,9 @@ export function splitRichLines(text: string): LineBlock[] {
       continue;
     }
     flushBullets();
-    if (line.trim() !== "") {
+    if (line.trim() === "") {
+      blocks.push({ kind: "gap" });
+    } else {
       blocks.push({ kind: "p", line });
     }
   }
@@ -88,6 +93,9 @@ export function richTextToHtml(text: string, paragraphClass = "lesson-body"): st
           .map((item) => `<li>${inlineTextToHtml(item)}</li>`)
           .join("");
         return `<ul class="rich-list">${items}</ul>`;
+      }
+      if (block.kind === "gap") {
+        return `<p class="rich-text-gap" aria-hidden="true"></p>`;
       }
       return `<p class="${paragraphClass}">${inlineTextToHtml(block.line)}</p>`;
     })

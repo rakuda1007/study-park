@@ -62,7 +62,9 @@
         return;
       }
       flush();
-      if (String(line).trim() !== "") {
+      if (String(line).trim() === "") {
+        blocks.push({ kind: "gap" });
+      } else {
         blocks.push({ kind: "p", line: line });
       }
     });
@@ -83,6 +85,9 @@
             block.items.map((item) => "<li>" + inlineHtml(item) + "</li>").join("") +
             "</ul>"
           );
+        }
+        if (block.kind === "gap") {
+          return '<p class="rich-text-gap" aria-hidden="true"></p>';
         }
         return '<p class="' + pClass + '">' + inlineHtml(block.line) + "</p>";
       })

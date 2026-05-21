@@ -13,7 +13,7 @@ export default function AdminLayout({
   return (
     <div className="admin-root">
       {/* eslint-disable-next-line @next/next/no-css-tags */}
-      <link rel="stylesheet" href="/shared/rich-text.css?v=2" />
+      <link rel="stylesheet" href="/shared/rich-text.css?v=3" />
       <AdminGate>{children}</AdminGate>
     </div>
   );

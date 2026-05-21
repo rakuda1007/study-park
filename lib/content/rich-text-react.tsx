@@ -50,6 +50,9 @@ export function RichTextContent({ text, paragraphClass = "lesson-body" }: Props)
             </ul>
           );
         }
+        if (block.kind === "gap") {
+          return <p key={`gap-${bi}`} className="rich-text-gap" aria-hidden="true" />;
+        }
         return (
           <p key={`p-${bi}`} className={paragraphClass}>
             {inlineTextToReact(block.line)}
