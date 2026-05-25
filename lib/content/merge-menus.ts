@@ -1,21 +1,8 @@
 import type { HomeSubjectMenu } from "./manifest-home";
 import { manifestToHomeMenus } from "./manifest-home";
+import { buildSubjectNameMap } from "./subject-names";
 import type { ContentDoc, ContentManifest, LegacyContentDoc, SubjectDoc } from "./types";
 import { contentPlayHref, slugFromLegacyHref } from "./urls";
-
-function buildSubjectNameMap(
-  manifest: ContentManifest,
-  subjects: SubjectDoc[],
-): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const s of manifest.subjects) {
-    map.set(s.id, s.name);
-  }
-  for (const s of subjects) {
-    map.set(s.id, s.name);
-  }
-  return map;
-}
 
 /** manifest の静的項目（Firestore 未同期時のフォールバック） */
 function manifestLegacyItems(manifest: ContentManifest): LegacyContentDoc[] {

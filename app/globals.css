@@ -139,6 +139,16 @@ body {
   color: rgba(255, 246, 232, 0.72);
 }
 
+.home-lead a {
+  color: var(--home-cream);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home-lead a:hover {
+  color: var(--home-amber);
+}
+
 .home-nav {
   margin: 0;
 }

@@ -7,7 +7,6 @@ import { manifestToHomeMenus } from "@/lib/content/manifest-home";
 import { mergeHomeMenus } from "@/lib/content/merge-menus";
 import {
   listPublicSubjects,
-  listPublishedContents,
   listPublishedLegacyContents,
 } from "@/lib/content/public-firestore";
 import type { ContentManifest } from "@/lib/content/types";
@@ -100,12 +99,12 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
     setLoadState("loading");
     setLoadError(null);
     try {
-      const [subjects, published, legacy] = await Promise.all([
+      const [subjects, legacy] = await Promise.all([
         listPublicSubjects(),
-        listPublishedContents(),
         listPublishedLegacyContents(),
       ]);
-      setMenus(mergeHomeMenus(manifest, subjects, published, legacy));
+      // 招待制ワークスペース教材はトップに出さない（無償の静的＋legacy のみ）
+      setMenus(mergeHomeMenus(manifest, subjects, [], legacy));
       setLoadState("ok");
     } catch (e) {
       console.error("HomeNav: Firestore メニュー取得失敗", e);

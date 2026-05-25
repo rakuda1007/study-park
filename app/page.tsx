@@ -28,6 +28,15 @@ export default function Home() {
               <h1 className="home-title">Study Park</h1>
               <p className="home-lead">
                 公園を少しずつ改装しています。できたエリアから遊んでね。
+                教室の教材は
+                <a href="/signup/learner" style={{ marginLeft: "0.25rem" }}>
+                  学習者登録
+                </a>
+                後に
+                <a href="/learner" style={{ marginLeft: "0.25rem" }}>
+                  学習者ホーム
+                </a>
+                から。
               </p>
             </div>
           </div>
