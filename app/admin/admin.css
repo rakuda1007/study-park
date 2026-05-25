@@ -223,6 +223,73 @@
   font-weight: 600;
 }
 
+/* 学習者ホーム — 行全体タップ、ボタン列は右端に揃える */
+.learner-subject-heading {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--admin-muted);
+}
+
+.learner-study-list li {
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.learner-study-list li:last-child {
+  border-bottom: none;
+}
+
+.learner-study-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 0.15rem;
+  color: inherit;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.learner-study-link:hover,
+.learner-study-link:focus-visible {
+  color: var(--admin-accent);
+}
+
+.learner-study-link__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.learner-study-link__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.learner-study-link__meta {
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+}
+
+.learner-study-link__arrow {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  opacity: 0.55;
+  line-height: 1;
+}
+
+.learner-study-link:hover .learner-study-link__arrow,
+.learner-study-link:focus-visible .learner-study-link__arrow {
+  opacity: 1;
+}
+
 .admin-hint {
   margin: 0 0 0.75rem;
   font-size: 0.8rem;

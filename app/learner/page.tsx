@@ -140,39 +140,24 @@ export default function LearnerHomePage() {
             <p className="admin-msg">公開中の教材はまだありません。</p>
           ) : (
             r.subjectGroups.map((g) => (
-              <div key={g.subjectId} style={{ marginBottom: "1rem" }}>
-                <h3
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    color: "var(--admin-muted, #5c6378)",
-                    margin: "0 0 0.5rem",
-                    paddingBottom: "0.25rem",
-                    borderBottom: "1px solid rgba(255,255,255,0.12)",
-                  }}
-                >
-                  {g.subjectName}
-                </h3>
-                <ul className="admin-list">
+              <div key={g.subjectId} className="admin-subject-group learner-subject-group">
+                <h3 className="learner-subject-heading">{g.subjectName}</h3>
+                <ul className="admin-list learner-study-list">
                   {g.items.map((c) => (
-                    <li key={c.id} className="admin-list-item">
-                      <span>
-                        {c.title}
-                        <span
-                          style={{
-                            marginLeft: "0.35rem",
-                            fontSize: "0.8rem",
-                            opacity: 0.75,
-                          }}
-                        >
-                          （{c.type === "quiz" ? "クイズ" : "レッスン"}）
-                        </span>
-                      </span>
+                    <li key={c.id}>
                       <Link
                         href={workspacePlayHref(r.workspaceSlug, c.slug)}
-                        className="admin-btn admin-btn--primary"
+                        className="learner-study-link"
                       >
-                        学習する
+                        <span className="learner-study-link__text">
+                          <span className="learner-study-link__title">{c.title}</span>
+                          <span className="learner-study-link__meta">
+                            {c.type === "quiz" ? "クイズ" : "レッスン"}
+                          </span>
+                        </span>
+                        <span className="learner-study-link__arrow" aria-hidden="true">
+                          →
+                        </span>
                       </Link>
                     </li>
                   ))}
