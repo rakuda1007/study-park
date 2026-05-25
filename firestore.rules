@@ -15,9 +15,101 @@ service cloud.firestore {
       return resource.data.status == 'published';
     }
 
+    function isWorkspaceOwner(wsId) {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/workspaces/$(wsId)).data.ownerId == request.auth.uid;
+    }
+
+    function isWorkspaceMember(wsId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/workspaceMembers/$(wsId + '_' + request.auth.uid))
+        && get(/databases/$(database)/documents/workspaceMembers/$(wsId + '_' + request.auth.uid)).data.status == 'active';
+    }
+
+    function canAccessWorkspace(wsId) {
+      return isAdmin() || isWorkspaceOwner(wsId) || isWorkspaceMember(wsId);
+    }
+
+    function isCreatorWithPurchase() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.appPurchase.status == 'active';
+    }
+
+    function isPublicVisibility() {
+      return resource.data.visibility == 'unlisted' || resource.data.visibility == 'public';
+    }
+
+    function canReadWorkspaceContent(wsId) {
+      return isAdmin()
+        || isWorkspaceOwner(wsId)
+        || (isWorkspaceMember(wsId) && isPublishedContent())
+        || (isPublishedContent() && isPublicVisibility());
+    }
+
     match /admins/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
       allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.role in ['creator', 'learner']
+        && request.resource.data.appPurchase.status == 'none';
+      allow update: if isAdmin()
+        || (isSignedIn() && request.auth.uid == uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.appPurchase == resource.data.appPurchase);
+    }
+
+    match /billingTiers/{tierId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /workspaceInviteCodes/{code} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /workspaces/{wsId} {
+      allow read: if canAccessWorkspace(wsId);
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.inviteCode is string;
+      allow update: if isWorkspaceOwner(wsId) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /contents/{contentId} {
+        allow read: if canReadWorkspaceContent(wsId);
+        allow create, update, delete: if isWorkspaceOwner(wsId)
+          && (isCreatorWithPurchase() || isAdmin());
+      }
+
+      match /subjects/{subjectId} {
+        allow read: if canAccessWorkspace(wsId);
+        allow write: if isWorkspaceOwner(wsId) || isAdmin();
+      }
+
+      match /assets/{assetId} {
+        allow read: if canAccessWorkspace(wsId);
+        allow write: if false;
+      }
+    }
+
+    match /workspaceMembers/{memberId} {
+      allow read: if isSignedIn()
+        && (resource.data.userId == request.auth.uid
+          || isWorkspaceOwner(resource.data.workspaceId)
+          || isAdmin());
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.role == 'learner'
+        && request.resource.data.status == 'active';
+      allow update: if isWorkspaceOwner(resource.data.workspaceId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     match /subjects/{subjectId} {

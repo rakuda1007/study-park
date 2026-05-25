@@ -9,6 +9,7 @@ type ImageBlock = Extract<LessonBlock, { kind: "image" }>;
 
 type Props = {
   contentId: string;
+  workspaceId?: string;
   block: ImageBlock;
   blockIndex: number;
   onChange: (patch: Partial<ImageBlock>) => void;
@@ -17,6 +18,7 @@ type Props = {
 
 export function ImageBlockEditor({
   contentId,
+  workspaceId,
   block,
   blockIndex,
   onChange,
@@ -45,7 +47,7 @@ export function ImageBlockEditor({
       setUploading(true);
 
       try {
-        const url = await uploadLessonImage(contentId, file, mime);
+        const url = await uploadLessonImage(contentId, file, mime, workspaceId);
         if (seq !== uploadSeqRef.current) return;
         onChangeRef.current({ src: url });
       } catch (e) {

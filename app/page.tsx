@@ -34,6 +34,12 @@ export default function Home() {
         </header>
 
         <HomeNav manifest={manifest} />
+
+        <nav className="home-auth-nav" aria-label="アカウント">
+          <a href="/login">ログイン</a>
+          <a href="/signup/creator">教材を作る（クリエイター）</a>
+          <a href="/signup/learner">学習者登録</a>
+        </nav>
       </div>
     </main>
   );

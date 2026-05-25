@@ -1,6 +1,11 @@
-/** Firestore 配信コンテンツのプレイ URL（静的 export 向け） */
+/** 公式（従来）Firestore コンテンツのプレイ URL */
 export function contentPlayHref(slug: string): string {
   return `/play?slug=${encodeURIComponent(slug)}`;
+}
+
+/** ワークスペース配信コンテンツのプレイ URL */
+export function workspacePlayHref(workspaceSlug: string, contentSlug: string): string {
+  return `/play?ws=${encodeURIComponent(workspaceSlug)}&slug=${encodeURIComponent(contentSlug)}`;
 }
 
 export function slugFromLegacyHref(href: string): string | null {

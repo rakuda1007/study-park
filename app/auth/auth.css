@@ -1,0 +1,128 @@
+.auth-root {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(165deg, #eef0ff 0%, #f8f9fc 45%, #fff 100%);
+  /* トップは暗色テーマだがログインは明るい UI — body の color を上書き */
+  color: #2a2f4a;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 8px 32px rgba(80, 88, 184, 0.12);
+}
+
+.auth-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #2a2f4a;
+  margin: 0 0 0.35rem;
+}
+
+.auth-lead {
+  font-size: 0.9rem;
+  color: #5c6378;
+  margin: 0 0 1.25rem;
+}
+
+.auth-field {
+  margin-bottom: 1rem;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #3d4460;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #c8cce8;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1c1814;
+  background: #fff;
+  caret-color: #1c1814;
+}
+
+.auth-field input::placeholder {
+  color: #8b90a8;
+}
+
+.auth-field input:-webkit-autofill,
+.auth-field input:-webkit-autofill:hover,
+.auth-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1c1814;
+  box-shadow: 0 0 0 1000px #e8f0fe inset;
+}
+
+.auth-btn {
+  display: inline-block;
+  padding: 0.65rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.auth-btn--primary {
+  background: #5058b8;
+  color: #fff;
+  width: 100%;
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-msg--error {
+  color: #b42318;
+  font-size: 0.88rem;
+  margin-bottom: 0.75rem;
+}
+
+.auth-links {
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+}
+
+.auth-links a {
+  color: #5058b8;
+  text-decoration: underline;
+}
+
+.auth-role-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.auth-role-card {
+  display: block;
+  padding: 1rem;
+  border: 2px solid #e2e5f5;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.auth-role-card:hover {
+  border-color: #5058b8;
+  background: #f5f6ff;
+}
+
+.auth-role-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}

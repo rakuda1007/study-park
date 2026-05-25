@@ -7,11 +7,12 @@ import { templateFromBlocks } from "@/lib/content/quiz-question";
 
 type Props = {
   contentId: string;
+  workspaceId?: string;
   blocks: LessonBlock[];
   onChange: (blocks: LessonBlock[], template: string) => void;
 };
 
-export function QuizQuestionBodyEditor({ contentId, blocks, onChange }: Props) {
+export function QuizQuestionBodyEditor({ contentId, workspaceId, blocks, onChange }: Props) {
   const sync = (next: LessonBlock[]) => {
     onChange(next, templateFromBlocks(next));
   };
@@ -89,6 +90,7 @@ export function QuizQuestionBodyEditor({ contentId, blocks, onChange }: Props) {
           {block.kind === "image" ? (
             <ImageBlockEditor
               contentId={contentId}
+              workspaceId={workspaceId}
               block={block}
               blockIndex={bi}
               onChange={(patch) => updateBlock(bi, { ...block, ...patch })}

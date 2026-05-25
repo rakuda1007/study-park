@@ -7,13 +7,18 @@ import { LessonView } from "@/components/content/LessonView";
 import { QuizShell } from "@/components/content/QuizShell";
 import { getPublishedContentBySlug } from "@/lib/content/public-firestore";
 import type { ContentDoc } from "@/lib/content/types";
+import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { getPublishedWorkspaceContentBySlug } from "@/lib/workspaces/content-firestore";
+import { canLearnerAccessWorkspace } from "@/lib/workspaces/members";
 
 function PlayInner() {
   const params = useSearchParams();
+  const wsSlug = (params.get("ws") ?? "").trim().toLowerCase();
   const slug = (params.get("slug") ?? "").trim().toLowerCase();
   const [content, setContent] = useState<ContentDoc | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [denied, setDenied] = useState(false);
 
   useEffect(() => {
     if (!slug) {
@@ -25,14 +30,39 @@ function PlayInner() {
     void (async () => {
       setLoading(true);
       setNotFound(false);
+      setDenied(false);
       try {
-        const doc = await getPublishedContentBySlug(slug);
-        if (cancelled) return;
-        if (!doc) {
-          setContent(null);
-          setNotFound(true);
-        } else {
+        if (wsSlug) {
+          const doc = await getPublishedWorkspaceContentBySlug(wsSlug, slug);
+          if (cancelled) return;
+          if (!doc) {
+            setNotFound(true);
+            return;
+          }
+          const uid = await new Promise<string | null>((resolve) => {
+            const unsub = subscribeAuth((user) => {
+              unsub();
+              resolve(user?.uid ?? null);
+            });
+          });
+          const allowed = await canLearnerAccessWorkspace(
+            wsSlug,
+            uid,
+            doc.visibility,
+          );
+          if (!allowed) {
+            setDenied(true);
+            return;
+          }
           setContent(doc);
+        } else {
+          const doc = await getPublishedContentBySlug(slug);
+          if (cancelled) return;
+          if (!doc) {
+            setNotFound(true);
+          } else {
+            setContent(doc);
+          }
         }
       } catch {
         if (!cancelled) setNotFound(true);
@@ -43,7 +73,7 @@ function PlayInner() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, wsSlug]);
 
   if (!slug || notFound) {
     return (
@@ -51,6 +81,17 @@ function PlayInner() {
         <p>コンテンツが見つからないか、まだ公開されていません。</p>
         <p>
           <Link href="/">トップへ戻る</Link>
+        </p>
+      </div>
+    );
+  }
+
+  if (denied) {
+    return (
+      <div className="play-status">
+        <p>この教材はログインした学習者のみ利用できます。</p>
+        <p>
+          <Link href="/login">ログイン</Link> · <Link href="/signup/learner">学習者登録</Link>
         </p>
       </div>
     );

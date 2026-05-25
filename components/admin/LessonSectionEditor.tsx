@@ -6,11 +6,20 @@ import type { LessonBlock, LessonSection } from "@/lib/content/types";
 
 type Props = {
   contentId: string;
+  workspaceId?: string;
   section: LessonSection;
+  sectionIndex?: number;
   onChange: (section: LessonSection) => void;
+  onRemove?: () => void;
 };
 
-export function LessonSectionEditor({ contentId, section, onChange }: Props) {
+export function LessonSectionEditor({
+  contentId,
+  workspaceId,
+  section,
+  onChange,
+  onRemove,
+}: Props) {
   const updateBlocks = (blocks: LessonBlock[]) => {
     onChange({ ...section, blocks });
   };
@@ -99,6 +108,7 @@ export function LessonSectionEditor({ contentId, section, onChange }: Props) {
           {block.kind === "image" ? (
             <ImageBlockEditor
               contentId={contentId}
+              workspaceId={workspaceId}
               block={block}
               blockIndex={bi}
               onChange={(patch) => updateBlock(bi, { ...block, ...patch })}

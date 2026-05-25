@@ -56,10 +56,10 @@ function assertStorageConfigured(): void {
   }
 }
 
-async function assertAdminAuth(): Promise<void> {
+async function assertSignedIn(): Promise<void> {
   const user = getFirebaseAuth().currentUser;
   if (!user) {
-    throw new Error("ログインし直してください（管理者として）。");
+    throw new Error("ログインし直してください。");
   }
   await user.getIdToken(true);
 }
@@ -69,19 +69,22 @@ export async function uploadLessonImage(
   contentId: string,
   file: File | Blob,
   mimeType: string,
+  workspaceId?: string,
 ): Promise<string> {
   if (!contentId.trim()) {
     throw new Error("コンテンツ ID がありません。ページを再読み込みしてください。");
   }
 
   assertStorageConfigured();
-  await assertAdminAuth();
+  await assertSignedIn();
 
   const prepared = await prepareImageForUpload(file, mimeType);
   const mime = prepared.type;
   const ext = extFromMime(mime);
   const name = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
-  const path = `lesson-images/${contentId}/${name}`;
+  const path = workspaceId
+    ? `workspaces/${workspaceId}/lesson-images/${contentId}/${name}`
+    : `lesson-images/${contentId}/${name}`;
   const storageRef = ref(getStorageClient(), path);
 
   try {

@@ -7,12 +7,30 @@ service firebase.storage {
         && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
     }
 
+    function isWorkspaceOwner(wsId) {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/workspaces/$(wsId)).data.ownerId == request.auth.uid;
+    }
+
+    function creatorCanUpload() {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.appPurchase.status == 'active';
+    }
+
     match /lesson-images/{contentId}/{fileName} {
       allow read: if true;
-      allow write: if isAdmin()
+      allow write: if (isAdmin() || creatorCanUpload())
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || creatorCanUpload();
+    }
+
+    match /workspaces/{wsId}/lesson-images/{contentId}/{fileName} {
+      allow read: if true;
+      allow write: if (isAdmin() || (isWorkspaceOwner(wsId) && creatorCanUpload()))
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin() || (isWorkspaceOwner(wsId) && creatorCanUpload());
     }
   }
 }

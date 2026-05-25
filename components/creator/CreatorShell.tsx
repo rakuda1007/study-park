@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { signOutAdmin } from "@/lib/firebase/auth-client";
 import { useRouter } from "next/navigation";
+import { signOutUser } from "@/lib/firebase/auth-client";
 
-export function AdminShell({
+export function CreatorShell({
   title,
   children,
 }: {
@@ -14,23 +14,26 @@ export function AdminShell({
   const router = useRouter();
 
   async function logout() {
-    await signOutAdmin();
-    router.replace("/admin/login");
+    await signOutUser();
+    router.replace("/login");
   }
 
   return (
     <div className="admin-shell">
       <header className="admin-header">
         <h1 className="admin-title">{title}</h1>
-        <nav className="admin-nav" aria-label="管理メニュー">
-          <Link href="/admin/contents" className="admin-link">
-            コンテンツ一覧
+        <nav className="admin-nav" aria-label="クリエイターメニュー">
+          <Link href="/creator" className="admin-link">
+            ダッシュボード
           </Link>
-          <Link href="/admin/invitations" className="admin-link">
-            学習者招待
+          <Link href="/creator/contents" className="admin-link">
+            教材一覧
+          </Link>
+          <Link href="/creator/learners" className="admin-link">
+            学習者
           </Link>
           <Link href="/" className="admin-link">
-            トップへ
+            トップ
           </Link>
           <button type="button" className="admin-btn" onClick={() => void logout()}>
             ログアウト
