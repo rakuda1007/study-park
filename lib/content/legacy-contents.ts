@@ -28,6 +28,7 @@ function mapLegacy(id: string, data: Record<string, unknown>): LegacyContentDoc 
   };
 }
 
+/** 管理画面用（非公開含む全件）。トップは listPublishedLegacyContents を使うこと */
 export async function listLegacyContents(subjectId?: string): Promise<LegacyContentDoc[]> {
   const col = collection(getFirestoreClient(), "legacyContents");
   const snap = await getDocs(query(col, orderBy("order", "asc")));

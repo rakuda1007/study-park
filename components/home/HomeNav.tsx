@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { HomeSubjectMenu } from "@/lib/content/manifest-home";
 import { mergeHomeMenus } from "@/lib/content/merge-menus";
-import { listPublicSubjects } from "@/lib/content/public-firestore";
-import { listLegacyContents } from "@/lib/content/legacy-contents";
+import {
+  listPublicSubjects,
+  listPublishedLegacyContents,
+} from "@/lib/content/public-firestore";
 import type { ContentManifest } from "@/lib/content/types";
 
 type MenuItem = {
@@ -97,14 +99,16 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
     try {
       const [subjects, legacy] = await Promise.all([
         listPublicSubjects(),
-        listLegacyContents(),
+        // 未ログインは ready==true のみ読める（全件 get は権限エラーになる）
+        listPublishedLegacyContents(),
       ]);
       // 招待制ワークスペース教材はトップに出さない。legacy は ready のみ表示
       setMenus(mergeHomeMenus(manifest, subjects, [], legacy));
       setLoadState("ok");
     } catch (e) {
       console.error("HomeNav: Firestore メニュー取得失敗", e);
-      setMenus(mergeHomeMenus(manifest, [], [], null));
+      // manifest に戻すと「トップ非表示」が全部出るため空メニューにする
+      setMenus(mergeHomeMenus(manifest, [], [], []));
       setLoadError(
         e instanceof Error
           ? e.message
