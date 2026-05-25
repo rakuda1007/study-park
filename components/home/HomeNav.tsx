@@ -3,12 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { HomeSubjectMenu } from "@/lib/content/manifest-home";
-import { manifestToHomeMenus } from "@/lib/content/manifest-home";
 import { mergeHomeMenus } from "@/lib/content/merge-menus";
-import {
-  listPublicSubjects,
-  listPublishedLegacyContents,
-} from "@/lib/content/public-firestore";
+import { listPublicSubjects } from "@/lib/content/public-firestore";
+import { listLegacyContents } from "@/lib/content/legacy-contents";
 import type { ContentManifest } from "@/lib/content/types";
 
 type MenuItem = {
@@ -90,8 +87,7 @@ function SubjectSection({ group }: { group: HomeSubjectMenu }) {
 }
 
 export function HomeNav({ manifest }: { manifest: ContentManifest }) {
-  const staticMenus = useMemo(() => manifestToHomeMenus(manifest), [manifest]);
-  const [menus, setMenus] = useState<HomeSubjectMenu[]>(staticMenus);
+  const [menus, setMenus] = useState<HomeSubjectMenu[]>([]);
   const [loadState, setLoadState] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -101,14 +97,14 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
     try {
       const [subjects, legacy] = await Promise.all([
         listPublicSubjects(),
-        listPublishedLegacyContents(),
+        listLegacyContents(),
       ]);
-      // 招待制ワークスペース教材はトップに出さない（無償の静的＋legacy のみ）
+      // 招待制ワークスペース教材はトップに出さない。legacy は ready のみ表示
       setMenus(mergeHomeMenus(manifest, subjects, [], legacy));
       setLoadState("ok");
     } catch (e) {
       console.error("HomeNav: Firestore メニュー取得失敗", e);
-      setMenus(staticMenus);
+      setMenus(mergeHomeMenus(manifest, [], [], null));
       setLoadError(
         e instanceof Error
           ? e.message
@@ -116,7 +112,7 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
       );
       setLoadState("error");
     }
-  }, [manifest, staticMenus]);
+  }, [manifest]);
 
   useEffect(() => {
     void refresh();
@@ -137,6 +133,11 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
           {isRefreshing ? "更新中…" : "更新"}
         </button>
       </div>
+      {loadState === "loading" ? (
+        <p className="home-menu-notice" role="status">
+          メニューを読み込み中…
+        </p>
+      ) : null}
       {loadState === "error" && loadError ? (
         <p className="home-menu-notice home-menu-notice--error" role="status">
           {loadError}

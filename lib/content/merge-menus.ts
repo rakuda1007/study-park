@@ -26,11 +26,13 @@ function manifestLegacyItems(manifest: ContentManifest): LegacyContentDoc[] {
   return out;
 }
 
+/** Firestore 取得済みならその一覧を使う（0件でも manifest に戻さない） */
 function resolveLegacyItems(
   manifest: ContentManifest,
-  fromFirestore: LegacyContentDoc[],
+  fromFirestore: LegacyContentDoc[] | null,
 ): LegacyContentDoc[] {
-  return fromFirestore.length > 0 ? fromFirestore : manifestLegacyItems(manifest);
+  if (fromFirestore !== null) return fromFirestore;
+  return manifestLegacyItems(manifest);
 }
 
 /** 静的メニューと Firestore 公開コンテンツをマージしたトップメニュー */
@@ -38,7 +40,7 @@ export function mergeHomeMenus(
   manifest: ContentManifest,
   subjects: SubjectDoc[],
   published: ContentDoc[],
-  legacyItems: LegacyContentDoc[],
+  legacyItems: LegacyContentDoc[] | null,
 ): HomeSubjectMenu[] {
   const legacy = resolveLegacyItems(manifest, legacyItems);
   const legacyReady = legacy.filter((l) => l.ready);

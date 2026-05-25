@@ -14,6 +14,7 @@ import {
   ensureLegacyContentsFromManifest,
   listLegacyContents,
   moveMenuEntryInSubject,
+  updateLegacyContent,
   type MenuEntryRef,
 } from "@/lib/content/legacy-contents";
 import type { ContentDoc, ContentType, LegacyContentDoc, SubjectDoc } from "@/lib/content/types";
@@ -224,9 +225,11 @@ export default function AdminContentsPage() {
       <section className="admin-card">
         <h2>一覧（{totalCount}件）</h2>
         <p className="admin-hint">
-          トップに出るコンテンツを教科ごとに並べ替えできます。初回表示時に、これまで
-          content-manifest.json にあった静的アプリ（県庁所在地・雪の多い地域など）を自動登録します。
-          静的アプリの問題文・HTML は public フォルダ内のファイルを編集してください。
+          <strong>Firestore（/play?slug=）</strong> の「下書き」はトップに出ません（招待用は
+          /admin/invitations のワークスペース側）。
+          <strong>静的アプリ</strong>（県庁・雪の地域など）は別管理で、「トップ表示」オフにすると
+          ログアウト後のトップから消えます（工事中表示）。
+          静的アプリの中身は public フォルダを編集してください。
         </p>
         {groupedRows.length === 0 ? (
           <p className="admin-hint">コンテンツがまだありません。</p>
@@ -251,7 +254,13 @@ export default function AdminContentsPage() {
 
                   const badge =
                     row.kind === "legacy" ? (
-                      <span className="admin-badge admin-badge--legacy">静的</span>
+                      <span
+                        className={`admin-badge ${
+                          row.doc.ready ? "admin-badge--published" : ""
+                        }`}
+                      >
+                        {row.doc.ready ? "トップ表示中" : "トップ非表示"}
+                      </span>
                     ) : (
                       <span
                         className={`admin-badge ${
@@ -340,6 +349,45 @@ export default function AdminContentsPage() {
                           </button>
                         </div>
                         {mainLink}
+                        {row.kind === "legacy" ? (
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--compact"
+                            title={
+                              row.doc.ready
+                                ? "トップメニューから外す"
+                                : "トップメニューに表示する"
+                            }
+                            disabled={busy}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              void (async () => {
+                                setErr("");
+                                setMsg("");
+                                try {
+                                  await updateLegacyContent(row.doc.id, {
+                                    ready: !row.doc.ready,
+                                  });
+                                  await reload();
+                                  setMsg(
+                                    row.doc.ready
+                                      ? "トップから非表示にしました。"
+                                      : "トップに表示するようにしました。",
+                                  );
+                                } catch (err) {
+                                  setErr(
+                                    err instanceof Error
+                                      ? err.message
+                                      : "更新に失敗しました。",
+                                  );
+                                }
+                              })();
+                            }}
+                          >
+                            {row.doc.ready ? "トップOFF" : "トップON"}
+                          </button>
+                        ) : null}
                       </div>
                     </li>
                   );
