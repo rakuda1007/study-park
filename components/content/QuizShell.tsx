@@ -223,7 +223,7 @@ export function QuizShell({ content }: Props) {
       <Script src="/shared/rich-text.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-format.js?v=13" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-mode.js?v=2" strategy="afterInteractive" />
-      <Script src="/shared/quiz-review-controller.js?v=1" strategy="afterInteractive" />
+      <Script src="/shared/quiz-review-controller.js?v=2" strategy="afterInteractive" />
       <Script src="/shared/quiz-streak-fx.js?v=10" strategy="afterInteractive" />
       <Script src={`/pwa-update.js?v=${ASSET_V}`} strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
