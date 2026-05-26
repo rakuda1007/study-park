@@ -9,7 +9,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { listContents } from "@/lib/content/firestore";
-import type { ContentDoc } from "@/lib/content/types";
+import type { ContentDoc, ContentStatus } from "@/lib/content/types";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import {
   createUserProfile,
@@ -32,19 +32,45 @@ export type MigrateResult = {
   archived: number;
 };
 
+/** 教室用同期時: 管理側の下書き化（旧URL停止）で教室の公開まで消さない */
+function resolveWorkspacePublishState(
+  c: ContentDoc,
+  existing: Record<string, unknown> | undefined,
+  archiveOriginal: boolean,
+): { status: ContentStatus; ready: boolean } {
+  if (archiveOriginal) {
+    return { status: c.status, ready: c.ready };
+  }
+  if (existing) {
+    const wsStatus = String(existing.status ?? "draft");
+    const wsReady = Boolean(existing.ready);
+    if (c.status === "published") {
+      return { status: "published", ready: c.ready };
+    }
+    if (wsStatus === "published") {
+      return { status: "published", ready: wsReady };
+    }
+    if (existing.migratedFrom) {
+      return { status: "published", ready: true };
+    }
+  }
+  return { status: c.status, ready: c.ready };
+}
+
 function contentToWorkspacePayload(
   c: ContentDoc,
   visibility: ContentVisibility,
   updatedBy: string,
+  publish: { status: ContentStatus; ready: boolean },
 ) {
   return {
     subjectId: c.subjectId,
     type: c.type,
     slug: c.slug,
     title: c.title,
-    status: c.status,
+    status: publish.status,
     order: c.order,
-    ready: c.ready,
+    ready: publish.ready,
     visibility,
     intro: c.intro ?? "",
     updatedBy,
@@ -94,8 +120,8 @@ export async function migrateAdminContentsToWorkspace(
   const wsCol = collection(getFirestoreClient(), "workspaces", workspaceId, "contents");
 
   const existingSnap = await getDocs(wsCol);
-  const existingIdBySlug = new Map(
-    existingSnap.docs.map((d) => [String(d.data().slug ?? ""), d.id] as const),
+  const existingBySlug = new Map(
+    existingSnap.docs.map((d) => [String(d.data().slug ?? ""), { id: d.id, data: d.data() }] as const),
   );
 
   let copied = 0;
@@ -103,11 +129,12 @@ export async function migrateAdminContentsToWorkspace(
   let archived = 0;
 
   for (const c of adminContents) {
-    const existingId = existingIdBySlug.get(c.slug);
-    if (existingId) {
+    const existing = existingBySlug.get(c.slug);
+    const publish = resolveWorkspacePublishState(c, existing?.data, archiveOriginal);
+    if (existing) {
       await setDoc(
-        doc(getFirestoreClient(), "workspaces", workspaceId, "contents", existingId),
-        contentToWorkspacePayload(c, visibility, updatedBy),
+        doc(getFirestoreClient(), "workspaces", workspaceId, "contents", existing.id),
+        contentToWorkspacePayload(c, visibility, updatedBy, publish),
       );
       updated += 1;
       if (archiveOriginal && c.status === "published") {
@@ -124,9 +151,9 @@ export async function migrateAdminContentsToWorkspace(
 
     await setDoc(
       doc(getFirestoreClient(), "workspaces", workspaceId, "contents", c.id),
-      contentToWorkspacePayload(c, visibility, updatedBy),
+      contentToWorkspacePayload(c, visibility, updatedBy, publish),
     );
-    existingIdBySlug.set(c.slug, c.id);
+    existingBySlug.set(c.slug, { id: c.id, data: {} });
     copied += 1;
 
     if (archiveOriginal && c.status === "published") {

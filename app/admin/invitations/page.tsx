@@ -202,6 +202,7 @@ export default function AdminInvitationsPage() {
             <p className="admin-msg" style={{ marginBottom: "0.75rem" }}>
               /admin で作った教材をワークスペース（学習者が見る教室用）へコピーします。
               同じ slug が既にある場合は<strong>上書き更新</strong>されます（HTML ブロックの変更もここで反映）。
+              「教室用に同期」は本文だけ更新し、教室側の<strong>公開状態は維持</strong>します（管理側が下書きでも学習者から消えません）。
               初回の「移行」では公開中の旧 URL（<code>/play?slug=...</code>）を下書きに戻します。
             </p>
             <button
