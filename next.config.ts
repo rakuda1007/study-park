@@ -4,7 +4,6 @@ import type { NextConfig } from "next";
 const STATIC_QUIZ_APPS = [
   "kuku",
   "kencho",
-  "tsuki",
   "shokubutsu",
   "yukichiiki",
   "sankaku",

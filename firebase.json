@@ -21,7 +21,6 @@
     "rewrites": [
       { "source": "/kuku", "destination": "/kuku/index.html" },
       { "source": "/kencho", "destination": "/kencho/index.html" },
-      { "source": "/tsuki", "destination": "/tsuki/index.html" },
       { "source": "/shokubutsu", "destination": "/shokubutsu/index.html" },
       { "source": "/yukichiiki", "destination": "/yukichiiki/index.html" },
       { "source": "/sankaku", "destination": "/sankaku/index.html" }
@@ -65,15 +64,6 @@
       },
       {
         "source": "**/*.html",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
-      },
-      {
-        "source": "/tsuki/**",
         "headers": [
           {
             "key": "Cache-Control",

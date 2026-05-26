@@ -2,7 +2,6 @@
 const SW_VERSION = "7";
 
 const NO_STORE_PREFIXES = [
-  "/tsuki/",
   "/kuku/",
   "/kencho/",
   "/shokubutsu/",
