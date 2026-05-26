@@ -3,7 +3,6 @@
 import {
   collection,
   doc,
-  getDoc,
   getDocs,
   serverTimestamp,
   setDoc,
@@ -30,7 +29,6 @@ import type { WorkspaceDoc } from "./types";
 export type MigrateResult = {
   copied: number;
   updated: number;
-  skipped: number;
   archived: number;
 };
 
@@ -102,7 +100,6 @@ export async function migrateAdminContentsToWorkspace(
 
   let copied = 0;
   let updated = 0;
-  let skipped = 0;
   let archived = 0;
 
   for (const c of adminContents) {
@@ -150,7 +147,7 @@ export async function migrateAdminContentsToWorkspace(
     updatedAt: serverTimestamp(),
   });
 
-  return { copied, updated, skipped, archived };
+  return { copied, updated, archived };
 }
 
 /** ワークスペースが既にあるか */
