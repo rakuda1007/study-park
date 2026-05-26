@@ -130,6 +130,21 @@ export async function resolveWorkspaceBySlug(
   return null;
 }
 
+/** workspaceId + uid で教材アクセス可否（プレイ画面・wid 付き URL 用） */
+export async function canLearnerAccessWorkspaceById(
+  workspaceId: string,
+  userId: string | null,
+  visibility: string,
+): Promise<boolean> {
+  if (visibility === "unlisted" || visibility === "public") return true;
+  if (visibility === "private") return false;
+  if (!userId) return false;
+  const ws = await getWorkspace(workspaceId);
+  if (!ws) return false;
+  if (ws.ownerId === userId) return true;
+  return isActiveMember(workspaceId, userId);
+}
+
 /** slug + uid でメンバー判定（プレイ画面用） */
 export async function canLearnerAccessWorkspace(
   workspaceSlug: string,

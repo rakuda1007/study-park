@@ -3,9 +3,18 @@ export function contentPlayHref(slug: string): string {
   return `/play?slug=${encodeURIComponent(slug)}`;
 }
 
-/** ワークスペース配信コンテンツのプレイ URL */
-export function workspacePlayHref(workspaceSlug: string, contentSlug: string): string {
-  return `/play?ws=${encodeURIComponent(workspaceSlug)}&slug=${encodeURIComponent(contentSlug)}`;
+/** ワークスペース配信コンテンツのプレイ URL（wid は学習者プレイ用の確実な解決） */
+export function workspacePlayHref(
+  workspaceSlug: string,
+  contentSlug: string,
+  workspaceId?: string,
+): string {
+  const q = new URLSearchParams({
+    ws: workspaceSlug,
+    slug: contentSlug,
+  });
+  if (workspaceId) q.set("wid", workspaceId);
+  return `/play?${q.toString()}`;
 }
 
 export function slugFromLegacyHref(href: string): string | null {

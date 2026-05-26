@@ -8,12 +8,19 @@ import { QuizShell } from "@/components/content/QuizShell";
 import { getPublishedContentBySlug } from "@/lib/content/public-firestore";
 import type { ContentDoc } from "@/lib/content/types";
 import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
-import { getPublishedWorkspaceContentBySlug } from "@/lib/workspaces/content-firestore";
-import { canLearnerAccessWorkspace } from "@/lib/workspaces/members";
+import {
+  getPublishedWorkspaceContentBySlug,
+  getPublishedWorkspaceContentInWorkspace,
+} from "@/lib/workspaces/content-firestore";
+import {
+  canLearnerAccessWorkspace,
+  canLearnerAccessWorkspaceById,
+} from "@/lib/workspaces/members";
 
 function PlayInner() {
   const params = useSearchParams();
   const wsSlug = (params.get("ws") ?? "").trim().toLowerCase();
+  const workspaceId = (params.get("wid") ?? "").trim();
   const slug = (params.get("slug") ?? "").trim().toLowerCase();
   const [content, setContent] = useState<ContentDoc | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +39,7 @@ function PlayInner() {
       setNotFound(false);
       setDenied(false);
       try {
-        if (wsSlug) {
+        if (wsSlug || workspaceId) {
           await waitForAuthReady();
           const uid = await new Promise<string | null>((resolve) => {
             const unsub = subscribeAuth((user) => {
@@ -40,17 +47,17 @@ function PlayInner() {
               resolve(user?.uid ?? null);
             });
           });
-          const doc = await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid);
+          const doc = workspaceId
+            ? await getPublishedWorkspaceContentInWorkspace(workspaceId, slug)
+            : await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid);
           if (cancelled) return;
           if (!doc) {
             setNotFound(true);
             return;
           }
-          const allowed = await canLearnerAccessWorkspace(
-            wsSlug,
-            uid,
-            doc.visibility,
-          );
+          const allowed = workspaceId
+            ? await canLearnerAccessWorkspaceById(workspaceId, uid, doc.visibility)
+            : await canLearnerAccessWorkspace(wsSlug, uid, doc.visibility);
           if (!allowed) {
             setDenied(true);
             return;
@@ -75,7 +82,7 @@ function PlayInner() {
     return () => {
       cancelled = true;
     };
-  }, [slug, wsSlug]);
+  }, [slug, wsSlug, workspaceId]);
 
   if (!slug || notFound) {
     return (

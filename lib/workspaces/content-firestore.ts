@@ -28,6 +28,7 @@ import type {
 } from "@/lib/content/types";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentVisibility } from "./types";
+import { resolveWorkspaceBySlug } from "./members";
 import { updateWorkspaceUsageCounts } from "./firestore";
 
 function contentsCol(workspaceId: string) {
@@ -236,36 +237,25 @@ export async function saveWorkspaceQuizQuestions(
   await syncQuestionCount(workspaceId);
 }
 
+/** workspaceId + slug で公開教材を取得（学習者ホームと同じ経路） */
+export async function getPublishedWorkspaceContentInWorkspace(
+  workspaceId: string,
+  contentSlug: string,
+): Promise<WorkspaceContentDoc | null> {
+  const normalized = contentSlug.trim().toLowerCase();
+  const items = await listPublishedContentsForMember(workspaceId);
+  return items.find((c) => c.slug.trim().toLowerCase() === normalized) ?? null;
+}
+
 /** 公開コンテンツを ws slug + content slug で取得 */
 export async function getPublishedWorkspaceContentBySlug(
   workspaceSlug: string,
   contentSlug: string,
   userId?: string | null,
 ): Promise<WorkspaceContentDoc | null> {
-  const { resolveWorkspaceBySlug } = await import("./members");
   const ws = await resolveWorkspaceBySlug(workspaceSlug, userId);
   if (!ws) return null;
-
-  const normalized = contentSlug.trim().toLowerCase();
-
-  try {
-    const snap = await getDocs(
-      query(
-        contentsCol(ws.id),
-        where("slug", "==", normalized),
-        where("status", "==", "published"),
-        limit(1),
-      ),
-    );
-    const d = snap.docs[0];
-    if (d) return mapContent(ws.id, d.id, d.data());
-  } catch {
-    // 複合クエリが権限・インデックスで失敗する場合がある（学習者ホームの一覧は通るのに個別取得だけ失敗、など）
-  }
-
-  // 学習者ホームと同じ経路で探す（一覧に出ている教材はここで必ず見つかる）
-  const items = await listPublishedContentsForMember(ws.id);
-  return items.find((c) => c.slug.trim().toLowerCase() === normalized) ?? null;
+  return getPublishedWorkspaceContentInWorkspace(ws.id, contentSlug);
 }
 
 /** 学習者向け: 紐づき ws の公開教材一覧 */
