@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  authStateReady,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
@@ -135,8 +134,14 @@ export async function resolvePostLoginPath(uid: string): Promise<string> {
 }
 
 /** 永続化されたセッション復元が終わるまで待つ（ゲートの誤リダイレクト防止） */
-export async function waitForAuthReady(): Promise<void> {
-  await authStateReady(getFirebaseAuth());
+export function waitForAuthReady(): Promise<void> {
+  const auth = getFirebaseAuth();
+  return new Promise((resolve) => {
+    const unsub = onAuthStateChanged(auth, () => {
+      unsub();
+      resolve();
+    });
+  });
 }
 
 export function subscribeAuth(callback: (user: User | null) => void) {
