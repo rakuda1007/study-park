@@ -58,7 +58,7 @@ export function LessonSectionEditor({
       ...section.blocks,
       {
         kind: "html",
-        html: '<p><a href="/sankaku/">リンクテキスト</a></p>',
+        html: '<p><a href="/play?slug=sankaku-link">リンクテキスト</a></p>',
       },
     ]);
   };
@@ -150,7 +150,7 @@ export function LessonSectionEditor({
                 />
               </div>
               <p style={{ fontSize: "0.8rem", color: "var(--admin-muted)", margin: "0.35rem 0 0" }}>
-                例: &lt;a href=&quot;/sankaku/&quot;&gt;いろいろな三角形の性質を開く&lt;/a&gt;
+                例: &lt;a href=&quot;/play?slug=sankaku-link&quot;&gt;いろいろな三角形の性質を開く&lt;/a&gt;
               </p>
             </div>
           ) : null}

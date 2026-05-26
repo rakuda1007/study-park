@@ -6,14 +6,7 @@
       "id": "math",
       "name": "算数",
       "order": 1,
-      "items": [
-        { "label": "九九", "href": "/kuku/", "ready": true },
-        {
-          "label": "いろいろな三角形の性質",
-          "href": "/sankaku/",
-          "ready": true
-        }
-      ]
+      "items": [{ "label": "九九", "href": "/kuku/", "ready": true }]
     },
     {
       "id": "social",

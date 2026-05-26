@@ -6,7 +6,6 @@ const STATIC_QUIZ_APPS = [
   "kencho",
   "shokubutsu",
   "yukichiiki",
-  "sankaku",
 ] as const;
 
 const isProdBuild = process.env.NODE_ENV === "production";
