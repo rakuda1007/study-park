@@ -53,6 +53,16 @@ export function LessonSectionEditor({
     ]);
   };
 
+  const addHtml = () => {
+    updateBlocks([
+      ...section.blocks,
+      {
+        kind: "html",
+        html: '<p><a href="/sankaku/">リンクテキスト</a></p>',
+      },
+    ]);
+  };
+
   return (
     <div className="admin-lesson-blocks">
       {section.blocks.length === 0 ? (
@@ -118,9 +128,29 @@ export function LessonSectionEditor({
 
           {block.kind === "html" ? (
             <div className="admin-block">
-              <p className="admin-block-label">HTML ブロック（読み取り専用）</p>
-              <p style={{ fontSize: "0.8rem", color: "var(--admin-muted)" }}>
-                静的ページ由来の HTML です。管理画面では編集できません。
+              <div className="admin-row" style={{ justifyContent: "space-between" }}>
+                <span className="admin-block-label">HTML {bi + 1}</span>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn--danger"
+                  onClick={() => removeBlock(bi)}
+                >
+                  削除
+                </button>
+              </div>
+              <div className="admin-field">
+                <label htmlFor={`${section.id}-html-${bi}`}>HTML（リンクなど）</label>
+                <textarea
+                  id={`${section.id}-html-${bi}`}
+                  className="admin-textarea"
+                  rows={5}
+                  value={block.html}
+                  onChange={(e) => updateBlock(bi, { kind: "html", html: e.target.value })}
+                  spellCheck={false}
+                />
+              </div>
+              <p style={{ fontSize: "0.8rem", color: "var(--admin-muted)", margin: "0.35rem 0 0" }}>
+                例: &lt;a href=&quot;/sankaku/&quot;&gt;いろいろな三角形の性質を開く&lt;/a&gt;
               </p>
             </div>
           ) : null}
@@ -133,6 +163,9 @@ export function LessonSectionEditor({
         </button>
         <button type="button" className="admin-btn" onClick={addImage}>
           ＋ 画像
+        </button>
+        <button type="button" className="admin-btn" onClick={addHtml}>
+          ＋ HTML
         </button>
       </div>
     </div>
