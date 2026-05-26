@@ -6,7 +6,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const targets = ["shokubutsu"];
+const targets = [];
 
 for (const app of targets) {
   const path = join(root, "public", app, "app.js");

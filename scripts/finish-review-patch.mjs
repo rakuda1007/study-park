@@ -297,7 +297,6 @@ function patchKuku() {
   console.log("patched kuku");
 }
 
-["public/shokubutsu/app.js"].forEach(patchBlankApp);
 ["public/kencho/index.html", "public/kuku/index.html"].forEach(
   patchHtmlScripts,
 );

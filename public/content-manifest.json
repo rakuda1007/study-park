@@ -18,9 +18,7 @@
       "id": "science",
       "name": "理科",
       "order": 3,
-      "items": [
-        { "label": "植物の育ち方", "href": "/shokubutsu/", "ready": true }
-      ]
+      "items": []
     }
   ]
 }

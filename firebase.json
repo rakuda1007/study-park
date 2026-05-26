@@ -46,12 +46,21 @@
         "source": "/yukichiiki/**",
         "destination": "/play?slug=much-snow",
         "type": 301
+      },
+      {
+        "source": "/shokubutsu",
+        "destination": "/play?slug=grow-plant",
+        "type": 301
+      },
+      {
+        "source": "/shokubutsu/**",
+        "destination": "/play?slug=grow-plant",
+        "type": 301
       }
     ],
     "rewrites": [
       { "source": "/kuku", "destination": "/kuku/index.html" },
-      { "source": "/kencho", "destination": "/kencho/index.html" },
-      { "source": "/shokubutsu", "destination": "/shokubutsu/index.html" }
+      { "source": "/kencho", "destination": "/kencho/index.html" }
     ],
     "headers": [
       {
@@ -110,15 +119,6 @@
       },
       {
         "source": "/kencho/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
-      },
-      {
-        "source": "/shokubutsu/**",
         "headers": [
           {
             "key": "Cache-Control",

@@ -373,13 +373,13 @@ function patchKukuApp() {
   console.log("app", rel);
 }
 
-["public/shokubutsu/index.html"].forEach(
+[].forEach(
   patchBlankQuizHtml,
 );
 patchKenchoHtml();
 patchKukuHtml();
 
-["public/shokubutsu/app.js"].forEach(
+[].forEach(
   patchBlankQuizApp,
 );
 patchKenchoApp();
