@@ -16,6 +16,16 @@
         "source": "/index.txt",
         "destination": "/",
         "type": 302
+      },
+      {
+        "source": "/tsuki",
+        "destination": "/play?slug=moon-move",
+        "type": 301
+      },
+      {
+        "source": "/tsuki/**",
+        "destination": "/play?slug=moon-move",
+        "type": 301
       }
     ],
     "rewrites": [
