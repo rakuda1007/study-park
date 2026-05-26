@@ -64,7 +64,8 @@ function PlayInner() {
             setContent(doc);
           }
         }
-      } catch {
+      } catch (e) {
+        console.error("Play: content load failed", e);
         if (!cancelled) setNotFound(true);
       } finally {
         if (!cancelled) setLoading(false);

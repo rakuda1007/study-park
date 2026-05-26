@@ -245,17 +245,26 @@ export async function getPublishedWorkspaceContentBySlug(
   const ws = await getWorkspaceBySlug(workspaceSlug);
   if (!ws) return null;
 
-  const snap = await getDocs(
-    query(
-      contentsCol(ws.id),
-      where("slug", "==", contentSlug),
-      where("status", "==", "published"),
-      limit(1),
-    ),
-  );
-  const d = snap.docs[0];
-  if (!d) return null;
-  return mapContent(ws.id, d.id, d.data());
+  const normalized = contentSlug.trim().toLowerCase();
+
+  try {
+    const snap = await getDocs(
+      query(
+        contentsCol(ws.id),
+        where("slug", "==", normalized),
+        where("status", "==", "published"),
+        limit(1),
+      ),
+    );
+    const d = snap.docs[0];
+    if (d) return mapContent(ws.id, d.id, d.data());
+  } catch {
+    // 複合クエリが権限・インデックスで失敗する場合がある（学習者ホームの一覧は通るのに個別取得だけ失敗、など）
+  }
+
+  // 学習者ホームと同じ経路で探す（一覧に出ている教材はここで必ず見つかる）
+  const items = await listPublishedContentsForMember(ws.id);
+  return items.find((c) => c.slug.trim().toLowerCase() === normalized) ?? null;
 }
 
 /** 学習者向け: 紐づき ws の公開教材一覧 */
