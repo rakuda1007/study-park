@@ -32,8 +32,8 @@ export function CreatorShell({
           <Link href="/creator/learners" className="admin-link">
             学習者
           </Link>
-          <Link href="/" className="admin-link">
-            トップ
+          <Link href="/" className="admin-link" title="ログアウトせず公園トップを表示">
+            Study Park トップ
           </Link>
           <button type="button" className="admin-btn" onClick={() => void logout()}>
             ログアウト

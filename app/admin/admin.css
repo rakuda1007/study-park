@@ -223,14 +223,106 @@
   font-weight: 600;
 }
 
-/* 学習者ホーム — 行全体タップ、ボタン列は右端に揃える */
-.learner-subject-heading {
-  margin: 0 0 0.5rem;
-  padding-bottom: 0.35rem;
+/* 学習者ホーム */
+.learner-workspace-card .learner-workspace-title {
+  margin: 0 0 1rem;
+  padding-bottom: 0.65rem;
   border-bottom: 1px solid var(--admin-border);
-  font-size: 0.95rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--admin-text);
+}
+
+.learner-subject-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.learner-subject-group {
+  margin: 0;
+}
+
+.learner-subject-label {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--admin-accent);
+}
+
+.learner-subject-group .learner-subject-label {
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(107, 140, 255, 0.12);
+  border: 1px solid rgba(107, 140, 255, 0.28);
+}
+
+.learner-subject-dropdown {
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.learner-subject-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.learner-subject-dropdown-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.learner-subject-dropdown-trigger .learner-subject-label {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.learner-subject-dropdown-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.learner-subject-count {
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--admin-muted);
+}
+
+.learner-subject-chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--admin-accent);
+  border-bottom: 2px solid var(--admin-accent);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.15s ease;
+}
+
+.learner-subject-dropdown[open] .learner-subject-chevron {
+  transform: rotate(-135deg) translateY(1px);
+}
+
+.learner-subject-dropdown-panel {
+  padding: 0 0.5rem 0.35rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.learner-study-list {
+  margin: 0;
 }
 
 .learner-study-list li {
@@ -247,7 +339,7 @@
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
-  padding: 0.85rem 0.15rem;
+  padding: 0.7rem 0.35rem;
   color: inherit;
   text-decoration: none;
   box-sizing: border-box;
@@ -263,24 +355,25 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
 .learner-study-link__title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.45;
   word-break: break-word;
+  color: var(--admin-text);
 }
 
 .learner-study-link__meta {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--admin-muted);
 }
 
 .learner-study-link__arrow {
   flex-shrink: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   opacity: 0.55;
   line-height: 1;
 }

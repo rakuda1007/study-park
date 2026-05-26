@@ -8,12 +8,12 @@ import {
   subjectSortOrder,
 } from "@/lib/content/subject-names";
 import type { ContentManifest } from "@/lib/content/types";
-import { workspacePlayHref } from "@/lib/content/urls";
 import { listPublicSubjects } from "@/lib/content/public-firestore";
 import { listPublishedContentsForMember } from "@/lib/workspaces/content-firestore";
 import { getWorkspace } from "@/lib/workspaces/firestore";
 import { listWorkspacesForLearner } from "@/lib/workspaces/members";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
+import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
 import { signOutUser, subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifest from "@/public/content-manifest.json";
 
@@ -134,36 +134,21 @@ export default function LearnerHomePage() {
       ) : null}
 
       {rowsWithGroups.map((r) => (
-        <section key={r.workspaceId} className="admin-card" style={{ marginBottom: "1rem" }}>
-          <h2 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>{r.workspaceName}</h2>
+        <section key={r.workspaceId} className="admin-card learner-workspace-card">
+          <h2 className="learner-workspace-title">{r.workspaceName}</h2>
           {r.subjectGroups.length === 0 ? (
             <p className="admin-msg">公開中の教材はまだありません。</p>
           ) : (
-            r.subjectGroups.map((g) => (
-              <div key={g.subjectId} className="admin-subject-group learner-subject-group">
-                <h3 className="learner-subject-heading">{g.subjectName}</h3>
-                <ul className="admin-list learner-study-list">
-                  {g.items.map((c) => (
-                    <li key={c.id}>
-                      <Link
-                        href={workspacePlayHref(r.workspaceSlug, c.slug)}
-                        className="learner-study-link"
-                      >
-                        <span className="learner-study-link__text">
-                          <span className="learner-study-link__title">{c.title}</span>
-                          <span className="learner-study-link__meta">
-                            {c.type === "quiz" ? "クイズ" : "レッスン"}
-                          </span>
-                        </span>
-                        <span className="learner-study-link__arrow" aria-hidden="true">
-                          →
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
+            <div className="learner-subject-list">
+              {r.subjectGroups.map((g, index) => (
+                <LearnerSubjectSection
+                  key={g.subjectId}
+                  group={g}
+                  workspaceSlug={r.workspaceSlug}
+                  defaultOpen={index === 0}
+                />
+              ))}
+            </div>
           )}
         </section>
       ))}

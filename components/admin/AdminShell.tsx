@@ -29,8 +29,8 @@ export function AdminShell({
           <Link href="/admin/invitations" className="admin-link">
             学習者招待
           </Link>
-          <Link href="/" className="admin-link">
-            トップへ
+          <Link href="/" className="admin-link" title="ログアウトせず公園トップを表示">
+            Study Park トップ
           </Link>
           <button type="button" className="admin-btn" onClick={() => void logout()}>
             ログアウト

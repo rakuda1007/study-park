@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  authStateReady,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
@@ -104,13 +105,38 @@ export async function isAdminUser(user: User | null): Promise<boolean> {
   return snap.exists();
 }
 
+export type AuthSessionKind = "admin" | "creator" | "learner";
+
+export function homePathForSession(kind: AuthSessionKind): string {
+  switch (kind) {
+    case "admin":
+      return "/admin/contents";
+    case "creator":
+      return "/creator/contents";
+    case "learner":
+      return "/learner";
+  }
+}
+
+export async function resolveAuthSession(user: User | null): Promise<AuthSessionKind | null> {
+  if (!user) return null;
+  if (await isAdminUser(user)) return "admin";
+  const profile = await getUserProfile(user.uid);
+  if (!profile) return null;
+  return profile.role === "learner" ? "learner" : "creator";
+}
+
 export async function resolvePostLoginPath(uid: string): Promise<string> {
   const adminSnap = await getDoc(doc(getFirestoreClient(), "admins", uid));
-  if (adminSnap.exists()) return "/admin/contents";
+  if (adminSnap.exists()) return homePathForSession("admin");
   const profile = await getUserProfile(uid);
   if (!profile) return "/signup";
-  if (profile.role === "learner") return "/learner";
-  return "/creator";
+  return homePathForSession(profile.role === "learner" ? "learner" : "creator");
+}
+
+/** 永続化されたセッション復元が終わるまで待つ（ゲートの誤リダイレクト防止） */
+export async function waitForAuthReady(): Promise<void> {
+  await authStateReady(getFirebaseAuth());
 }
 
 export function subscribeAuth(callback: (user: User | null) => void) {

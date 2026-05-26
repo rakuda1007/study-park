@@ -1,3 +1,4 @@
+import { HomeAuthNav } from "@/components/home/HomeAuthNav";
 import { HomeNav } from "@/components/home/HomeNav";
 import type { ContentManifest } from "@/lib/content/types";
 import contentManifest from "@/public/content-manifest.json";
@@ -44,11 +45,7 @@ export default function Home() {
 
         <HomeNav manifest={manifest} />
 
-        <nav className="home-auth-nav" aria-label="アカウント">
-          <a href="/login">ログイン</a>
-          <a href="/signup/creator">教材を作る（クリエイター）</a>
-          <a href="/signup/learner">学習者登録</a>
-        </nav>
+        <HomeAuthNav />
       </div>
     </main>
   );

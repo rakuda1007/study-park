@@ -396,3 +396,10 @@ body {
 .home-auth-nav a:hover {
   color: var(--home-amber);
 }
+
+.home-auth-nav__status {
+  margin: 0;
+  width: 100%;
+  font-size: 0.85rem;
+  color: rgba(255, 246, 232, 0.72);
+}

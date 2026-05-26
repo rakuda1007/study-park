@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { isAdminUser, subscribeAuth } from "@/lib/firebase/auth-client";
+import { isAdminUser, subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -18,19 +18,29 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
     setReady(false);
-    const unsub = subscribeAuth(async (user) => {
-      const ok = await isAdminUser(user);
-      if (!user || !ok) {
-        router.replace("/admin/login");
-        setAllowed(false);
+
+    void waitForAuthReady().then(() => {
+      if (cancelled) return;
+      unsub = subscribeAuth(async (user) => {
+        const ok = await isAdminUser(user);
+        if (!user || !ok) {
+          router.replace("/admin/login");
+          setAllowed(false);
+          setReady(true);
+          return;
+        }
+        setAllowed(true);
         setReady(true);
-        return;
-      }
-      setAllowed(true);
-      setReady(true);
+      });
     });
-    return () => unsub();
+
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
   }, [isLogin, router]);
 
   if (!ready) {
