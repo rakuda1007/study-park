@@ -94,9 +94,19 @@
     return blank.answers[0];
   }
 
+  function answerEntries(question) {
+    if (Array.isArray(question.answerDisplay) && question.answerDisplay.length > 0) {
+      return question.answerDisplay;
+    }
+    return question.blanks.map((b) => ({
+      marker: b.marker,
+      text: formatCorrectAnswer(b),
+    }));
+  }
+
   function allCorrectSummary(question) {
-    return question.blanks
-      .map((b) => `${b.marker}${formatCorrectAnswer(b)}`)
+    return answerEntries(question)
+      .map((e) => `${e.marker}${e.text}`)
       .join("、");
   }
 
