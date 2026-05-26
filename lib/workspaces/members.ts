@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import { getWorkspace, getWorkspaceBySlug } from "./firestore";
+import { normalizeWorkspaceSlug } from "./slug";
+import type { WorkspaceDoc } from "./types";
 import type { WorkspaceMemberDoc } from "./types";
 
 function tsToIso(v: unknown): string {
@@ -107,6 +109,27 @@ export async function joinWorkspaceByInviteCode(
   };
 }
 
+/**
+ * URL の ws パラメータからワークスペースを解決する。
+ * 学習者は workspaces を slug 検索できないため、参加中の教室からも探す。
+ */
+export async function resolveWorkspaceBySlug(
+  workspaceSlug: string,
+  userId?: string | null,
+): Promise<WorkspaceDoc | null> {
+  const normalized = normalizeWorkspaceSlug(workspaceSlug);
+  const direct = await getWorkspaceBySlug(normalized);
+  if (direct) return direct;
+  if (!userId) return null;
+
+  const memberships = await listWorkspacesForLearner(userId);
+  for (const m of memberships) {
+    const ws = await getWorkspace(m.workspaceId);
+    if (ws && normalizeWorkspaceSlug(ws.slug) === normalized) return ws;
+  }
+  return null;
+}
+
 /** slug + uid でメンバー判定（プレイ画面用） */
 export async function canLearnerAccessWorkspace(
   workspaceSlug: string,
@@ -116,7 +139,7 @@ export async function canLearnerAccessWorkspace(
   if (visibility === "unlisted" || visibility === "public") return true;
   if (visibility === "private") return false;
   if (!userId) return false;
-  const ws = await getWorkspaceBySlug(workspaceSlug);
+  const ws = await resolveWorkspaceBySlug(workspaceSlug, userId);
   if (!ws) return false;
   if (ws.ownerId === userId) return true;
   return isActiveMember(ws.id, userId);

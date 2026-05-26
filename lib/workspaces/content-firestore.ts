@@ -240,9 +240,10 @@ export async function saveWorkspaceQuizQuestions(
 export async function getPublishedWorkspaceContentBySlug(
   workspaceSlug: string,
   contentSlug: string,
+  userId?: string | null,
 ): Promise<WorkspaceContentDoc | null> {
-  const { getWorkspaceBySlug } = await import("./firestore");
-  const ws = await getWorkspaceBySlug(workspaceSlug);
+  const { resolveWorkspaceBySlug } = await import("./members");
+  const ws = await resolveWorkspaceBySlug(workspaceSlug, userId);
   if (!ws) return null;
 
   const normalized = contentSlug.trim().toLowerCase();

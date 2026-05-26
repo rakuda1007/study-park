@@ -7,7 +7,7 @@ import { LessonView } from "@/components/content/LessonView";
 import { QuizShell } from "@/components/content/QuizShell";
 import { getPublishedContentBySlug } from "@/lib/content/public-firestore";
 import type { ContentDoc } from "@/lib/content/types";
-import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 import { getPublishedWorkspaceContentBySlug } from "@/lib/workspaces/content-firestore";
 import { canLearnerAccessWorkspace } from "@/lib/workspaces/members";
 
@@ -33,18 +33,19 @@ function PlayInner() {
       setDenied(false);
       try {
         if (wsSlug) {
-          const doc = await getPublishedWorkspaceContentBySlug(wsSlug, slug);
-          if (cancelled) return;
-          if (!doc) {
-            setNotFound(true);
-            return;
-          }
+          await waitForAuthReady();
           const uid = await new Promise<string | null>((resolve) => {
             const unsub = subscribeAuth((user) => {
               unsub();
               resolve(user?.uid ?? null);
             });
           });
+          const doc = await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid);
+          if (cancelled) return;
+          if (!doc) {
+            setNotFound(true);
+            return;
+          }
           const allowed = await canLearnerAccessWorkspace(
             wsSlug,
             uid,
