@@ -113,7 +113,7 @@ export default function AdminInvitationsPage() {
         visibility: "members",
       });
       setMsg(
-        `移行しました。追加 ${result.copied} 件、スキップ ${result.skipped} 件、元を下書きに ${result.archived} 件。`,
+        `移行しました。追加 ${result.copied} 件、更新 ${result.updated} 件、元を下書きに ${result.archived} 件。`,
       );
       await reload(uid);
     } catch (e) {
@@ -200,9 +200,9 @@ export default function AdminInvitationsPage() {
           <section className="admin-card" style={{ marginBottom: "1rem" }}>
             <h2 style={{ fontSize: "1.05rem" }}>2. 教材の移行</h2>
             <p className="admin-msg" style={{ marginBottom: "0.75rem" }}>
-              /admin で作った教材をワークスペースへコピーします。公開中の旧 URL（
-              <code>/play?slug=...</code>）は下書きに戻し、招待版（
-              <code>/play?ws=...&slug=...</code>）を使います。
+              /admin で作った教材をワークスペース（学習者が見る教室用）へコピーします。
+              同じ slug が既にある場合は<strong>上書き更新</strong>されます（HTML ブロックの変更もここで反映）。
+              初回の「移行」では公開中の旧 URL（<code>/play?slug=...</code>）を下書きに戻します。
             </p>
             <button
               type="button"
@@ -227,7 +227,7 @@ export default function AdminInvitationsPage() {
                 })
                   .then((result) => {
                     setMsg(
-                      `同期しました。追加 ${result.copied} 件、既にあり ${result.skipped} 件。`,
+                      `同期しました。追加 ${result.copied} 件、更新 ${result.updated} 件。`,
                     );
                     return reload(uid);
                   })
@@ -237,7 +237,7 @@ export default function AdminInvitationsPage() {
                   .finally(() => setBusy(false));
               }}
             >
-              未移行分だけ同期
+              教室用に同期（追加・更新）
             </button>
           </section>
 

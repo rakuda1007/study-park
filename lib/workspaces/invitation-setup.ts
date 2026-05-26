@@ -29,6 +29,7 @@ import type { WorkspaceDoc } from "./types";
 
 export type MigrateResult = {
   copied: number;
+  updated: number;
   skipped: number;
   archived: number;
 };
@@ -95,17 +96,32 @@ export async function migrateAdminContentsToWorkspace(
   const wsCol = collection(getFirestoreClient(), "workspaces", workspaceId, "contents");
 
   const existingSnap = await getDocs(wsCol);
-  const existingSlugs = new Set(
-    existingSnap.docs.map((d) => String(d.data().slug ?? "")),
+  const existingIdBySlug = new Map(
+    existingSnap.docs.map((d) => [String(d.data().slug ?? ""), d.id] as const),
   );
 
   let copied = 0;
+  let updated = 0;
   let skipped = 0;
   let archived = 0;
 
   for (const c of adminContents) {
-    if (existingSlugs.has(c.slug)) {
-      skipped += 1;
+    const existingId = existingIdBySlug.get(c.slug);
+    if (existingId) {
+      await setDoc(
+        doc(getFirestoreClient(), "workspaces", workspaceId, "contents", existingId),
+        contentToWorkspacePayload(c, visibility, updatedBy),
+      );
+      updated += 1;
+      if (archiveOriginal && c.status === "published") {
+        await updateDoc(doc(getFirestoreClient(), "contents", c.id), {
+          status: "draft",
+          ready: false,
+          updatedBy,
+          updatedAt: serverTimestamp(),
+        });
+        archived += 1;
+      }
       continue;
     }
 
@@ -113,7 +129,7 @@ export async function migrateAdminContentsToWorkspace(
       doc(getFirestoreClient(), "workspaces", workspaceId, "contents", c.id),
       contentToWorkspacePayload(c, visibility, updatedBy),
     );
-    existingSlugs.add(c.slug);
+    existingIdBySlug.set(c.slug, c.id);
     copied += 1;
 
     if (archiveOriginal && c.status === "published") {
@@ -134,7 +150,7 @@ export async function migrateAdminContentsToWorkspace(
     updatedAt: serverTimestamp(),
   });
 
-  return { copied, skipped, archived };
+  return { copied, updated, skipped, archived };
 }
 
 /** ワークスペースが既にあるか */
