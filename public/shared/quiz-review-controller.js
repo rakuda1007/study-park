@@ -30,19 +30,34 @@
       startSession,
     } = cfg;
 
-    function setPlayUiVisible(visible) {
-      const hide = !visible;
+    /** display:flex 等が [hidden] を上書きするため style でも非表示にする */
+    function setNodeHidden(node, hidden) {
+      if (!node) return;
+      node.hidden = hidden;
+      if (hidden) {
+        node.style.display = "none";
+      } else {
+        node.style.removeProperty("display");
+      }
+    }
+
+    function setPlayUiVisible(playVisible) {
+      const hidePlay = !playVisible;
       playUiKeys.forEach((key) => {
-        const node = els[key];
-        if (node) node.hidden = hide;
+        setNodeHidden(els[key], hidePlay);
       });
-      if (els.reviewPanel) els.reviewPanel.hidden = visible;
+      setNodeHidden(els.reviewPanel, playVisible);
+      const main = els.quizMain;
+      if (main) {
+        main.classList.toggle("quiz-main--review", !playVisible);
+      }
     }
 
     function startReviewMode() {
       state.inReview = true;
       state.session.finished = true;
       state.locked = true;
+      state.current = null;
       closeModal();
       setPlayUiVisible(false);
       renderReviewList();

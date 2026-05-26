@@ -1,4 +1,23 @@
 /* まとめて確認パネル（全クイズ共通） */
+
+/* 各アプリの .question-card { display:flex } が [hidden] を打ち消すのを防ぐ */
+.question-card[hidden],
+.answer-actions[hidden],
+.character-panel[hidden],
+.stats-bar[hidden] {
+  display: none !important;
+}
+
+.quiz-main--review {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.quiz-main--review .review-panel {
+  flex: 1 1 auto;
+  margin-bottom: 0;
+  max-height: none;
+}
+
 .review-panel {
   margin: 0 0 1.25rem;
   padding: 1rem;

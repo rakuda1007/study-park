@@ -670,6 +670,7 @@
     els.btnModalRestart = $("btnModalRestart");
     els.reviewPanel = $("reviewPanel");
     els.reviewList = $("reviewList");
+    els.quizMain = document.querySelector(".quiz-main");
     els.statsBar = document.querySelector(".stats-bar");
     els.answerActions = $("answerActions");
 
