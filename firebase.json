@@ -36,13 +36,22 @@
         "source": "/sankaku/**",
         "destination": "/play?slug=sankaku-link",
         "type": 301
+      },
+      {
+        "source": "/yukichiiki",
+        "destination": "/play?slug=much-snow",
+        "type": 301
+      },
+      {
+        "source": "/yukichiiki/**",
+        "destination": "/play?slug=much-snow",
+        "type": 301
       }
     ],
     "rewrites": [
       { "source": "/kuku", "destination": "/kuku/index.html" },
       { "source": "/kencho", "destination": "/kencho/index.html" },
-      { "source": "/shokubutsu", "destination": "/shokubutsu/index.html" },
-      { "source": "/yukichiiki", "destination": "/yukichiiki/index.html" }
+      { "source": "/shokubutsu", "destination": "/shokubutsu/index.html" }
     ],
     "headers": [
       {
@@ -110,15 +119,6 @@
       },
       {
         "source": "/shokubutsu/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
-      },
-      {
-        "source": "/yukichiiki/**",
         "headers": [
           {
             "key": "Cache-Control",

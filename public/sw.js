@@ -1,13 +1,7 @@
 /* Study Park — Service Worker（PWA・更新反映用） */
-const SW_VERSION = "8";
+const SW_VERSION = "9";
 
-const NO_STORE_PREFIXES = [
-  "/kuku/",
-  "/kencho/",
-  "/shokubutsu/",
-  "/yukichiiki/",
-  "/shared/",
-];
+const NO_STORE_PREFIXES = ["/kuku/", "/kencho/", "/shokubutsu/", "/shared/"];
 const NO_STORE_FILES = ["/sw.js", "/pwa-update.js", "/study-park-asset-version.js"];
 
 function shouldBypassCache(url) {

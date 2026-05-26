@@ -1,12 +1,7 @@
 import type { NextConfig } from "next";
 
 /** public 配下の静的クイズ（index.html） */
-const STATIC_QUIZ_APPS = [
-  "kuku",
-  "kencho",
-  "shokubutsu",
-  "yukichiiki",
-] as const;
+const STATIC_QUIZ_APPS = ["kuku", "kencho", "shokubutsu"] as const;
 
 const isProdBuild = process.env.NODE_ENV === "production";
 
