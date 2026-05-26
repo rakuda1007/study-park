@@ -3,6 +3,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   orderBy,
@@ -39,10 +40,40 @@ export async function listLegacyContents(subjectId?: string): Promise<LegacyCont
   return filtered.sort((a, b) => a.order - b.order);
 }
 
+function manifestHrefSet(manifest: ContentManifest): Set<string> {
+  const hrefs = new Set<string>();
+  for (const subject of manifest.subjects) {
+    for (const item of subject.items) {
+      if (item.href) hrefs.add(item.href);
+    }
+  }
+  return hrefs;
+}
+
+/** manifest に無い静的メニュー行を削除（例: /tsuki/ を manifest から外したあと） */
+export async function pruneLegacyContentsNotInManifest(
+  manifest: ContentManifest,
+): Promise<number> {
+  const allowed = manifestHrefSet(manifest);
+  const existing = await listLegacyContents();
+  let removed = 0;
+  await Promise.all(
+    existing
+      .filter((item) => !allowed.has(item.href))
+      .map(async (item) => {
+        await deleteDoc(doc(getFirestoreClient(), "legacyContents", item.id));
+        removed += 1;
+      }),
+  );
+  return removed;
+}
+
 /** content-manifest.json の項目を Firestore に未登録なら取り込む（既存の order は維持） */
 export async function ensureLegacyContentsFromManifest(
   manifest: ContentManifest,
 ): Promise<void> {
+  await pruneLegacyContentsNotInManifest(manifest);
+
   const existing = await listLegacyContents();
   const byHref = new Map(existing.map((e) => [e.href, e]));
 
@@ -65,6 +96,10 @@ export async function ensureLegacyContentsFromManifest(
       });
     }
   }
+}
+
+export async function deleteLegacyContent(id: string): Promise<void> {
+  await deleteDoc(doc(getFirestoreClient(), "legacyContents", id));
 }
 
 export async function updateLegacyContent(

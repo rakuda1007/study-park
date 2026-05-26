@@ -11,6 +11,7 @@ import {
   listSubjects,
 } from "@/lib/content/firestore";
 import {
+  deleteLegacyContent,
   ensureLegacyContentsFromManifest,
   listLegacyContents,
   moveMenuEntryInSubject,
@@ -227,9 +228,9 @@ export default function AdminContentsPage() {
         <p className="admin-hint">
           <strong>Firestore（/play?slug=）</strong> の「下書き」はトップに出ません（招待用は
           /admin/invitations のワークスペース側）。
-          <strong>静的アプリ</strong>（県庁・雪の地域など）は別管理で、「トップ表示」オフにすると
-          ログアウト後のトップから消えます（工事中表示）。
-          静的アプリの中身は public フォルダを編集してください。
+          <strong>静的アプリ</strong>（県庁・雪の地域など）は Firestore の legacy と public
+          フォルダで管理します。manifest から外した静的アプリは、この画面を開くと一覧から自動削除されます。
+          トップ表示オフにするとログアウト後のトップから消えます（工事中表示）。
         </p>
         {groupedRows.length === 0 ? (
           <p className="admin-hint">コンテンツがまだありません。</p>
@@ -350,43 +351,79 @@ export default function AdminContentsPage() {
                         </div>
                         {mainLink}
                         {row.kind === "legacy" ? (
-                          <button
-                            type="button"
-                            className="admin-btn admin-btn--compact"
-                            title={
-                              row.doc.ready
-                                ? "トップメニューから外す"
-                                : "トップメニューに表示する"
-                            }
-                            disabled={busy}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              void (async () => {
-                                setErr("");
-                                setMsg("");
-                                try {
-                                  await updateLegacyContent(row.doc.id, {
-                                    ready: !row.doc.ready,
-                                  });
-                                  await reload();
-                                  setMsg(
-                                    row.doc.ready
-                                      ? "トップから非表示にしました。"
-                                      : "トップに表示するようにしました。",
-                                  );
-                                } catch (err) {
-                                  setErr(
-                                    err instanceof Error
-                                      ? err.message
-                                      : "更新に失敗しました。",
-                                  );
+                          <>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn--compact"
+                              title={
+                                row.doc.ready
+                                  ? "トップメニューから外す"
+                                  : "トップメニューに表示する"
+                              }
+                              disabled={busy}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                void (async () => {
+                                  setErr("");
+                                  setMsg("");
+                                  try {
+                                    await updateLegacyContent(row.doc.id, {
+                                      ready: !row.doc.ready,
+                                    });
+                                    await reload();
+                                    setMsg(
+                                      row.doc.ready
+                                        ? "トップから非表示にしました。"
+                                        : "トップに表示するようにしました。",
+                                    );
+                                  } catch (err) {
+                                    setErr(
+                                      err instanceof Error
+                                        ? err.message
+                                        : "更新に失敗しました。",
+                                    );
+                                  }
+                                })();
+                              }}
+                            >
+                              {row.doc.ready ? "トップOFF" : "トップON"}
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn--compact admin-btn--danger"
+                              title="静的メニュー行を削除"
+                              disabled={busy}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (
+                                  !window.confirm(
+                                    `「${row.doc.label}」の静的メニュー行を削除しますか？`,
+                                  )
+                                ) {
+                                  return;
                                 }
-                              })();
-                            }}
-                          >
-                            {row.doc.ready ? "トップOFF" : "トップON"}
-                          </button>
+                                void (async () => {
+                                  setErr("");
+                                  setMsg("");
+                                  try {
+                                    await deleteLegacyContent(row.doc.id);
+                                    await reload();
+                                    setMsg("静的メニュー行を削除しました。");
+                                  } catch (err) {
+                                    setErr(
+                                      err instanceof Error
+                                        ? err.message
+                                        : "削除に失敗しました。",
+                                    );
+                                  }
+                                })();
+                              }}
+                            >
+                              削除
+                            </button>
+                          </>
                         ) : null}
                       </div>
                     </li>
