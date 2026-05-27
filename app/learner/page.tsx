@@ -104,7 +104,7 @@ export default function LearnerHomePage() {
       <header className="admin-header">
         <h1 className="admin-title">学習者ホーム</h1>
         <nav className="admin-nav">
-          <Link href="/" className="admin-link">
+          <Link href="/?park=1" className="admin-link">
             Study Park トップ
           </Link>
           <button
@@ -118,7 +118,7 @@ export default function LearnerHomePage() {
       </header>
 
       <p className="admin-msg" style={{ marginBottom: "1rem" }}>
-        九九・県庁所在地は <Link href="/">トップページ</Link> から無料で利用できます。
+        九九・県庁所在地は <Link href="/?park=1">トップページ</Link> から無料で利用できます。
         招待された教材はこのページから学習してください。
       </p>
 

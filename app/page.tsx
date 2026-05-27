@@ -1,5 +1,6 @@
 import { HomeAuthNav } from "@/components/home/HomeAuthNav";
 import { HomeNav } from "@/components/home/HomeNav";
+import { HomePwaLanding } from "@/components/home/HomePwaLanding";
 import type { ContentManifest } from "@/lib/content/types";
 import contentManifest from "@/public/content-manifest.json";
 
@@ -7,6 +8,7 @@ export default function Home() {
   const manifest = contentManifest as ContentManifest;
 
   return (
+    <HomePwaLanding>
     <main className="home">
       <div className="home-caution" aria-hidden="true" />
       <div className="home-inner">
@@ -48,5 +50,6 @@ export default function Home() {
         <HomeAuthNav />
       </div>
     </main>
+    </HomePwaLanding>
   );
 }

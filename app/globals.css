@@ -46,6 +46,18 @@ body {
   color: var(--home-cream);
 }
 
+.home--pwa-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-pwa-loading__text {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--home-cream);
+}
+
 .home-caution {
   height: 10px;
   background: repeating-linear-gradient(
