@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { siteOriginFromEnv } from "@/lib/site-url";
 import { PwaRegister } from "./pwa-register";
 import "./globals.css";
 
@@ -14,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteOriginFromEnv()),
   title: "Study Park",
   description: "学習用 Web アプリ（study-park）",
   applicationName: "Study Park",

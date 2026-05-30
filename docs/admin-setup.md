@@ -47,6 +47,8 @@ npm run dev
 
 ブラウザで `http://localhost:3000/admin/login` を開き、管理者アカウントでログインします。
 
+本番の公開 URL: **https://study.tennis-community.com**（学習者登録: `/signup/learner`）
+
 ### 本番サイト（Hosting）でログインする場合
 
 `NEXT_PUBLIC_*` は **ビルド時に** JavaScript に埋め込まれます。GitHub Actions でデプロイする場合は次を満たす必要があります。

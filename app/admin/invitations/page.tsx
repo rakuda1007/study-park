@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { workspacePlayHref } from "@/lib/content/urls";
+import { absoluteSiteUrl } from "@/lib/site-url";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { listWorkspaceContents } from "@/lib/workspaces/content-firestore";
 import {
@@ -123,10 +124,7 @@ export default function AdminInvitationsPage() {
     }
   }
 
-  const learnerSignupUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/signup/learner`
-      : "/signup/learner";
+  const learnerSignupUrl = absoluteSiteUrl("/signup/learner");
 
   return (
     <AdminShell title="学習者招待">
@@ -269,7 +267,7 @@ export default function AdminInvitationsPage() {
                     <span>
                       {c.title}{" "}
                       <code style={{ fontSize: "0.8rem" }}>
-                        {workspacePlayHref(ws.slug, c.slug)}
+                        {absoluteSiteUrl(workspacePlayHref(ws.slug, c.slug))}
                       </code>
                     </span>
                     <Link

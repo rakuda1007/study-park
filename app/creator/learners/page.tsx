@@ -6,6 +6,7 @@ import { listMembersForWorkspace } from "@/lib/workspaces/members";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { absoluteSiteUrl } from "@/lib/site-url";
 import type { WorkspaceMemberDoc } from "@/lib/workspaces/types";
 
 export default function CreatorLearnersPage() {
@@ -48,8 +49,12 @@ export default function CreatorLearnersPage() {
             {ws.inviteCode}
           </p>
           <p className="admin-msg" style={{ marginTop: "0.75rem" }}>
-            学習者は <a href="/signup/learner">学習者登録</a>
-            でこのコードを入力して参加します。公開を「リンク共有」にした教材はログインなしでも学習できます。
+            学習者登録ページ:{" "}
+            <a href={absoluteSiteUrl("/signup/learner")} target="_blank" rel="noreferrer">
+              {absoluteSiteUrl("/signup/learner")}
+            </a>
+            <br />
+            上記で招待コードを入力して参加します。公開を「リンク共有」にした教材はログインなしでも学習できます。
           </p>
           <h2 style={{ fontSize: "1rem", margin: "1.25rem 0 0.5rem" }}>参加済み（{members.length}）</h2>
           {members.length === 0 ? (
