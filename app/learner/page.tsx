@@ -140,12 +140,11 @@ export default function LearnerHomePage() {
             <p className="admin-msg">公開中の教材はまだありません。</p>
           ) : (
             <div className="learner-subject-list">
-              {r.subjectGroups.map((g, index) => (
+              {r.subjectGroups.map((g) => (
                 <LearnerSubjectSection
                   key={g.subjectId}
                   group={g}
                   workspaceSlug={r.workspaceSlug}
-                  defaultOpen={index === 0}
                 />
               ))}
             </div>

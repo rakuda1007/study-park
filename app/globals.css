@@ -27,7 +27,7 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* トップ — 公園改装テーマ */
+/* トップ — 公園テーマ */
 .home {
   --home-amber: #f5b942;
   --home-amber-dim: #c4922a;
@@ -56,16 +56,6 @@ body {
   margin: 0;
   font-size: 1rem;
   color: var(--home-cream);
-}
-
-.home-caution {
-  height: 10px;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--home-amber) 0 12px,
-    #1c1814 12px 24px
-  );
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
 .home-inner {
@@ -118,22 +108,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-}
-
-.home-renovation-badge {
-  margin: 0;
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--home-ink);
-  background: var(--home-amber);
-  box-shadow: 0 2px 0 var(--home-amber-dim);
 }
 
 .home-title {

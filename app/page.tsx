@@ -10,7 +10,6 @@ export default function Home() {
   return (
     <HomePwaLanding>
     <main className="home">
-      <div className="home-caution" aria-hidden="true" />
       <div className="home-inner">
         <header className="home-header">
           <div className="home-brand">
@@ -25,12 +24,9 @@ export default function Home() {
               />
             </div>
             <div className="home-title-block">
-              <p className="home-renovation-badge">
-                <span aria-hidden="true">🚧</span> 改装中
-              </p>
               <h1 className="home-title">Study Park</h1>
               <p className="home-lead">
-                公園を少しずつ改装しています。できたエリアから遊んでね。
+                学習コンテンツを選んで始めよう。
                 教室の教材は
                 <a href="/signup/learner" style={{ marginLeft: "0.25rem" }}>
                   学習者登録

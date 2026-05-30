@@ -1,11 +1,18 @@
 .play-status {
   max-width: 28rem;
   margin: 3rem auto;
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem;
   text-align: center;
-  color: #e8ecf4;
+  color: var(--ink, #1a2433);
+  background: var(--surface, #ffffff);
+  border: 2px solid var(--header-border, #b0c4de);
+  border-radius: var(--radius, 16px);
+  box-shadow: 0 6px 20px rgba(26, 36, 51, 0.12);
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .play-status a {
-  color: #6b8cff;
+  color: var(--accent-dark, #4a6fa5);
+  font-weight: 700;
 }

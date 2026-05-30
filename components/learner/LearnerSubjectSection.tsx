@@ -42,11 +42,9 @@ function StudyItemList({
 export function LearnerSubjectSection({
   group,
   workspaceSlug,
-  defaultOpen = false,
 }: {
   group: LearnerSubjectGroup;
   workspaceSlug: string;
-  defaultOpen?: boolean;
 }) {
   const count = group.items.length;
 
@@ -67,7 +65,7 @@ export function LearnerSubjectSection({
   }
 
   return (
-    <details className="learner-subject-dropdown" open={defaultOpen}>
+    <details className="learner-subject-dropdown">
       <summary className="learner-subject-dropdown-trigger">
         <span id={`learner-subject-${group.subjectId}`} className="learner-subject-label">
           {group.subjectName}
