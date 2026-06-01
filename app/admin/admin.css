@@ -123,6 +123,14 @@
   font-size: 0.85rem;
 }
 
+.admin-rich-textarea--resizable {
+  resize: both;
+  min-height: 5.5rem;
+  min-width: 12rem;
+  max-width: 100%;
+  overflow: auto;
+}
+
 .admin-row {
   display: flex;
   flex-wrap: wrap;
@@ -131,7 +139,7 @@
 }
 
 .admin-row--blank {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .admin-btn--compact {
@@ -597,6 +605,15 @@
 .admin-rich-preview-body .rich-text-small {
   font-size: 0.9em;
   color: var(--admin-muted);
+}
+
+.admin-rich-preview-body .rich-text-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.admin-row--blank .admin-rich-text {
+  width: 100%;
 }
 
 .admin-rich-preview-body .rich-list {

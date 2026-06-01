@@ -157,7 +157,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </div>
 
     <script src="/study-park-asset-version.js?v=${ASSET_V}"></script>
-    <script src="/shared/rich-text.js?v=1"></script>
+    <script src="/shared/rich-text.js?v=2"></script>
     <script src="/shared/quiz-format.js?v=13"></script>
     <script src="/shared/quiz-review-mode.js?v=2"></script>
     <script src="/shared/quiz-review-controller.js?v=1"></script>

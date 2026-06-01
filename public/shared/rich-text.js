@@ -1,11 +1,11 @@
 /**
  * 段落用リッチテキスト（クイズ静的アプリ用）
- * **太字**、^^大^^、<<小>>、行頭 - / ・ で箇条書き
+ * **太字**、__下線__、^^大^^、<<小>>、行頭 - / ・ で箇条書き
  */
 (function () {
   "use strict";
 
-  const INLINE_RE = /(\*\*[^*]+\*\*|\^\^[^\^]+\^\^|<<[^>]+>>)/g;
+  const INLINE_RE = /(\*\*[^*]+\*\*|__[^_]+__|\^\^[^\^]+\^\^|<<[^>]+>>)/g;
 
   function escHtml(s) {
     return String(s)
@@ -22,6 +22,11 @@
       .map((part) => {
         if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
           return "<strong>" + escHtml(part.slice(2, -2)) + "</strong>";
+        }
+        if (part.startsWith("__") && part.endsWith("__") && part.length > 4) {
+          return (
+            '<span class="rich-text-underline">' + escHtml(part.slice(2, -2)) + "</span>"
+          );
         }
         if (part.startsWith("^^") && part.endsWith("^^") && part.length > 4) {
           return '<span class="rich-text-large">' + escHtml(part.slice(2, -2)) + "</span>";

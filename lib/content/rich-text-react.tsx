@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { splitRichLines } from "./rich-text";
 
-const INLINE_RE = /(\*\*[^*]+\*\*|\^\^[^\^]+\^\^|<<[^>]+>>)/g;
+const INLINE_RE = /(\*\*[^*]+\*\*|__[^_]+__|\^\^[^\^]+\^\^|<<[^>]+>>)/g;
 
 function inlineTextToReact(text: string): ReactNode[] {
   if (!text) return [];
@@ -9,6 +9,13 @@ function inlineTextToReact(text: string): ReactNode[] {
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
       return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("__") && part.endsWith("__") && part.length > 4) {
+      return (
+        <span key={i} className="rich-text-underline">
+          {part.slice(2, -2)}
+        </span>
+      );
     }
     if (part.startsWith("^^") && part.endsWith("^^") && part.length > 4) {
       return (

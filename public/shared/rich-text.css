@@ -8,6 +8,11 @@
   font-size: 0.88em;
 }
 
+.rich-text-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .rich-list {
   margin: 0.5rem 0 0.75rem;
   padding: 0;

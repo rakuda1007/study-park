@@ -100,6 +100,22 @@
     return blank.answers[0];
   }
 
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function answerTextHtml(text) {
+    const rt = window.StudyParkRichText;
+    if (rt && typeof rt.richTextToHtml === "function") {
+      return rt.richTextToHtml(text || "", "answer-rich");
+    }
+    return escHtml(text || "");
+  }
+
   function answerEntries(question) {
     if (Array.isArray(question.answerDisplay) && question.answerDisplay.length > 0) {
       return question.answerDisplay;
@@ -286,7 +302,9 @@
     els.answerList.innerHTML = "";
     answerEntries(question).forEach((entry) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="answer-marker">${entry.marker}</span><span class="answer-text">${entry.text}</span>`;
+      li.innerHTML =
+        `<span class="answer-marker">${escHtml(entry.marker)}</span>` +
+        `<span class="answer-text">${answerTextHtml(entry.text)}</span>`;
       els.answerList.appendChild(li);
     });
   }

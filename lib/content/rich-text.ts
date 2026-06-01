@@ -1,13 +1,14 @@
 /**
  * 段落用の簡易リッチテキスト（管理画面で入力）
  * - **太字**
+ * - __下線__
  * - ^^大きい文字^^
  * - <<小さい文字>>
  * - 行頭の「- 」または「・ 」で箇条書き（連続行は1つのリスト）
  */
 
 export const RICH_TEXT_HELP =
-  "**太字**、^^大きい^^、<<小さい>>。箇条書きは行頭に「- 」または「・ 」。空行で段落の間隔をあけられます。";
+  "**太字**、__下線__、^^大きい^^、<<小さい>>。箇条書きは行頭に「- 」または「・ 」。空行で段落の間隔をあけられます。";
 
 function escHtml(s: string): string {
   return s
@@ -17,7 +18,7 @@ function escHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-const INLINE_RE = /(\*\*[^*]+\*\*|\^\^[^\^]+\^\^|<<[^>]+>>)/g;
+const INLINE_RE = /(\*\*[^*]+\*\*|__[^_]+__|\^\^[^\^]+\^\^|<<[^>]+>>)/g;
 
 /** 1行分のインライン装飾を HTML に */
 export function inlineTextToHtml(text: string): string {
@@ -27,6 +28,9 @@ export function inlineTextToHtml(text: string): string {
     .map((part) => {
       if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
         return `<strong>${escHtml(part.slice(2, -2))}</strong>`;
+      }
+      if (part.startsWith("__") && part.endsWith("__") && part.length > 4) {
+        return `<span class="rich-text-underline">${escHtml(part.slice(2, -2))}</span>`;
       }
       if (part.startsWith("^^") && part.endsWith("^^") && part.length > 4) {
         return `<span class="rich-text-large">${escHtml(part.slice(2, -2))}</span>`;

@@ -38,6 +38,7 @@ import { SLUG_PATTERN } from "@/lib/content/types";
 import { contentPlayHref } from "@/lib/content/urls";
 import { listLegacyContents } from "@/lib/content/legacy-contents";
 import { RichTextArea } from "@/components/admin/RichTextArea";
+import { blankAnswersToInput, parseBlankAnswersInput } from "@/lib/content/quiz-answers";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifestBase from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
@@ -389,17 +390,17 @@ function EditContentInner() {
                         />
                       </div>
                       <div className="admin-field" style={{ flex: "1 1 auto" }}>
-                        <label>正答（カンマ区切り）</label>
-                        <input
-                          value={b.answers.join("、")}
-                          onChange={(e) =>
-                            updateBlank(qi, bi, {
-                              answers: e.target.value
-                                .split(/[,、]/)
-                                .map((a) => a.trim())
-                                .filter(Boolean),
-                            })
+                        <RichTextArea
+                          id={`blank-${q.id}-${bi}-answers`}
+                          label="正答（別解はカンマ・読点区切り）"
+                          value={blankAnswersToInput(b.answers)}
+                          onChange={(v) =>
+                            updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })
                           }
+                          rows={3}
+                          resizable
+                          showPreview={false}
+                          previewClass="answer-rich"
                         />
                       </div>
                       <button

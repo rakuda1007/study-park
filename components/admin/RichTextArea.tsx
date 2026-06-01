@@ -11,6 +11,10 @@ type Props = {
   onChange: (value: string) => void;
   rows?: number;
   previewClass?: string;
+  /** プレビュー欄を表示しない（コンパクトな行内編集向け） */
+  showPreview?: boolean;
+  /** 右下をドラッグして入力欄の大きさを変えられる */
+  resizable?: boolean;
 };
 
 function wrapSelection(
@@ -58,6 +62,8 @@ export function RichTextArea({
   onChange,
   rows = 4,
   previewClass = "lesson-body",
+  showPreview = true,
+  resizable = false,
 }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -81,6 +87,16 @@ export function RichTextArea({
             }
           >
             <strong>B</strong>
+          </button>
+          <button
+            type="button"
+            className="admin-btn admin-btn--compact"
+            title="下線（__文字__）"
+            onClick={() =>
+              run((ta) => wrapSelection(ta, value, onChange, "__", "__"))
+            }
+          >
+            <span className="rich-text-underline">U</span>
           </button>
           <button
             type="button"
@@ -114,13 +130,14 @@ export function RichTextArea({
         <textarea
           id={id}
           ref={ref}
+          className={resizable ? "admin-rich-textarea--resizable" : undefined}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={rows}
         />
         <p className="admin-field-hint">{RICH_TEXT_HELP}</p>
       </div>
-      {value.trim() ? (
+      {showPreview && value.trim() ? (
         <div className="admin-rich-preview" aria-label="プレビュー">
           <p className="admin-rich-preview-label">プレビュー</p>
           <div className="admin-rich-preview-body">

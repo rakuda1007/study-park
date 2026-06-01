@@ -45,11 +45,29 @@
     appendRichParagraph(container, q.template || "", "question-paragraph");
   }
 
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function answerTextHtml(text) {
+    const rt = window.StudyParkRichText;
+    if (rt && typeof rt.richTextToHtml === "function") {
+      return rt.richTextToHtml(text || "", "answer-rich");
+    }
+    return escHtml(text || "");
+  }
+
   function renderAnswerList(ul, entries) {
     ul.innerHTML = "";
     entries.forEach((entry) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="answer-marker">${entry.marker}</span><span class="answer-text">${entry.text}</span>`;
+      li.innerHTML =
+        `<span class="answer-marker">${escHtml(entry.marker)}</span>` +
+        `<span class="answer-text">${answerTextHtml(entry.text)}</span>`;
       ul.appendChild(li);
     });
   }

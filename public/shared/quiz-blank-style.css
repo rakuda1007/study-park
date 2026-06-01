@@ -532,6 +532,22 @@ select.mode-select {
   color: var(--ok);
 }
 
+.answer-text .answer-rich,
+.answer-text .rich-list,
+.answer-text p {
+  margin: 0;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.answer-text .rich-text-gap {
+  min-height: 0.45rem;
+}
+
+.answer-text .rich-list {
+  margin-top: 0.25rem;
+}
+
 .self-grade-hint {
   margin: 10px 0 0;
   font-size: 0.78rem;
