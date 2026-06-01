@@ -110,8 +110,11 @@
 
   function answerTextHtml(text) {
     const rt = window.StudyParkRichText;
-    if (rt && typeof rt.richTextToHtml === "function") {
-      return rt.richTextToHtml(text || "", "answer-rich");
+    if (rt && typeof rt.answerDisplayHtml === "function") {
+      return rt.answerDisplayHtml(text || "");
+    }
+    if (rt && typeof rt.inlineHtml === "function") {
+      return rt.inlineHtml(text || "");
     }
     return escHtml(text || "");
   }

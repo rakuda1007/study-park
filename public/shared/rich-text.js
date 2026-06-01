@@ -99,6 +99,22 @@
       .join("");
   }
 
+  function needsBlockLayout(text) {
+    const raw = String(text || "");
+    if (!raw) return false;
+    if (raw.includes("\n")) return true;
+    return raw.split("\n").some((line) => isBulletLine(line));
+  }
+
+  /** 正答表示用（空欄記号と同じ行に並べる） */
+  function answerDisplayHtml(text) {
+    const raw = String(text || "");
+    if (!needsBlockLayout(raw)) {
+      return inlineHtml(raw);
+    }
+    return richTextToHtml(raw, "answer-rich");
+  }
+
   function appendRichText(container, text, paragraphClass) {
     if (!container) return;
     const html = richTextToHtml(text, paragraphClass);
@@ -114,6 +130,7 @@
   window.StudyParkRichText = {
     inlineHtml: inlineHtml,
     richTextToHtml: richTextToHtml,
+    answerDisplayHtml: answerDisplayHtml,
     appendRichText: appendRichText,
   };
 })();

@@ -540,6 +540,18 @@ select.mode-select {
   color: inherit;
 }
 
+/* 複数行の正答: 1行目だけ空欄記号と同じ行に */
+.answer-text > p.answer-rich:first-child {
+  display: inline;
+}
+
+.answer-text > p.answer-rich:first-child + p.answer-rich,
+.answer-text > p.answer-rich:first-child + ul.rich-list,
+.answer-text > p.answer-rich:first-child + p.rich-text-gap {
+  display: block;
+  margin-top: 0.25rem;
+}
+
 .answer-text .rich-text-gap {
   min-height: 0.45rem;
 }
