@@ -23,5 +23,5 @@ export function lessonBlockToHtml(b: LessonBlock): string {
           <img src="${escHtml(b.src)}" alt="${alt}" class="lesson-figure-img" loading="lazy" />${cap}
         </figure>`;
   }
-  return `        ${richTextToHtml(b.text, "lesson-body")}`;
+  return `        <div class="lesson-paragraph">${richTextToHtml(b.text, "lesson-body")}</div>`;
 }

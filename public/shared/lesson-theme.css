@@ -128,6 +128,19 @@
   margin-top: 0.75rem;
 }
 
+/* 管理画面で追加した段落ブロックごとの区切り */
+.lesson-page .lesson-paragraph {
+  margin: 0 0 1.25rem;
+}
+
+.lesson-page .lesson-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.lesson-page .lesson-paragraph .lesson-body:last-child {
+  margin-bottom: 0;
+}
+
 .lesson-page .lesson-html {
   margin: 0 0 0.75rem;
   line-height: 1.75;

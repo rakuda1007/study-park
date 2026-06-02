@@ -31,7 +31,11 @@ export function LessonBlocks({ sectionId, blocks }: Props) {
             </figure>
           );
         }
-        return <RichTextContent key={key} text={b.text} paragraphClass="lesson-body" />;
+        return (
+          <div key={key} className="lesson-paragraph">
+            <RichTextContent text={b.text} paragraphClass="lesson-body" />
+          </div>
+        );
       })}
     </>
   );

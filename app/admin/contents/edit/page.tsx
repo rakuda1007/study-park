@@ -253,6 +253,13 @@ function EditContentInner() {
     setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
   }
 
+  function removeSection(index: number) {
+    const sec = sections[index];
+    const label = sec?.heading?.trim() || `セクション ${index + 1}`;
+    if (!confirm(`「${label}」を削除しますか？`)) return;
+    setSections((prev) => prev.filter((_, i) => i !== index));
+  }
+
   if (!id) {
     return (
       <AdminShell title="編集">
@@ -444,12 +451,23 @@ function EditContentInner() {
               </p>
               {sections.map((sec, si) => (
                 <div key={sec.id} className="admin-question">
-                  <div className="admin-field">
-                    <label>見出し</label>
-                    <input
-                      value={sec.heading}
-                      onChange={(e) => updateSection(si, { heading: e.target.value })}
-                    />
+                  <div className="admin-row" style={{ alignItems: "flex-end", gap: "0.5rem" }}>
+                    <div className="admin-field" style={{ flex: "1 1 auto", marginBottom: 0 }}>
+                      <label htmlFor={`section-heading-${sec.id}`}>見出し</label>
+                      <input
+                        id={`section-heading-${sec.id}`}
+                        value={sec.heading}
+                        onChange={(e) => updateSection(si, { heading: e.target.value })}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn--danger admin-btn--compact"
+                      onClick={() => removeSection(si)}
+                      aria-label={`${sec.heading || `セクション ${si + 1}`} を削除`}
+                    >
+                      セクション削除
+                    </button>
                   </div>
                   {doc ? (
                     <LessonSectionEditor

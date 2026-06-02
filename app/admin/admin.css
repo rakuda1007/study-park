@@ -28,6 +28,12 @@
   border-bottom: 1px solid var(--admin-border);
 }
 
+.admin-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--admin-border);
+}
+
 .admin-title {
   margin: 0;
   font-size: 1.25rem;
