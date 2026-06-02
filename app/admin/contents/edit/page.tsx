@@ -381,15 +381,16 @@ function EditContentInner() {
                     />
                   ) : null}
                   {q.blanks.map((b, bi) => (
-                    <div key={`${q.id}-blank-${bi}`} className="admin-row admin-row--blank">
-                      <div className="admin-field" style={{ flex: "0 0 4rem" }}>
-                        <label>記号</label>
+                    <div key={`${q.id}-blank-${bi}`} className="admin-blank-row">
+                      <div className="admin-blank-marker">
+                        <label htmlFor={`blank-${q.id}-${bi}-marker`}>記号</label>
                         <input
+                          id={`blank-${q.id}-${bi}-marker`}
                           value={b.marker}
                           onChange={(e) => updateBlank(qi, bi, { marker: e.target.value })}
                         />
                       </div>
-                      <div className="admin-field" style={{ flex: "1 1 auto" }}>
+                      <div className="admin-blank-answer">
                         <RichTextArea
                           id={`blank-${q.id}-${bi}-answers`}
                           label="正答（別解はカンマ・読点区切り）"
@@ -397,15 +398,16 @@ function EditContentInner() {
                           onChange={(v) =>
                             updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })
                           }
-                          rows={3}
+                          rows={2}
                           resizable
                           showPreview={false}
+                          showHint={false}
                           previewClass="answer-rich"
                         />
                       </div>
                       <button
                         type="button"
-                        className="admin-btn admin-btn--danger admin-btn--compact"
+                        className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
                         onClick={() => removeBlank(qi, bi)}
                         disabled={q.blanks.length <= 1}
                         aria-label={`空欄 ${b.marker || bi + 1} を削除`}

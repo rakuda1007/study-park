@@ -142,6 +142,49 @@
   align-items: flex-start;
 }
 
+.admin-blank-row {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}
+
+.admin-blank-marker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-blank-marker label {
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+}
+
+.admin-blank-marker input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font: inherit;
+  text-align: center;
+}
+
+.admin-blank-answer {
+  min-width: 0;
+}
+
+.admin-blank-answer .admin-field {
+  margin-bottom: 0;
+}
+
+.admin-blank-delete {
+  align-self: start;
+}
+
 .admin-btn--compact {
   flex: 0 0 auto;
   padding: 0.4rem 0.65rem;
@@ -612,7 +655,8 @@
   text-underline-offset: 2px;
 }
 
-.admin-row--blank .admin-rich-text {
+.admin-row--blank .admin-rich-text,
+.admin-blank-answer .admin-rich-text {
   width: 100%;
 }
 

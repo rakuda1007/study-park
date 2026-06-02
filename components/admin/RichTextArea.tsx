@@ -15,6 +15,8 @@ type Props = {
   showPreview?: boolean;
   /** 右下をドラッグして入力欄の大きさを変えられる */
   resizable?: boolean;
+  /** 記法のヒント文を表示する */
+  showHint?: boolean;
 };
 
 function wrapSelection(
@@ -64,6 +66,7 @@ export function RichTextArea({
   previewClass = "lesson-body",
   showPreview = true,
   resizable = false,
+  showHint = true,
 }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -135,7 +138,7 @@ export function RichTextArea({
           onChange={(e) => onChange(e.target.value)}
           rows={rows}
         />
-        <p className="admin-field-hint">{RICH_TEXT_HELP}</p>
+        {showHint ? <p className="admin-field-hint">{RICH_TEXT_HELP}</p> : null}
       </div>
       {showPreview && value.trim() ? (
         <div className="admin-rich-preview" aria-label="プレビュー">
