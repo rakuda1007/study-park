@@ -53,27 +53,38 @@
     const lines = String(text).split("\n");
     const blocks = [];
     let bulletItems = [];
+    let paragraphLines = [];
 
-    function flush() {
+    function flushBullets() {
       if (bulletItems.length) {
         blocks.push({ kind: "ul", items: bulletItems.slice() });
         bulletItems = [];
       }
     }
 
+    function flushParagraph() {
+      if (paragraphLines.length) {
+        blocks.push({ kind: "p", text: paragraphLines.join("\n") });
+        paragraphLines = [];
+      }
+    }
+
     lines.forEach((line) => {
       if (isBulletLine(line)) {
+        flushParagraph();
         bulletItems.push(bulletItemText(line));
         return;
       }
-      flush();
+      flushBullets();
       if (String(line).trim() === "") {
+        flushParagraph();
         blocks.push({ kind: "gap" });
       } else {
-        blocks.push({ kind: "p", line: line });
+        paragraphLines.push(line);
       }
     });
-    flush();
+    flushParagraph();
+    flushBullets();
     return blocks;
   }
 
@@ -94,7 +105,7 @@
         if (block.kind === "gap") {
           return '<p class="rich-text-gap" aria-hidden="true"></p>';
         }
-        return '<p class="' + pClass + '">' + inlineHtml(block.line) + "</p>";
+        return '<p class="' + pClass + '">' + inlineHtml(block.text) + "</p>";
       })
       .join("");
   }
@@ -102,8 +113,8 @@
   function needsBlockLayout(text) {
     const raw = String(text || "");
     if (!raw) return false;
-    if (raw.includes("\n")) return true;
-    return raw.split("\n").some((line) => isBulletLine(line));
+    if (raw.split("\n").some((line) => isBulletLine(line))) return true;
+    return /\n\s*\n/.test(raw);
   }
 
   /** 正答表示用（空欄記号と同じ行に並べる） */

@@ -30,7 +30,7 @@ export function LessonView({ content }: Props) {
       <main className="lesson-main">
         {intro ? (
           <div className="lesson-intro">
-            <RichTextContent text={intro} paragraphClass="lesson-intro" />
+            <RichTextContent text={intro} paragraphClass="lesson-intro-body" />
           </div>
         ) : null}
         {sections.length > 0 ? (

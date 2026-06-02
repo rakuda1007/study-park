@@ -8,7 +8,7 @@
  */
 
 export const RICH_TEXT_HELP =
-  "**太字**、__下線__、^^大きい^^、<<小さい>>。箇条書きは行頭に「- 」または「・ 」。空行で段落の間隔をあけられます。";
+  "**太字**、__下線__、^^大きい^^、<<小さい>>。箇条書きは行頭に「- 」または「・ 」。Enterで改行（同一段落内）。段落を分けるには空行を入れます。";
 
 function escHtml(s: string): string {
   return s
@@ -44,7 +44,7 @@ export function inlineTextToHtml(text: string): string {
 }
 
 type LineBlock =
-  | { kind: "p"; line: string }
+  | { kind: "p"; text: string }
   | { kind: "ul"; items: string[] }
   | { kind: "gap" };
 
@@ -56,11 +56,12 @@ function bulletItemText(line: string): string {
   return line.trim().replace(/^[-・]\s+/, "");
 }
 
-/** 改行区切りテキストを段落・リストに分割 */
+/** 改行区切りテキストを段落・リストに分割（単一改行は同一段落、空行で段落区切り） */
 export function splitRichLines(text: string): LineBlock[] {
   const lines = text.split("\n");
   const blocks: LineBlock[] = [];
   let bulletItems: string[] = [];
+  let paragraphLines: string[] = [];
 
   const flushBullets = () => {
     if (bulletItems.length > 0) {
@@ -69,18 +70,28 @@ export function splitRichLines(text: string): LineBlock[] {
     }
   };
 
+  const flushParagraph = () => {
+    if (paragraphLines.length > 0) {
+      blocks.push({ kind: "p", text: paragraphLines.join("\n") });
+      paragraphLines = [];
+    }
+  };
+
   for (const line of lines) {
     if (isBulletLine(line)) {
+      flushParagraph();
       bulletItems.push(bulletItemText(line));
       continue;
     }
     flushBullets();
     if (line.trim() === "") {
+      flushParagraph();
       blocks.push({ kind: "gap" });
     } else {
-      blocks.push({ kind: "p", line });
+      paragraphLines.push(line);
     }
   }
+  flushParagraph();
   flushBullets();
   return blocks;
 }
@@ -101,7 +112,7 @@ export function richTextToHtml(text: string, paragraphClass = "lesson-body"): st
       if (block.kind === "gap") {
         return `<p class="rich-text-gap" aria-hidden="true"></p>`;
       }
-      return `<p class="${paragraphClass}">${inlineTextToHtml(block.line)}</p>`;
+      return `<p class="${paragraphClass}">${inlineTextToHtml(block.text)}</p>`;
     })
     .join("\n");
 }

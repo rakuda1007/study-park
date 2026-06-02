@@ -41,7 +41,17 @@
   font-size: 0.92rem;
   line-height: 1.65;
   box-shadow: var(--lesson-shadow);
+}
+
+.lesson-page .lesson-intro-body {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
   white-space: pre-line;
+}
+
+.lesson-page .lesson-intro-body + .lesson-intro-body {
+  margin-top: 0.75rem;
 }
 
 .lesson-page .lesson-toc {

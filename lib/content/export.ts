@@ -157,7 +157,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </div>
 
     <script src="/study-park-asset-version.js?v=${ASSET_V}"></script>
-    <script src="/shared/rich-text.js?v=3"></script>
+    <script src="/shared/rich-text.js?v=4"></script>
     <script src="/shared/quiz-format.js?v=13"></script>
     <script src="/shared/quiz-review-mode.js?v=2"></script>
     <script src="/shared/quiz-review-controller.js?v=1"></script>
@@ -174,7 +174,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
 
 export function buildLessonIndexHtml(content: ContentDoc): string {
   const title = escHtml(content.title);
-  const intro = richTextToHtml(content.intro ?? "", "lesson-intro");
+  const intro = richTextToHtml(content.intro ?? "", "lesson-intro-body");
   const sections = content.lesson?.sections ?? [];
 
   const tocItems = sections
@@ -205,7 +205,7 @@ ${blocks}
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
-    <link rel="stylesheet" href="/shared/lesson-theme.css?v=3" />
+    <link rel="stylesheet" href="/shared/lesson-theme.css?v=4" />
     <link rel="stylesheet" href="/shared/rich-text.css?v=3" />
   </head>
   <body class="lesson-page">

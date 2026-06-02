@@ -62,7 +62,7 @@ export function RichTextContent({ text, paragraphClass = "lesson-body" }: Props)
         }
         return (
           <p key={`p-${bi}`} className={paragraphClass}>
-            {inlineTextToReact(block.line)}
+            {inlineTextToReact(block.text)}
           </p>
         );
       })}
