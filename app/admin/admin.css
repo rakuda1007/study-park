@@ -639,6 +639,11 @@
   color: var(--admin-text);
 }
 
+.admin-rich-preview-body .lesson-body,
+.admin-rich-preview-body .lesson-intro-body {
+  white-space: pre-line;
+}
+
 .admin-rich-preview-body p,
 .admin-rich-preview-body li,
 .admin-rich-preview-body strong {

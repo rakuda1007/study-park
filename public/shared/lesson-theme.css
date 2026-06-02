@@ -138,16 +138,22 @@
   margin-top: 0.75rem;
 }
 
-/* 管理画面で追加した段落ブロックごとの区切り */
-.lesson-page .lesson-paragraph {
-  margin: 0 0 1.25rem;
+/* 管理画面の「＋段落」で追加したブロックごとの区切り */
+.lesson-page .lesson-section > .lesson-paragraph + .lesson-paragraph {
+  margin-top: 1.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid #e8e0ff;
 }
 
-.lesson-page .lesson-paragraph:last-child {
-  margin-bottom: 0;
+.lesson-page .lesson-section > .lesson-figure + .lesson-paragraph,
+.lesson-page .lesson-section > .lesson-html + .lesson-paragraph,
+.lesson-page .lesson-section > .lesson-paragraph + .lesson-figure,
+.lesson-page .lesson-section > .lesson-paragraph + .lesson-html {
+  margin-top: 1.25rem;
 }
 
-.lesson-page .lesson-paragraph .lesson-body:last-child {
+.lesson-page .lesson-paragraph .lesson-body:last-child,
+.lesson-page .lesson-paragraph .rich-text-gap:last-child {
   margin-bottom: 0;
 }
 

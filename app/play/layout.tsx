@@ -20,8 +20,8 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
       <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
-      <link rel="stylesheet" href="/shared/rich-text.css?v=3" />
-      <link rel="stylesheet" href="/shared/lesson-theme.css?v=4" />
+      <link rel="stylesheet" href="/shared/rich-text.css?v=4" />
+      <link rel="stylesheet" href="/shared/lesson-theme.css?v=5" />
       {children}
     </>
   );

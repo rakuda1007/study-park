@@ -1,4 +1,9 @@
 /* リッチテキスト（太字・サイズ・箇条書き） */
+.lesson-body,
+.lesson-intro-body {
+  white-space: pre-line;
+}
+
 .rich-text-large {
   font-size: 1.15em;
   font-weight: 600;
