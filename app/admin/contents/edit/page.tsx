@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { LessonSectionEditor } from "@/components/admin/LessonSectionEditor";
+import { LessonSectionsEditor } from "@/components/admin/LessonSectionsEditor";
 import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEditor";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
@@ -237,29 +237,6 @@ function EditContentInner() {
     setQuestions((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function addSection() {
-    const n = sections.length + 1;
-    setSections((prev) => [
-      ...prev,
-      {
-        id: `section-${n}`,
-        heading: `セクション ${n}`,
-        blocks: [{ kind: "paragraph", text: "" }],
-      },
-    ]);
-  }
-
-  function updateSection(index: number, patch: Partial<LessonSection>) {
-    setSections((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
-  }
-
-  function removeSection(index: number) {
-    const sec = sections[index];
-    const label = sec?.heading?.trim() || `セクション ${index + 1}`;
-    if (!confirm(`「${label}」を削除しますか？`)) return;
-    setSections((prev) => prev.filter((_, i) => i !== index));
-  }
-
   if (!id) {
     return (
       <AdminShell title="編集">
@@ -446,41 +423,11 @@ function EditContentInner() {
           ) : (
             <section className="admin-card">
               <h2>レッスン（{sections.length}セクション）</h2>
-              <p style={{ fontSize: "0.85rem", color: "var(--admin-muted)", margin: "0 0 1rem" }}>
-                段落のほか「＋ 画像」で図を追加できます。画像エリアをクリックして Ctrl+V で貼り付け、またはファイルを選択してください。
-              </p>
-              {sections.map((sec, si) => (
-                <div key={sec.id} className="admin-question">
-                  <div className="admin-row" style={{ alignItems: "flex-end", gap: "0.5rem" }}>
-                    <div className="admin-field" style={{ flex: "1 1 auto", marginBottom: 0 }}>
-                      <label htmlFor={`section-heading-${sec.id}`}>見出し</label>
-                      <input
-                        id={`section-heading-${sec.id}`}
-                        value={sec.heading}
-                        onChange={(e) => updateSection(si, { heading: e.target.value })}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn--danger admin-btn--compact"
-                      onClick={() => removeSection(si)}
-                      aria-label={`${sec.heading || `セクション ${si + 1}`} を削除`}
-                    >
-                      セクション削除
-                    </button>
-                  </div>
-                  {doc ? (
-                    <LessonSectionEditor
-                      contentId={doc.id}
-                      section={sec}
-                      onChange={(next) => updateSection(si, next)}
-                    />
-                  ) : null}
-                </div>
-              ))}
-              <button type="button" className="admin-btn" onClick={addSection}>
-                セクションを追加
-              </button>
+              <LessonSectionsEditor
+                contentId={doc.id}
+                sections={sections}
+                onChange={setSections}
+              />
             </section>
           )}
 

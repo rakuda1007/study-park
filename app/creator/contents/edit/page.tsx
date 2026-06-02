@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { LessonSectionEditor } from "@/components/admin/LessonSectionEditor";
+import { LessonSectionsEditor } from "@/components/admin/LessonSectionsEditor";
 import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEditor";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
@@ -271,18 +271,13 @@ function EditInner() {
             </section>
           ) : (
             <section className="admin-card">
-              <h2>レッスン</h2>
-              {sections.map((sec, si) => (
-                <LessonSectionEditor
-                  key={sec.id}
-                  contentId={doc.id}
-                  workspaceId={ws.id}
-                  section={sec}
-                  onChange={(next) =>
-                    setSections((prev) => prev.map((s, i) => (i === si ? next : s)))
-                  }
-                />
-              ))}
+              <h2>レッスン（{sections.length}セクション）</h2>
+              <LessonSectionsEditor
+                contentId={doc.id}
+                workspaceId={ws.id}
+                sections={sections}
+                onChange={setSections}
+              />
             </section>
           )}
 
