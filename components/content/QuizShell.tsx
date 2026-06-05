@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Script from "next/script";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import type { ContentDoc } from "@/lib/content/types";
 import { richTextToHtml } from "@/lib/content/rich-text";
 
@@ -12,27 +13,47 @@ declare global {
       slug: string;
       title: string;
       questions: NonNullable<ContentDoc["quiz"]>["questions"];
+      showAds?: boolean;
     };
   }
 }
 
 type Props = {
   content: ContentDoc;
+  /** 無料枠ワークスペースの教材のみ true */
+  showAds?: boolean;
 };
 
 const ASSET_V = "7";
 
-export function QuizShell({ content }: Props) {
+export function QuizShell({ content, showAds = false }: Props) {
   const title = content.title;
   const intro = content.intro ?? "問題に挑戦してみましょう。";
+  const [showFinishAd, setShowFinishAd] = useState(false);
 
   useEffect(() => {
     window.__STUDY_PARK_QUIZ__ = {
       slug: content.slug,
       title: content.title,
       questions: content.quiz?.questions ?? [],
+      showAds,
     };
-  }, [content]);
+  }, [content, showAds]);
+
+  useEffect(() => {
+    if (!showAds) {
+      setShowFinishAd(false);
+      return;
+    }
+    const onFinished = () => setShowFinishAd(true);
+    const onModalClosed = () => setShowFinishAd(false);
+    window.addEventListener("study-park-quiz-finished", onFinished);
+    window.addEventListener("study-park-quiz-modal-closed", onModalClosed);
+    return () => {
+      window.removeEventListener("study-park-quiz-finished", onFinished);
+      window.removeEventListener("study-park-quiz-modal-closed", onModalClosed);
+    };
+  }, [showAds]);
 
   return (
     <>
@@ -208,6 +229,9 @@ export function QuizShell({ content }: Props) {
             alt="みんなでお祝い"
             hidden
           />
+          {showAds && showFinishAd ? (
+            <AdSenseUnit slotKey="quiz_finish" className="adsense-unit--modal" />
+          ) : null}
           <div className="celebrate-modal-actions">
             <button type="button" id="btnModalRestart" className="btn-primary">
               もういちど
@@ -229,7 +253,7 @@ export function QuizShell({ content }: Props) {
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=5"
+        src="/shared/quiz-blank-app.js?v=6"
         strategy="afterInteractive"
         key={content.slug}
       />

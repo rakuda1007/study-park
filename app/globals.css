@@ -389,3 +389,29 @@ body {
   font-size: 0.85rem;
   color: rgba(255, 246, 232, 0.72);
 }
+
+.adsense-unit {
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  text-align: center;
+  overflow: hidden;
+}
+
+.adsense-unit-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.adsense-unit--modal {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.adsense-unit--creator {
+  margin-top: 1.25rem;
+}

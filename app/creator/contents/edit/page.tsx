@@ -5,7 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { LessonSectionsEditor } from "@/components/admin/LessonSectionsEditor";
 import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEditor";
+import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import { CreatorShell } from "@/components/creator/CreatorShell";
+import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { workspacePlayHref } from "@/lib/content/urls";
 import {
@@ -28,6 +30,7 @@ import {
 } from "@/lib/workspaces/content-firestore";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 import type { ContentVisibility } from "@/lib/workspaces/types";
+import { syncWorkspaceAdFlag } from "@/lib/workspaces/ad-flags";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
@@ -60,6 +63,9 @@ function EditInner() {
     if (!id || !uid) return;
     const workspace = await getWorkspaceByOwner(uid);
     setWs(workspace);
+    if (workspace) {
+      await syncWorkspaceAdFlag(workspace.id, workspace.planId);
+    }
     if (!workspace) {
       setErr("ワークスペースが見つかりません。");
       return;
@@ -268,6 +274,9 @@ function EditInner() {
               <button type="button" className="admin-btn" onClick={() => addQuestion()}>
                 ＋ 問題を追加
               </button>
+              {shouldShowAdsForPlan(ws.planId) ? (
+                <AdSenseUnit slotKey="creator_edit" className="adsense-unit--creator" />
+              ) : null}
             </section>
           ) : (
             <section className="admin-card">

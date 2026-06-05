@@ -8,6 +8,7 @@ import { QuizShell } from "@/components/content/QuizShell";
 import { getPublishedContentBySlug } from "@/lib/content/public-firestore";
 import type { ContentDoc } from "@/lib/content/types";
 import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
+import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
 import {
   getPublishedWorkspaceContentBySlug,
   getPublishedWorkspaceContentInWorkspace,
@@ -23,6 +24,7 @@ function PlayInner() {
   const workspaceId = (params.get("wid") ?? "").trim();
   const slug = (params.get("slug") ?? "").trim().toLowerCase();
   const [content, setContent] = useState<ContentDoc | null>(null);
+  const [showAds, setShowAds] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [denied, setDenied] = useState(false);
@@ -63,6 +65,7 @@ function PlayInner() {
             return;
           }
           setContent(doc);
+          setShowAds(await getWorkspaceShowAds(doc.workspaceId));
         } else {
           const doc = await getPublishedContentBySlug(slug);
           if (cancelled) return;
@@ -70,6 +73,7 @@ function PlayInner() {
             setNotFound(true);
           } else {
             setContent(doc);
+            setShowAds(false);
           }
         }
       } catch (e) {
@@ -111,7 +115,7 @@ function PlayInner() {
   }
 
   if (content.type === "quiz") {
-    return <QuizShell content={content} />;
+    return <QuizShell content={content} showAds={showAds} />;
   }
 
   return <LessonView content={content} />;

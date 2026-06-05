@@ -16,6 +16,7 @@ import { getBillingTier, limitsFromTier } from "@/lib/billing/tiers";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import { getUserProfile } from "@/lib/users/firestore";
 import type { AppPurchaseStatus } from "@/lib/billing/types";
+import { syncWorkspaceAdFlag } from "./ad-flags";
 import { generateInviteCode, isValidWorkspaceSlug, normalizeWorkspaceSlug } from "./slug";
 import type { WorkspaceDoc } from "./types";
 
@@ -122,6 +123,7 @@ export async function createWorkspaceForCreator(
     workspaceId: ref.id,
     ownerId,
   });
+  await syncWorkspaceAdFlag(ref.id, limits.planId);
   const snap = await getDoc(ref);
   return mapWorkspace(ref.id, snap.data() ?? payload);
 }
@@ -149,6 +151,7 @@ export async function applyBillingTierToWorkspace(
     questionCountLimit: limits.questionCountLimit,
     updatedAt: serverTimestamp(),
   });
+  await syncWorkspaceAdFlag(workspaceId, tierId);
 }
 
 export async function updateWorkspaceUsageCounts(

@@ -571,6 +571,7 @@
   function closeModal() {
     if (els.modal) els.modal.hidden = true;
     if (els.modalCard) els.modalCard.classList.remove("record-burst");
+    window.dispatchEvent(new CustomEvent("study-park-quiz-modal-closed"));
   }
 
   function quitSession() {
@@ -681,6 +682,9 @@
 
     openModal(title, msg, showImage);
     if (els.btnModalRestart) els.btnModalRestart.hidden = false;
+    if (CFG.showAds) {
+      window.dispatchEvent(new CustomEvent("study-park-quiz-finished"));
+    }
   }
 
   function advanceAfterAnswer() {
