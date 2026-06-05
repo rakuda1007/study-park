@@ -8,13 +8,16 @@ import { fileURLToPath } from "node:url";
 
 const outDir = fileURLToPath(new URL("../out", import.meta.url));
 
+/** AdSense 等でルート公開が必要な *.txt は残す */
+const KEEP_TXT = new Set(["ads.txt"]);
+
 async function walkRemoveTxt(dir) {
   const names = await readdir(dir, { withFileTypes: true });
   for (const e of names) {
     const p = join(dir, e.name);
     if (e.isDirectory()) {
       await walkRemoveTxt(p);
-    } else if (e.isFile() && e.name.endsWith(".txt")) {
+    } else if (e.isFile() && e.name.endsWith(".txt") && !KEEP_TXT.has(e.name)) {
       await unlink(p);
       console.log(`[cleanRscTxt] removed ${p}`);
     }
