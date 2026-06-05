@@ -6,6 +6,12 @@ const SLOT_ENV: Record<AdSenseSlotKey, string> = {
   quiz_finish: "NEXT_PUBLIC_ADSENSE_SLOT_QUIZ_FINISH",
 };
 
+/** スロット ID はページソースに露出するため、Secrets 未設定時のフォールバック */
+const DEFAULT_SLOTS: Record<AdSenseSlotKey, string> = {
+  creator_edit: "9526417095",
+  quiz_finish: "7447048663",
+};
+
 export function getAdSenseClientId(): string | null {
   const id = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID?.trim();
   return id || null;
@@ -14,7 +20,7 @@ export function getAdSenseClientId(): string | null {
 export function getAdSenseSlot(key: AdSenseSlotKey): string | null {
   const envName = SLOT_ENV[key];
   const id = process.env[envName]?.trim();
-  return id || null;
+  return id || DEFAULT_SLOTS[key] || null;
 }
 
 export function isAdSenseConfigured(key: AdSenseSlotKey): boolean {

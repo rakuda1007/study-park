@@ -59,7 +59,7 @@ export function AdSenseUnit({ slotKey, className }: Props) {
           />
         ) : (
           <p className="adsense-unit-placeholder">
-            広告枠（.env.local の AdSense 設定を確認してください）
+            広告枠（AdSense のクライアント ID / スロット ID が未設定です）
           </p>
         )}
       </aside>
