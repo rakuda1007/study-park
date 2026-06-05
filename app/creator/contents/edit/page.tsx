@@ -8,6 +8,7 @@ import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEdito
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
+import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { workspacePlayHref } from "@/lib/content/urls";
 import {
@@ -53,6 +54,7 @@ function EditInner() {
   const [visibility, setVisibility] = useState<ContentVisibility>("members");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [sections, setSections] = useState<LessonSection[]>([]);
+  const [showAds, setShowAds] = useState(false);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => setUid(user?.uid ?? ""));
@@ -65,6 +67,9 @@ function EditInner() {
     setWs(workspace);
     if (workspace) {
       await syncWorkspaceAdFlag(workspace.id, workspace.planId);
+      setShowAds(
+        (await getWorkspaceShowAds(workspace.id)) && shouldShowAdsForPlan(workspace.planId),
+      );
     }
     if (!workspace) {
       setErr("ワークスペースが見つかりません。");
@@ -152,10 +157,7 @@ function EditInner() {
   function addQuestion() {
     if (!ws) return;
     void (async () => {
-      const profile = await getUserProfile(uid);
-      const usage = checkWorkspaceUsage(ws, "add_question", {
-        hasActivePurchase: profile?.appPurchase.status === "active",
-      });
+      const usage = checkWorkspaceUsage(ws, "add_question");
       if (!usage.ok) {
         setErr(usage.reason);
         return;
@@ -242,6 +244,9 @@ function EditInner() {
           {doc.type === "quiz" ? (
             <section className="admin-card">
               <h2>問題（{questions.length}問）</h2>
+              {showAds ? (
+                <AdSenseUnit slotKey="creator_edit" className="adsense-unit--creator" />
+              ) : null}
               {questions.map((q, qi) => (
                 <div key={q.id} className="admin-question">
                   <div className="admin-row">
@@ -274,9 +279,6 @@ function EditInner() {
               <button type="button" className="admin-btn" onClick={() => addQuestion()}>
                 ＋ 問題を追加
               </button>
-              {shouldShowAdsForPlan(ws.planId) ? (
-                <AdSenseUnit slotKey="creator_edit" className="adsense-unit--creator" />
-              ) : null}
             </section>
           ) : (
             <section className="admin-card">

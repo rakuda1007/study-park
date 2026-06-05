@@ -10,7 +10,7 @@ export default function SignupHubPage() {
         <div className="auth-role-grid">
           <Link href="/signup/creator" className="auth-role-card">
             <strong>クリエイター（教材を作る）</strong>
-            <span>問題・レッスンを作成して学習者に配信します。九九・県庁以外は買い切りが必要です。</span>
+            <span>問題・レッスンを作成して学習者に配信します。まずは無料枠（上限あり）で始められます。</span>
           </Link>
           <Link href="/signup/learner" className="auth-role-card">
             <strong>学習者</strong>

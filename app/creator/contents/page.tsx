@@ -8,7 +8,6 @@ import { workspacePlayHref } from "@/lib/content/urls";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import type { ContentType } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
-import { getUserProfile } from "@/lib/users/firestore";
 import {
   createWorkspaceContent,
   ensureWorkspaceSubjects,
@@ -63,10 +62,7 @@ export default function CreatorContentsPage() {
       setErr("スラッグは英小文字・数字・ハイフンのみです。");
       return;
     }
-    const profile = await getUserProfile(uid);
-    const usage = checkWorkspaceUsage(ws, "add_question", {
-      hasActivePurchase: profile?.appPurchase.status === "active",
-    });
+    const usage = checkWorkspaceUsage(ws, "add_question");
     if (!usage.ok) {
       setErr(usage.reason);
       return;

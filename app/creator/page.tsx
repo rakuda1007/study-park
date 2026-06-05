@@ -6,7 +6,6 @@ import { CreatorShell } from "@/components/creator/CreatorShell";
 import { formatBytes, usagePercent } from "@/lib/billing/usage";
 import { listBillingTiers } from "@/lib/billing/tiers";
 import type { BillingTierDoc } from "@/lib/billing/types";
-import { stripeNotReadyMessage, isStripeConfigured } from "@/lib/billing/stripe";
 import { getUserProfile } from "@/lib/users/firestore";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
@@ -72,17 +71,14 @@ export default function CreatorDashboardPage() {
       </section>
 
       <section className="admin-card" style={{ marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1rem", margin: "0 0 0.75rem" }}>クリエイター版（買い切り）</h2>
-        <p>
-          状態:{" "}
-          <strong>
-            {purchaseStatus === "active" ? "購入済み" : "未購入（教材の新規作成は不可）"}
-          </strong>
+        <h2 style={{ fontSize: "1rem", margin: "0 0 0.75rem" }}>無料枠での作成</h2>
+        <p style={{ margin: 0, fontSize: "0.9rem" }}>
+          無料枠の範囲内で教材の作成・公開ができます。上限を超えると上位プラン（月額）への変更が必要です。
+          {ws.planId === "included" ? " 無料枠では広告が表示されます。" : ""}
         </p>
-        {purchaseStatus !== "active" ? (
-          <p className="admin-msg" style={{ marginTop: "0.5rem" }}>
-            {stripeNotReadyMessage("creator_purchase")}
-            {isStripeConfigured() ? " Stripe 設定は検出されました。Checkout 接続は次フェーズです。" : ""}
+        {purchaseStatus === "active" ? (
+          <p className="admin-msg" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
+            クリエイター版（買い切り）: 購入済み
           </p>
         ) : null}
       </section>

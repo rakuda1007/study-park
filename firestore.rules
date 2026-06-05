@@ -73,6 +73,15 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /workspaceSlugs/{slug} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.workspaceId is string;
+      allow update, delete: if isAdmin()
+        || (isSignedIn() && resource.data.ownerId == request.auth.uid);
+    }
+
     match /workspaceInviteCodes/{code} {
       allow read: if isSignedIn();
       allow create: if isSignedIn()
@@ -81,7 +90,9 @@ service cloud.firestore {
     }
 
     match /workspaces/{wsId} {
-      allow read: if canAccessWorkspace(wsId);
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.ownerId == request.auth.uid)
+        || isWorkspaceMember(wsId);
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.inviteCode is string;
@@ -90,8 +101,7 @@ service cloud.firestore {
 
       match /contents/{contentId} {
         allow read: if canReadWorkspaceContent(wsId);
-        allow create, update, delete: if isWorkspaceOwner(wsId)
-          && (isCreatorWithPurchase() || isAdmin());
+        allow create, update, delete: if isWorkspaceOwner(wsId) || isAdmin();
       }
 
       match /subjects/{subjectId} {

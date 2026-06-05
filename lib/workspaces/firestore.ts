@@ -17,6 +17,12 @@ import { getFirestoreClient } from "@/lib/firebase/client";
 import { getUserProfile } from "@/lib/users/firestore";
 import type { AppPurchaseStatus } from "@/lib/billing/types";
 import { syncWorkspaceAdFlag } from "./ad-flags";
+import {
+  ensureWorkspaceSlugIndex,
+  getWorkspaceIdBySlug,
+  isGlobalWorkspaceSlugTaken,
+  registerWorkspaceSlugIndex,
+} from "./slug-index";
 import { generateInviteCode, isValidWorkspaceSlug, normalizeWorkspaceSlug } from "./slug";
 import type { WorkspaceDoc } from "./types";
 
@@ -54,13 +60,9 @@ export async function getWorkspace(workspaceId: string): Promise<WorkspaceDoc | 
 }
 
 export async function getWorkspaceBySlug(slug: string): Promise<WorkspaceDoc | null> {
-  const normalized = normalizeWorkspaceSlug(slug);
-  const snap = await getDocs(
-    query(collection(getFirestoreClient(), "workspaces"), where("slug", "==", normalized)),
-  );
-  const d = snap.docs[0];
-  if (!d) return null;
-  return mapWorkspace(d.id, d.data());
+  const workspaceId = await getWorkspaceIdBySlug(slug);
+  if (!workspaceId) return null;
+  return getWorkspace(workspaceId);
 }
 
 export async function getWorkspaceByOwner(ownerId: string): Promise<WorkspaceDoc | null> {
@@ -69,15 +71,14 @@ export async function getWorkspaceByOwner(ownerId: string): Promise<WorkspaceDoc
   );
   const d = snap.docs[0];
   if (!d) return null;
-  return mapWorkspace(d.id, d.data());
+  const ws = mapWorkspace(d.id, d.data());
+  await ensureWorkspaceSlugIndex(ws);
+  return ws;
 }
 
+/** ワークスペース URL 用 slug の重複（contents の slug とは別） */
 export async function isWorkspaceSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
-  const normalized = normalizeWorkspaceSlug(slug);
-  const snap = await getDocs(
-    query(collection(getFirestoreClient(), "workspaces"), where("slug", "==", normalized)),
-  );
-  return snap.docs.some((d) => d.id !== excludeId);
+  return isGlobalWorkspaceSlugTaken(slug, excludeId);
 }
 
 /** クリエイター登録時にワークスペースを1件作成 */
@@ -119,11 +120,16 @@ export async function createWorkspaceForCreator(
     updatedAt: serverTimestamp(),
   };
   await setDoc(ref, payload);
+  await registerWorkspaceSlugIndex(slug, ref.id, ownerId);
   await setDoc(doc(getFirestoreClient(), "workspaceInviteCodes", payload.inviteCode), {
     workspaceId: ref.id,
     ownerId,
   });
-  await syncWorkspaceAdFlag(ref.id, limits.planId);
+  try {
+    await syncWorkspaceAdFlag(ref.id, limits.planId);
+  } catch {
+    /* 広告フラグ未デプロイ時も WS 作成は完了させる */
+  }
   const snap = await getDoc(ref);
   return mapWorkspace(ref.id, snap.data() ?? payload);
 }

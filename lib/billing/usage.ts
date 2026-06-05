@@ -5,7 +5,7 @@ export type UsageCheckAction = "add_question" | "upload_image";
 
 export type UsageCheckResult =
   | { ok: true }
-  | { ok: false; reason: string; code: "storage" | "questions" | "purchase" };
+  | { ok: false; reason: string; code: "storage" | "questions" };
 
 export function countQuestionsInContents(contents: ContentDoc[]): number {
   let n = 0;
@@ -20,17 +20,8 @@ export function countQuestionsInContents(contents: ContentDoc[]): number {
 export function checkWorkspaceUsage(
   ws: WorkspaceDoc,
   action: UsageCheckAction,
-  opts?: { additionalBytes?: number; hasActivePurchase?: boolean },
+  opts?: { additionalBytes?: number },
 ): UsageCheckResult {
-  const purchaseOk = opts?.hasActivePurchase ?? ws.appPurchaseStatus === "active";
-  if (!purchaseOk) {
-    return {
-      ok: false,
-      code: "purchase",
-      reason: "クリエイター版（買い切り）の購入が必要です。決済連携準備中の場合は管理者にご連絡ください。",
-    };
-  }
-
   if (action === "add_question") {
     if (ws.questionCount >= ws.questionCountLimit) {
       return {

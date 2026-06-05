@@ -37,6 +37,11 @@ function mapAuthError(e: unknown): Error {
   if (code === "auth/too-many-requests") {
     return new Error("試行回数が多すぎます。しばらく待ってから再度お試しください。");
   }
+  if (code === "permission-denied") {
+    return new Error(
+      "データの保存権限がありません。Firestore のルールが未デプロイの可能性があります。時間をおいてログインし直すか、管理者に連絡してください。",
+    );
+  }
   if (e instanceof Error) return e;
   return new Error("認証に失敗しました。");
 }

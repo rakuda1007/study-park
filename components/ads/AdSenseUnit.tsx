@@ -20,38 +20,48 @@ export function AdSenseUnit({ slotKey, className }: Props) {
   const clientId = getAdSenseClientId();
   const slotId = getAdSenseSlot(slotKey);
   const pushed = useRef(false);
+  const configured = Boolean(clientId && slotId);
 
   useEffect(() => {
-    if (!clientId || !slotId || pushed.current) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      pushed.current = true;
-    } catch {
-      /* ignore */
-    }
-  }, [clientId, slotId]);
-
-  if (!clientId || !slotId) return null;
+    if (!configured || pushed.current) return;
+    const timer = window.setTimeout(() => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        pushed.current = true;
+      } catch {
+        /* ignore */
+      }
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [configured, clientId, slotId]);
 
   return (
     <>
-      <Script
-        id="adsense-script"
-        async
-        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-      />
+      {configured ? (
+        <Script
+          id="adsense-script"
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      ) : null}
       <aside className={`adsense-unit ${className ?? ""}`} aria-label="広告">
         <p className="adsense-unit-label">広告</p>
-        <ins
-          className="adsbygoogle"
-          style={{ display: "block", minHeight: 90 }}
-          data-ad-client={clientId}
-          data-ad-slot={slotId}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
+        {configured ? (
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block", minHeight: 90 }}
+            data-ad-client={clientId!}
+            data-ad-slot={slotId!}
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        ) : (
+          <p className="adsense-unit-placeholder">
+            広告枠（.env.local の AdSense 設定を確認してください）
+          </p>
+        )}
       </aside>
     </>
   );

@@ -705,3 +705,20 @@
 .admin-rich-preview-body .rich-list li::before {
   color: var(--admin-text);
 }
+
+/* クリエイター編集画面（ダークテーマ）の AdSense 枠 */
+.admin-root .adsense-unit {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-root .adsense-unit-label {
+  color: var(--admin-muted);
+}
+
+.admin-root .adsense-unit-placeholder {
+  margin: 0;
+  padding: 1.5rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+}
