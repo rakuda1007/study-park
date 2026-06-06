@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCreatorTheme } from "@/components/creator/CreatorThemeProvider";
+import type { CreatorTheme } from "@/lib/creator/theme";
 import { signOutUser } from "@/lib/firebase/auth-client";
 
 export function CreatorShell({
@@ -12,6 +14,7 @@ export function CreatorShell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { theme, setTheme } = useCreatorTheme();
 
   async function logout() {
     await signOutUser();
@@ -23,6 +26,18 @@ export function CreatorShell({
       <header className="admin-header">
         <h1 className="admin-title">{title}</h1>
         <nav className="admin-nav" aria-label="クリエイターメニュー">
+          <label className="admin-theme-toggle" htmlFor="creator-theme">
+            <span className="admin-theme-toggle__label">表示</span>
+            <select
+              id="creator-theme"
+              className="admin-theme-select"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as CreatorTheme)}
+            >
+              <option value="light">通常</option>
+              <option value="dark">ダーク</option>
+            </select>
+          </label>
           <Link href="/creator" className="admin-link">
             ダッシュボード
           </Link>

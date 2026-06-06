@@ -706,19 +706,88 @@
   color: var(--admin-text);
 }
 
+/* クリエイター画面：通常モード（デフォルト） */
+.admin-root--light {
+  --admin-bg: #f4f5f8;
+  --admin-panel: #ffffff;
+  --admin-border: #d5dae3;
+  --admin-text: #1a1f2e;
+  --admin-muted: #5c6478;
+  --admin-accent: #3d5fc4;
+  --admin-danger: #c94a4a;
+}
+
+.admin-root--light .admin-badge--published {
+  background: #d8f0e4;
+  color: #1a6b42;
+}
+
+.admin-root--light .admin-badge--pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.admin-root--light .admin-badge--legacy {
+  background: #e8edf8;
+  color: #4a5f8a;
+}
+
+.admin-root--light .admin-msg--error {
+  background: #fde8e8;
+  color: #b32d2d;
+}
+
+.admin-root--light .admin-msg--ok {
+  background: #e6f7ed;
+  color: #1a7a45;
+}
+
+.admin-root--light .adsense-unit {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-root--light .adsense-unit-label,
+.admin-root--light .adsense-unit-placeholder {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+}
+
+.admin-theme-toggle__label {
+  white-space: nowrap;
+}
+
+.admin-theme-select {
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel);
+  color: var(--admin-text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.admin-theme-select:hover,
+.admin-theme-select:focus-visible {
+  border-color: var(--admin-accent);
+  outline: none;
+}
+
 /* クリエイター編集画面（ダークテーマ）の AdSense 枠 */
-.admin-root .adsense-unit {
+.admin-root:not(.admin-root--light) .adsense-unit {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--admin-border);
 }
 
-.admin-root .adsense-unit-label {
-  color: var(--admin-muted);
-}
-
-.admin-root .adsense-unit-placeholder {
-  margin: 0;
-  padding: 1.5rem 0.5rem;
-  font-size: 0.8rem;
+.admin-root:not(.admin-root--light) .adsense-unit-label,
+.admin-root:not(.admin-root--light) .adsense-unit-placeholder {
   color: var(--admin-muted);
 }

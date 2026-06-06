@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CreatorGate } from "@/components/creator/CreatorGate";
+import { CreatorThemeProvider } from "@/components/creator/CreatorThemeProvider";
 import "../admin/admin.css";
 
 export const metadata: Metadata = {
@@ -10,11 +10,5 @@ export const metadata: Metadata = {
 export default function CreatorLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="admin-root">
-      {/* eslint-disable-next-line @next/next/no-css-tags */}
-      <link rel="stylesheet" href="/shared/rich-text.css?v=3" />
-      <CreatorGate>{children}</CreatorGate>
-    </div>
-  );
+  return <CreatorThemeProvider>{children}</CreatorThemeProvider>;
 }
