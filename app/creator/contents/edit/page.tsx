@@ -194,6 +194,9 @@ function EditInner() {
 
       {doc && ws ? (
         <>
+          {showAds ? (
+            <AdSenseUnit slotKey="creator_edit" className="adsense-unit--creator" />
+          ) : null}
           <section className="admin-card">
             <h2>基本情報</h2>
             <div className="admin-field">
@@ -244,9 +247,6 @@ function EditInner() {
           {doc.type === "quiz" ? (
             <section className="admin-card">
               <h2>問題（{questions.length}問）</h2>
-              {showAds ? (
-                <AdSenseUnit slotKey="creator_edit" className="adsense-unit--creator" />
-              ) : null}
               {questions.map((q, qi) => (
                 <div key={q.id} className="admin-question">
                   <div className="admin-row">
