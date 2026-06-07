@@ -6,9 +6,11 @@ type Props = {
   submitLabel: string;
   onSubmit: (email: string, password: string) => Promise<void>;
   children?: React.ReactNode;
+  /** 登録シェル内など、外側にカードがあるときは true */
+  embedded?: boolean;
 };
 
-export function EmailAuthForm({ submitLabel, onSubmit, children }: Props) {
+export function EmailAuthForm({ submitLabel, onSubmit, children, embedded = false }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,7 +30,10 @@ export function EmailAuthForm({ submitLabel, onSubmit, children }: Props) {
   }
 
   return (
-    <form className="auth-card" onSubmit={(e) => void handleSubmit(e)}>
+    <form
+      className={embedded ? "auth-form" : "auth-card"}
+      onSubmit={(e) => void handleSubmit(e)}
+    >
       {error ? <p className="auth-msg--error">{error}</p> : null}
       {children}
       <div className="auth-field">

@@ -144,5 +144,206 @@
 
 .auth-role-card strong {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  font-size: 1.02rem;
+}
+
+.auth-role-card span {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: #5c6378;
+}
+
+/* 新規登録ハブ（2択） */
+.auth-signup-hub {
+  align-items: flex-start;
+  padding: 1rem 1.25rem 2.5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(80, 88, 184, 0.1) 0%, transparent 55%),
+    linear-gradient(180deg, #f4f6fb 0%, #fff 55%);
+}
+
+.auth-signup-hub__wrap {
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.auth-signup-hub__hero {
+  position: relative;
+  width: 100%;
+  min-height: clamp(11rem, 32vw, 16rem);
+  margin-bottom: 1.25rem;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(26, 31, 46, 0.14);
+}
+
+.auth-signup-hub__hero-photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.auth-signup-hub__hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(12, 18, 32, 0.62) 0%,
+    rgba(12, 18, 32, 0.34) 42%,
+    rgba(12, 18, 32, 0.1) 68%,
+    transparent 82%
+  );
+}
+
+.auth-signup-hub__hero-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(100%, 28rem);
+  padding: 1.35rem 1.5rem;
+}
+
+.auth-signup-hub__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.auth-signup-hub__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+}
+
+.auth-signup-hub__lead {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.auth-signup-hub__body {
+  padding: 1.35rem 1.25rem 1.5rem;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e2e5f5;
+  box-shadow: 0 8px 28px rgba(80, 88, 184, 0.1);
+}
+
+.auth-signup-hub .auth-role-grid {
+  margin-top: 0;
+}
+
+.auth-signup-hub .auth-role-card {
+  padding: 1.1rem 1.15rem;
+}
+
+.auth-signup-hub .auth-links {
+  margin-top: 1.35rem;
+  text-align: center;
+}
+
+.auth-form {
+  width: 100%;
+}
+
+.auth-hint--tight {
+  margin-top: -0.35rem;
+  margin-bottom: 1rem;
+}
+
+.auth-input--code {
+  letter-spacing: 0.15em;
+}
+
+.auth-mode-toggle {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+}
+
+.auth-mode-toggle__btn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #5058b8;
+  font: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-msg--ok {
+  margin: 0.75rem 0 0;
+  color: #067647;
+  font-size: 0.9rem;
+}
+
+.auth-links--center {
+  text-align: center;
+}
+
+/* 登録フォーム（クリエイター・学習者） */
+.auth-signup-form {
+  align-items: flex-start;
+  padding: 1rem 1.25rem 2.5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(80, 88, 184, 0.1) 0%, transparent 55%),
+    linear-gradient(180deg, #f4f6fb 0%, #fff 55%);
+}
+
+.auth-signup-form .auth-signup-hub__wrap {
+  max-width: 44rem;
+}
+
+.auth-signup-form .auth-signup-hub__hero-copy {
+  width: min(100%, 36rem);
+}
+
+.auth-signup-form .auth-signup-hub__title {
+  font-size: clamp(1.05rem, 3vw, 1.5rem);
+  line-height: 1.45;
+}
+
+.auth-signup-form .auth-signup-hub__body .auth-links {
+  margin-top: 1.35rem;
+}
+
+@media (min-width: 640px) {
+  .auth-signup-hub {
+    padding: 1.5rem 1.75rem 3rem;
+  }
+
+  .auth-signup-hub__wrap {
+    max-width: 44rem;
+  }
+
+  .auth-signup-hub__body {
+    padding: 1.5rem 1.75rem 1.75rem;
+  }
+
+  .auth-signup-form {
+    padding: 1.5rem 1.75rem 3rem;
+  }
+
+  .auth-signup-form .auth-signup-hub__wrap {
+    max-width: 48rem;
+  }
 }
