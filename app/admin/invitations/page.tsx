@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { workspacePlayHref } from "@/lib/content/urls";
+import { listPublicSubjects } from "@/lib/content/public-firestore";
+import type { ContentManifest } from "@/lib/content/types";
 import { absoluteSiteUrl } from "@/lib/site-url";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { listWorkspaceContents } from "@/lib/workspaces/content-firestore";
@@ -13,10 +13,17 @@ import {
   migrateAdminContentsToWorkspace,
 } from "@/lib/workspaces/invitation-setup";
 import { listMembersForWorkspace } from "@/lib/workspaces/members";
+import {
+  listWorkspaceSubjects,
+  setWorkspaceSubjectStatus,
+  syncWorkspaceSubjectsFromContents,
+} from "@/lib/workspaces/subjects-firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 import type { WorkspaceMemberDoc } from "@/lib/workspaces/types";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
+import type { WorkspaceSubjectDoc } from "@/lib/workspaces/types";
 import { isValidWorkspaceSlug, normalizeWorkspaceSlug } from "@/lib/workspaces/slug";
+import contentManifest from "@/public/content-manifest.json";
 
 export default function AdminInvitationsPage() {
   const [uid, setUid] = useState("");
@@ -24,6 +31,8 @@ export default function AdminInvitationsPage() {
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
   const [members, setMembers] = useState<WorkspaceMemberDoc[]>([]);
   const [wsContents, setWsContents] = useState<WorkspaceContentDoc[]>([]);
+  const [wsSubjects, setWsSubjects] = useState<WorkspaceSubjectDoc[]>([]);
+  const manifest = contentManifest as ContentManifest;
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -36,17 +45,52 @@ export default function AdminInvitationsPage() {
     const workspace = await getAdminInvitationWorkspace(ownerId);
     setWs(workspace);
     if (workspace) {
-      const [m, c] = await Promise.all([
+      const [m, c, publicSubjects] = await Promise.all([
         listMembersForWorkspace(workspace.id),
         listWorkspaceContents(workspace.id),
+        listPublicSubjects(),
       ]);
+      await syncWorkspaceSubjectsFromContents(workspace.id, manifest, publicSubjects);
+      const subjects = await listWorkspaceSubjects(workspace.id);
       setMembers(m);
-      setWsContents(c.filter((x) => x.status === "published"));
+      setWsContents(c);
+      setWsSubjects(subjects);
     } else {
       setMembers([]);
       setWsContents([]);
+      setWsSubjects([]);
     }
-  }, []);
+  }, [manifest]);
+
+  const contentCountBySubject = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of wsContents) {
+      map.set(c.subjectId, (map.get(c.subjectId) ?? 0) + 1);
+    }
+    return map;
+  }, [wsContents]);
+
+  const publishedSubjectCount = wsSubjects.filter((s) => s.status === "published").length;
+
+  async function toggleSubjectPublish(subject: WorkspaceSubjectDoc) {
+    if (!ws) return;
+    const next = subject.status === "published" ? "draft" : "published";
+    setBusy(true);
+    setErr("");
+    try {
+      await setWorkspaceSubjectStatus(ws.id, subject.id, next);
+      setMsg(
+        next === "published"
+          ? `「${subject.name}」を学習者に公開しました。`
+          : `「${subject.name}」を非公開にしました。`,
+      );
+      await reload(uid);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "公開設定の更新に失敗しました。");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -138,7 +182,7 @@ export default function AdminInvitationsPage() {
           <li>下の「準備」でワークスペースと招待コードを作る</li>
           <li>「教材を移行」で /admin の教材を招待対応版へコピーする</li>
           <li>学習者に招待コードと <a href="/signup/learner">学習者登録</a> の URL を伝える</li>
-          <li>学習者はログイン後 <a href="/learner">学習者ホーム</a> から学習する</li>
+          <li>科目ごとに公開を設定し、学習者は <a href="/learner">学習者ホーム</a> から学習する</li>
         </ol>
       </section>
 
@@ -257,34 +301,49 @@ export default function AdminInvitationsPage() {
           </section>
 
           <section className="admin-card">
-            <h2 style={{ fontSize: "1.05rem" }}>招待用の学習 URL（公開中 {wsContents.length}）</h2>
-            {wsContents.length === 0 ? (
-              <p className="admin-msg">移行後に公開状態の教材がここに表示されます。</p>
+            <h2 style={{ fontSize: "1.05rem" }}>
+              3. 科目ごとの公開（公開中 {publishedSubjectCount} / {wsSubjects.length}）
+            </h2>
+            <p className="admin-msg" style={{ marginTop: 0, marginBottom: "0.75rem" }}>
+              学習者に見せる教材は科目単位で公開します。科目を公開すると、その中の教材が学習者ホームに表示されます。
+            </p>
+            {wsSubjects.length === 0 ? (
+              <p className="admin-msg">教材を移行すると、科目がここに表示されます。</p>
             ) : (
               <ul className="admin-list">
-                {wsContents.map((c) => (
-                  <li key={c.id} className="admin-list-item">
-                    <span>
-                      {c.title}{" "}
-                      <code style={{ fontSize: "0.8rem" }}>
-                        {absoluteSiteUrl(workspacePlayHref(ws.slug, c.slug))}
-                      </code>
-                    </span>
-                    <Link
-                      href={workspacePlayHref(ws.slug, c.slug)}
-                      className="admin-btn"
-                      target="_blank"
-                    >
-                      開く
-                    </Link>
-                  </li>
-                ))}
+                {wsSubjects.map((s) => {
+                  const count = contentCountBySubject.get(s.id) ?? 0;
+                  return (
+                    <li key={s.id} className="admin-list-item">
+                      <span>
+                        <strong>{s.name}</strong>
+                        <br />
+                        <small style={{ color: "var(--admin-muted)" }}>
+                          教材 {count} 件
+                        </small>
+                      </span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span
+                          className={`admin-badge ${
+                            s.status === "published" ? "admin-badge--published" : ""
+                          }`}
+                        >
+                          {s.status === "published" ? "公開中" : "非公開"}
+                        </span>
+                        <button
+                          type="button"
+                          className="admin-btn"
+                          disabled={busy || count === 0}
+                          onClick={() => void toggleSubjectPublish(s)}
+                        >
+                          {s.status === "published" ? "非公開にする" : "公開する"}
+                        </button>
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             )}
-            <p className="admin-msg" style={{ marginTop: "0.75rem" }}>
-              リンクだけ渡したい場合は編集画面で公開範囲を「リンク共有（unlisted）」に変更できます（
-              <Link href="/creator/contents">/creator/contents</Link> から編集）。
-            </p>
           </section>
         </>
       )}

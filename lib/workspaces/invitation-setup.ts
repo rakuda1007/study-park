@@ -21,7 +21,11 @@ import {
   getWorkspaceByOwner,
   syncWorkspacePurchaseStatus,
 } from "./firestore";
+import contentManifest from "@/public/content-manifest.json";
+import { listPublicSubjects } from "@/lib/content/public-firestore";
+import type { ContentManifest } from "@/lib/content/types";
 import { ensureWorkspaceSubjects, listWorkspaceContents } from "./content-firestore";
+import { syncWorkspaceSubjectsFromContents } from "./subjects-firestore";
 import { countQuestionsInContents } from "@/lib/billing/usage";
 import type { ContentVisibility } from "./types";
 import type { WorkspaceDoc } from "./types";
@@ -173,6 +177,10 @@ export async function migrateAdminContentsToWorkspace(
     questionCount,
     updatedAt: serverTimestamp(),
   });
+
+  const manifest = contentManifest as ContentManifest;
+  const publicSubjects = await listPublicSubjects();
+  await syncWorkspaceSubjectsFromContents(workspaceId, manifest, publicSubjects);
 
   return { copied, updated, archived };
 }

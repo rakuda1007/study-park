@@ -3,6 +3,15 @@ import type { AppPurchaseStatus, BillingTierId, SubscriptionStatus } from "@/lib
 /** 公開範囲（仕様書 §7） */
 export type ContentVisibility = "private" | "members" | "unlisted" | "public";
 
+export type WorkspaceSubjectStatus = "draft" | "published";
+
+export type WorkspaceSubjectDoc = {
+  id: string;
+  name: string;
+  order: number;
+  status: WorkspaceSubjectStatus;
+};
+
 export type WorkspaceDoc = {
   id: string;
   ownerId: string;

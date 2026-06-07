@@ -30,6 +30,7 @@ import type {
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentVisibility } from "./types";
 import { resolveWorkspaceBySlug } from "./members";
+import { listWorkspaceSubjects } from "./subjects-firestore";
 import { updateWorkspaceUsageCounts } from "./firestore";
 
 function contentsCol(workspaceId: string) {
@@ -273,16 +274,28 @@ export async function getPublishedWorkspaceContentBySlug(
   return getPublishedWorkspaceContentInWorkspace(ws.id, contentSlug);
 }
 
-/** 学習者向け: 紐づき ws の公開教材一覧 */
+/** 学習者向け: 公開科目に属する教材一覧 */
 export async function listPublishedContentsForMember(
   workspaceId: string,
 ): Promise<WorkspaceContentDoc[]> {
-  const snap = await getDocs(
-    query(contentsCol(workspaceId), where("status", "==", "published"), orderBy("order", "asc")),
+  const [subjects, snap] = await Promise.all([
+    listWorkspaceSubjects(workspaceId),
+    getDocs(
+      query(contentsCol(workspaceId), where("status", "==", "published"), orderBy("order", "asc")),
+    ),
+  ]);
+  const publishedSubjectIds = new Set(
+    subjects.filter((s) => s.status === "published").map((s) => s.id),
   );
   return snap.docs
     .map((d) => mapContent(workspaceId, d.id, d.data()))
-    .filter((c) => c.visibility === "members" || c.visibility === "unlisted" || c.visibility === "public");
+    .filter(
+      (c) =>
+        publishedSubjectIds.has(c.subjectId) &&
+        (c.visibility === "members" ||
+          c.visibility === "unlisted" ||
+          c.visibility === "public"),
+    );
 }
 
 /** ワークスペース内の教科（簡易: デフォルト教科を doc 化） */

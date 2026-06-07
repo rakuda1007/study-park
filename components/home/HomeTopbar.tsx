@@ -16,14 +16,8 @@ import {
 } from "@/lib/firebase/auth-client";
 
 function menuItemsForSession(session: AuthSessionKind | null): ShellMenuItem[] {
-  const freeItems: ShellMenuItem[] = [
-    { label: "九九", href: "/kuku" },
-    { label: "県庁所在地", href: "/kencho" },
-  ];
-
   if (!session) {
     return [
-      ...freeItems,
       { label: "ログイン", href: "/login" },
       { label: "学習者登録", href: "/signup/learner" },
       { label: "教材を作る", href: "/signup/creator" },
@@ -33,7 +27,6 @@ function menuItemsForSession(session: AuthSessionKind | null): ShellMenuItem[] {
   const meta = sessionModeMeta(session);
   const items: ShellMenuItem[] = [
     { label: meta.dashboardLinkLabel, href: homePathForSession(session) },
-    ...freeItems,
   ];
 
   if (session === "admin") {
