@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
 import { ShellBrandLink } from "@/components/shell/ShellBrandLink";
 import { ShellHamburgerMenu } from "@/components/shell/ShellHamburgerMenu";
+import { PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
 import { useAdminTheme } from "@/components/admin/AdminThemeProvider";
 import type { AdminTheme } from "@/lib/admin/theme";
 import { signOutAdmin } from "@/lib/firebase/auth-client";
@@ -14,6 +15,7 @@ const ADMIN_MENU_MAIN = [
   { label: "学習者招待", href: "/admin/invitations" },
   { label: "利用者一覧", href: "/admin/users" },
   { label: "学習者ホーム", href: "/learner" },
+  PORTAL_MENU_ITEM,
 ];
 
 const ADMIN_MENU_BOTTOM = [{ label: "プロフィール", href: "/admin/profile" }];

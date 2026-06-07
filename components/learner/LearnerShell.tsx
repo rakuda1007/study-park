@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
 import { ShellHamburgerMenu } from "@/components/shell/ShellHamburgerMenu";
+import { PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
 import {
   resolveAuthSession,
   signOutUser,
@@ -14,6 +15,7 @@ import {
 const LEARNER_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
   { label: "学習者ホーム", href: "/learner" },
+  PORTAL_MENU_ITEM,
 ];
 
 const LEARNER_MENU_BOTTOM = [{ label: "プロフィール", href: "/learner/profile" }];

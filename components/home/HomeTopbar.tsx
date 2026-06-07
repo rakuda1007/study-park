@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
 import { sessionModeMeta } from "@/lib/auth/session-display";
 import { ShellHamburgerMenu, type ShellMenuItem } from "@/components/shell/ShellHamburgerMenu";
+import { PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
 import {
   homePathForSession,
   resolveAuthSession,
@@ -27,6 +28,7 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
         { label: "ログイン", href: "/login" },
         { label: "学習者登録", href: "/signup/learner" },
         { label: "教材を作る", href: "/signup/creator" },
+        PORTAL_MENU_ITEM,
       ],
       bottomItems: [],
     };
@@ -57,6 +59,7 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
     bottomItems.push({ label: "プロフィール", href: "/learner/profile" });
   }
 
+  items.push(PORTAL_MENU_ITEM);
   bottomItems.push({ label: "別のアカウントでログイン", href: "/login" });
   return { items, bottomItems };
 }
