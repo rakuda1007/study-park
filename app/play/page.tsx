@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { User } from "firebase/auth";
 import { Suspense, useEffect, useState } from "react";
 import { LessonView } from "@/components/content/LessonView";
 import { QuizShell } from "@/components/content/QuizShell";
 import { getPublishedContentBySlug } from "@/lib/content/public-firestore";
 import type { ContentDoc } from "@/lib/content/types";
-import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
+import { resolveAuthSession, subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
 import {
   getPublishedWorkspaceContentBySlug,
@@ -29,6 +30,7 @@ function PlayInner() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [homeHref, setHomeHref] = useState("/");
 
   useEffect(() => {
     if (!slug) {
@@ -43,13 +45,17 @@ function PlayInner() {
       setDenied(false);
       try {
         await waitForAuthReady();
-        const uid = await new Promise<string | null>((resolve) => {
+        const authUser = await new Promise<User | null>((resolve) => {
           const unsub = subscribeAuth((user) => {
             unsub();
-            resolve(user?.uid ?? null);
+            resolve(user);
           });
         });
-        if (wsSlug || workspaceId) {
+        const uid = authUser?.uid ?? null;
+        const session = await resolveAuthSession(authUser);
+        const isWorkspacePlay = !!(wsSlug || workspaceId);
+        setHomeHref(session === "learner" && isWorkspacePlay ? "/learner" : "/");
+        if (isWorkspacePlay) {
           const doc = workspaceId
             ? await getPublishedWorkspaceContentInWorkspace(workspaceId, slug)
             : await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid);
@@ -125,10 +131,10 @@ function PlayInner() {
   }
 
   if (content.type === "quiz") {
-    return <QuizShell content={content} showAds={showAds} />;
+    return <QuizShell content={content} showAds={showAds} homeHref={homeHref} />;
   }
 
-  return <LessonView content={content} />;
+  return <LessonView content={content} homeHref={homeHref} />;
 }
 
 export default function PlayPage() {

@@ -22,11 +22,13 @@ type Props = {
   content: ContentDoc;
   /** 無料枠ワークスペースの教材のみ true */
   showAds?: boolean;
+  /** ロゴのリンク先（学習者は /learner） */
+  homeHref?: string;
 };
 
 const ASSET_V = "7";
 
-export function QuizShell({ content, showAds = false }: Props) {
+export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
   const title = content.title;
   const intro = content.intro ?? "問題に挑戦してみましょう。";
   const [showFinishAd, setShowFinishAd] = useState(false);
@@ -58,7 +60,11 @@ export function QuizShell({ content, showAds = false }: Props) {
   return (
     <>
       <header className="app-header app-header--unified">
-        <Link href="/" className="app-header-logo-link" aria-label="トップへ">
+        <Link
+          href={homeHref}
+          className="app-header-logo-link"
+          aria-label={homeHref === "/learner" ? "学習者ホームへ" : "トップへ"}
+        >
           <img
             className="app-header-logo"
             src="/study-park-logo.png?v=8"

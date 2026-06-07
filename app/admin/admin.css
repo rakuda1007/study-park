@@ -140,6 +140,18 @@
   font-size: 0.82rem;
 }
 
+.learner-header__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.learner-header__title {
+  margin: 0;
+}
+
 .learner-welcome-msg {
   margin-bottom: 1rem;
 }

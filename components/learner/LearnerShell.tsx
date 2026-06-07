@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SessionModeBar } from "@/components/auth/SessionModeBar";
+import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
 import { signOutUser } from "@/lib/firebase/auth-client";
 
 export function LearnerShell({
@@ -21,15 +20,12 @@ export function LearnerShell({
 
   return (
     <div className="admin-shell">
-      <header className="admin-header admin-header--stacked">
-        <div className="admin-header__lead">
-          <SessionModeBar kind="learner" />
-          <h1 className="admin-title">{title}</h1>
+      <header className="admin-header learner-header">
+        <div className="learner-header__title-row">
+          <h1 className="admin-title learner-header__title">{title}</h1>
+          <SessionModeBadge kind="learner" />
         </div>
         <nav className="admin-nav" aria-label="学習メニュー">
-          <Link href="/?park=1" className="admin-link">
-            Study Park トップ
-          </Link>
           <button type="button" className="admin-btn" onClick={() => void logout()}>
             ログアウト
           </button>

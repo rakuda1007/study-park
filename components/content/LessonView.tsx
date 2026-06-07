@@ -7,16 +7,22 @@ import type { ContentDoc } from "@/lib/content/types";
 
 type Props = {
   content: ContentDoc;
+  /** ロゴのリンク先（学習者は /learner） */
+  homeHref?: string;
 };
 
-export function LessonView({ content }: Props) {
+export function LessonView({ content, homeHref = "/" }: Props) {
   const intro = content.intro ?? "";
   const sections = content.lesson?.sections ?? [];
 
   return (
     <div className="lesson-page">
       <header className="app-header app-header--unified">
-        <Link href="/" className="app-header-logo-link" aria-label="トップへ">
+        <Link
+          href={homeHref}
+          className="app-header-logo-link"
+          aria-label={homeHref === "/learner" ? "学習者ホームへ" : "トップへ"}
+        >
           <img
             className="app-header-logo"
             src="/study-park-logo.png?v=8"
