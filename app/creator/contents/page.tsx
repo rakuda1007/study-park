@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
@@ -10,6 +11,7 @@ import { SLUG_PATTERN } from "@/lib/content/types";
 import {
   CONTENT_PERIOD_FILTER_ALL,
   contentMatchesPeriodFilter,
+  currentContentPeriod,
   formatContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
@@ -35,6 +37,8 @@ export default function CreatorContentsPage() {
   const [newSlug, setNewSlug] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
+  const [newPeriodYear, setNewPeriodYear] = useState(currentContentPeriod().year);
+  const [newPeriodMonth, setNewPeriodMonth] = useState(currentContentPeriod().month);
 
   const reload = useCallback(async (workspaceId: string) => {
     await ensureWorkspaceSubjects(workspaceId);
@@ -85,6 +89,8 @@ export default function CreatorContentsPage() {
         type: newType,
         slug,
         title: newTitle.trim() || slug,
+        periodYear: newPeriodYear,
+        periodMonth: newPeriodMonth,
         updatedBy: uid,
         visibility: "members",
       });
@@ -131,6 +137,14 @@ export default function CreatorContentsPage() {
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
               />
+            </div>
+            <ContentPeriodFields
+              year={newPeriodYear}
+              month={newPeriodMonth}
+              onYearChange={setNewPeriodYear}
+              onMonthChange={setNewPeriodMonth}
+            />
+            <div className="admin-row">
               <button type="submit" className="admin-btn admin-btn--primary">
                 作成
               </button>
@@ -143,6 +157,7 @@ export default function CreatorContentsPage() {
               contents={items}
               value={periodFilter}
               onChange={setPeriodFilter}
+              storageKey="study-park-creator-content-period-filter"
             />
           </div>
 

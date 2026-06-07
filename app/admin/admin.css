@@ -651,8 +651,23 @@
 }
 
 .admin-content-period-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.65rem;
   margin: 0;
-  min-width: 10rem;
+}
+
+.admin-content-period-filter .admin-field {
+  margin: 0;
+}
+
+.admin-content-period-filter__mode {
+  min-width: 8.5rem;
+}
+
+.admin-content-period-filter__part {
+  min-width: 5.5rem;
 }
 
 .admin-rich-toolbar {

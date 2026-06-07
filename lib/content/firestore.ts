@@ -103,12 +103,17 @@ export type CreateContentInput = {
   slug: string;
   title: string;
   intro?: string;
+  periodYear?: number;
+  periodMonth?: number;
   updatedBy: string;
 };
 
 export async function createContent(input: CreateContentInput): Promise<string> {
   const now = serverTimestamp();
-  const period = currentContentPeriod();
+  const period =
+    input.periodYear && input.periodMonth
+      ? { year: input.periodYear, month: input.periodMonth }
+      : currentContentPeriod();
   const base = {
     subjectId: input.subjectId,
     type: input.type,

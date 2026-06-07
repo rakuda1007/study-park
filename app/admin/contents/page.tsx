@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
@@ -22,6 +23,7 @@ import {
 import {
   CONTENT_PERIOD_FILTER_ALL,
   contentMatchesPeriodFilter,
+  currentContentPeriod,
   formatContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
@@ -55,6 +57,8 @@ export default function AdminContentsPage() {
   const [creating, setCreating] = useState(false);
   const [reorderingKey, setReorderingKey] = useState<string | null>(null);
   const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
+  const [newPeriodYear, setNewPeriodYear] = useState(currentContentPeriod().year);
+  const [newPeriodMonth, setNewPeriodMonth] = useState(currentContentPeriod().month);
 
   const reload = useCallback(async () => {
     await ensureDefaultSubjects();
@@ -116,6 +120,8 @@ export default function AdminContentsPage() {
         type: newType,
         slug,
         title: newTitle.trim(),
+        periodYear: newPeriodYear,
+        periodMonth: newPeriodMonth,
         updatedBy: uid,
       });
       setMsg("作成しました。編集画面へ移動します。");
@@ -232,6 +238,12 @@ export default function AdminContentsPage() {
               required
             />
           </div>
+          <ContentPeriodFields
+            year={newPeriodYear}
+            month={newPeriodMonth}
+            onYearChange={setNewPeriodYear}
+            onMonthChange={setNewPeriodMonth}
+          />
           <button type="submit" className="admin-btn admin-btn--primary" disabled={creating}>
             {creating ? "作成中…" : "作成して編集"}
           </button>
@@ -245,6 +257,7 @@ export default function AdminContentsPage() {
             contents={contents}
             value={periodFilter}
             onChange={setPeriodFilter}
+            storageKey="study-park-admin-content-period-filter"
           />
         </div>
         <p className="admin-hint">
