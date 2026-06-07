@@ -12,6 +12,15 @@
   line-height: 1.5;
 }
 
+@media (min-width: 640px) {
+  .play-status {
+    max-width: 36rem;
+    margin: 4rem auto;
+    padding: 1.5rem 2rem;
+    font-size: 1rem;
+  }
+}
+
 .play-status a {
   color: var(--accent-dark, #4a6fa5);
   font-weight: 700;
