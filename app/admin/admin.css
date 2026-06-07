@@ -666,21 +666,21 @@
 .admin-rich-marker-more {
   flex-shrink: 0;
   width: auto;
-  min-width: 2.85rem;
-  max-width: 3.1rem;
-  padding: 0.35rem 1.15rem 0.35rem 0.45rem;
+  min-width: 3.6rem;
+  padding: 0.35rem 1.25rem 0.35rem 0.5rem;
   border-radius: 8px;
   border: 1px solid var(--admin-border);
-  background: var(--admin-panel);
+  background-color: var(--admin-panel);
   color: var(--admin-muted);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%239aa3b5' d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.35rem center;
+  background-position: right 0.4rem center;
 }
 
 .admin-rich-marker-more:hover,
