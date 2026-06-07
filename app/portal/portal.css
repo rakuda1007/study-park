@@ -14,7 +14,7 @@
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-.portal a {
+.portal a:not(.portal-header-btn):not(.portal-btn) {
   color: var(--portal-green);
 }
 
