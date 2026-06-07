@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { DEFAULT_QUIZ_BLANK_ANSWERS } from "./quiz-answers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "./quiz-question";
 import { defaultQuizBlankMarker } from "./quiz-markers";
 import type {
@@ -148,7 +149,7 @@ export async function createContent(input: CreateContentInput): Promise<string> 
             },
           ],
           template: DEFAULT_QUIZ_QUESTION_BODY,
-          blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
+          blanks: [{ marker: defaultQuizBlankMarker(0), answers: DEFAULT_QUIZ_BLANK_ANSWERS }],
         },
       ],
     },

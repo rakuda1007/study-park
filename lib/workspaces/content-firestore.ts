@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { countQuestionsInContents } from "@/lib/billing/usage";
+import { DEFAULT_QUIZ_BLANK_ANSWERS } from "@/lib/content/quiz-answers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "@/lib/content/quiz-question";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
 import type {
@@ -164,7 +165,7 @@ export async function createWorkspaceContent(
           label: "問1",
           blocks: [{ kind: "paragraph", text: DEFAULT_QUIZ_QUESTION_BODY }],
           template: DEFAULT_QUIZ_QUESTION_BODY,
-          blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
+          blanks: [{ marker: defaultQuizBlankMarker(0), answers: DEFAULT_QUIZ_BLANK_ANSWERS }],
         },
       ],
     },

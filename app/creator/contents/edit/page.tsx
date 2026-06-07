@@ -15,6 +15,7 @@ import {
   normalizeQuizQuestion,
   prepareQuizQuestionForSave,
 } from "@/lib/content/quiz-question";
+import { DEFAULT_QUIZ_BLANK_ANSWERS } from "@/lib/content/quiz-answers";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "@/lib/content/quiz-question";
 import type { ContentStatus, LessonSection, QuizQuestion } from "@/lib/content/types";
@@ -172,7 +173,12 @@ function EditInner() {
           label: `問${n}`,
           blocks: [{ kind: "paragraph", text: defaultText }],
           template: defaultText,
-          blanks: [{ marker: defaultQuizBlankMarker(prev.length), answers: ["答え"] }],
+          blanks: [
+            {
+              marker: defaultQuizBlankMarker(prev.length),
+              answers: DEFAULT_QUIZ_BLANK_ANSWERS,
+            },
+          ],
         },
       ]);
     })();

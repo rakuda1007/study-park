@@ -1,3 +1,4 @@
+import { normalizeBlankAnswerList } from "./quiz-answers";
 import type { LessonBlock, QuizQuestion } from "./types";
 
 /** 新規クイズ問題の本文デフォルト（空欄記号はエディタから挿入） */
@@ -26,18 +27,29 @@ export function templateFromBlocks(blocks: LessonBlock[]): string {
     .join("\n\n");
 }
 
+function normalizeQuizQuestionBlanks(q: QuizQuestion): QuizQuestion {
+  if (!q.blanks?.length) return q;
+  return {
+    ...q,
+    blanks: q.blanks.map((blank) => ({
+      ...blank,
+      answers: normalizeBlankAnswerList(blank.answers, blank.marker),
+    })),
+  };
+}
+
 export function normalizeQuizQuestion(q: QuizQuestion): QuizQuestion {
   if (q.blocks && q.blocks.length > 0) {
     const blocks = normalizeParagraphBlocks(q.blocks);
     const template = templateFromBlocks(blocks) || stripLegacyDefaultQuizBody(q.template);
-    return { ...q, blocks, template };
+    return normalizeQuizQuestionBlanks({ ...q, blocks, template });
   }
   const text = stripLegacyDefaultQuizBody(q.template);
-  return {
+  return normalizeQuizQuestionBlanks({
     ...q,
     template: text,
     blocks: [{ kind: "paragraph", text }],
-  };
+  });
 }
 
 export function prepareQuizQuestionForSave(q: QuizQuestion): QuizQuestion {

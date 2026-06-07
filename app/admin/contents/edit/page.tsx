@@ -38,7 +38,11 @@ import { SLUG_PATTERN } from "@/lib/content/types";
 import { contentPlayHref } from "@/lib/content/urls";
 import { listLegacyContents } from "@/lib/content/legacy-contents";
 import { RichTextArea } from "@/components/admin/RichTextArea";
-import { blankAnswersToInput, parseBlankAnswersInput } from "@/lib/content/quiz-answers";
+import {
+  blankAnswersToInput,
+  DEFAULT_QUIZ_BLANK_ANSWERS,
+  parseBlankAnswersInput,
+} from "@/lib/content/quiz-answers";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifestBase from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
@@ -228,7 +232,7 @@ function EditContentInner() {
         label: `問${n}`,
         blocks: [{ kind: "paragraph", text: defaultText }],
         template: defaultText,
-        blanks: [{ marker: defaultQuizBlankMarker(0), answers: ["答え"] }],
+        blanks: [{ marker: defaultQuizBlankMarker(0), answers: DEFAULT_QUIZ_BLANK_ANSWERS }],
       },
     ]);
   }
@@ -407,7 +411,10 @@ function EditContentInner() {
                       updateQuestion(qi, {
                         blanks: [
                           ...q.blanks,
-                          { marker: defaultQuizBlankMarker(q.blanks.length), answers: [""] },
+                          {
+                            marker: defaultQuizBlankMarker(q.blanks.length),
+                            answers: DEFAULT_QUIZ_BLANK_ANSWERS,
+                          },
                         ],
                       })
                     }
