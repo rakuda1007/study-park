@@ -38,6 +38,14 @@
   margin-inline: auto;
 }
 
+.portal-header__brand-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  min-width: 0;
+}
+
 .portal-brand {
   display: inline-flex;
   align-items: center;
@@ -88,6 +96,53 @@
 
 .portal-header-btn:hover {
   background: #2f6342;
+  color: #fff;
+}
+
+.portal-header-btn--ghost {
+  border: 1px solid var(--portal-border);
+  background: #fff;
+  color: var(--portal-muted);
+  cursor: pointer;
+  font: inherit;
+}
+
+.portal-header-btn--ghost:hover {
+  background: #f4f6f8;
+  color: var(--portal-ink);
+}
+
+.portal-header-muted {
+  font-size: 0.9rem;
+  color: var(--portal-muted);
+}
+
+.portal .session-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.portal .session-mode-badge--admin {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+}
+
+.portal .session-mode-badge--creator {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+}
+
+.portal .session-mode-badge--learner {
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
 }
 
 /* トップバナー（画像主役・左寄せコピー） */
