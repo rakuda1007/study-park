@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import { CreatorGate } from "@/components/creator/CreatorGate";
 import {
@@ -25,19 +26,26 @@ export function useCreatorTheme(): CreatorThemeContextValue {
 }
 
 export function CreatorThemeProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLogin = pathname === "/creator/login";
   const [theme, setThemeState] = useState<CreatorTheme>(DEFAULT_CREATOR_THEME);
 
   useEffect(() => {
+    if (isLogin) {
+      setThemeState(DEFAULT_CREATOR_THEME);
+      return;
+    }
     setThemeState(readStoredCreatorTheme());
-  }, []);
+  }, [isLogin]);
 
   function setTheme(next: CreatorTheme) {
     setThemeState(next);
     storeCreatorTheme(next);
   }
 
+  const displayTheme = isLogin ? DEFAULT_CREATOR_THEME : theme;
   const rootClass =
-    theme === "light" ? "admin-root admin-root--light" : "admin-root";
+    displayTheme === "light" ? "admin-root admin-root--light" : "admin-root";
 
   return (
     <CreatorThemeContext.Provider value={{ theme, setTheme }}>

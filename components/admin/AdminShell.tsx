@@ -22,7 +22,7 @@ export function AdminShell({
     <div className="admin-shell">
       <header className="admin-header">
         <h1 className="admin-title">{title}</h1>
-        <AdminNav onLogout={() => void logout()} />
+        <AdminNav onLogout={() => void logout()} showThemeToggle />
       </header>
       {children}
       <footer className="admin-footer">

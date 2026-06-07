@@ -734,7 +734,7 @@
   color: var(--admin-text);
 }
 
-/* クリエイター画面：通常モード（デフォルト） */
+/* 管理・クリエイター画面：通常モード（デフォルト） */
 .admin-root--light {
   --admin-bg: #f4f5f8;
   --admin-panel: #ffffff;
@@ -809,7 +809,7 @@
   outline: none;
 }
 
-/* クリエイター編集画面（ダークテーマ）の AdSense 枠 */
+/* 管理・クリエイター編集画面（ダークテーマ）の AdSense 枠 */
 .admin-root:not(.admin-root--light) .adsense-unit {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--admin-border);
