@@ -1,7 +1,17 @@
 "use client";
 
-import { collection, getCountFromServer, getDocs, type Timestamp } from "firebase/firestore";
+import {
+  collection,
+  getCountFromServer,
+  getDocs,
+  query,
+  where,
+  type Timestamp,
+} from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
+import { listMembersForWorkspace } from "@/lib/workspaces/members";
+import type { WorkspaceMemberDoc } from "@/lib/workspaces/types";
 import type { UserProfile, UserRole } from "./types";
 
 function tsToIso(v: unknown): string {
@@ -34,6 +44,29 @@ export type UserStats = {
   creators: number;
   registeredLearners: number;
   guestLearners: number;
+};
+
+export type CreatorParticipantRow = {
+  workspaceId: string;
+  workspaceName: string;
+  ownerId: string;
+  ownerEmail: string;
+  ownerDisplayName?: string;
+  participantCount: number;
+};
+
+export type CreatorParticipantOverview = {
+  creatorCount: number;
+  totalParticipants: number;
+  uniqueParticipants: number;
+  byCreator: CreatorParticipantRow[];
+};
+
+export type MyWorkspaceParticipantOverview = {
+  workspaceId: string;
+  workspaceName: string;
+  participantCount: number;
+  participants: WorkspaceMemberDoc[];
 };
 
 export type GuestLearnerSummary = {
@@ -73,6 +106,69 @@ export async function listUsersByRole(role: UserRole): Promise<UserProfile[]> {
     .map((d) => mapUser(d.id, d.data()))
     .filter((u) => u.role === role)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function fetchCreatorParticipantOverview(): Promise<CreatorParticipantOverview> {
+  const db = getFirestoreClient();
+  const [usersSnap, workspacesSnap, membersSnap] = await Promise.all([
+    getDocs(collection(db, "users")),
+    getDocs(collection(db, "workspaces")),
+    getDocs(
+      query(collection(db, "workspaceMembers"), where("status", "==", "active")),
+    ),
+  ]);
+
+  const creators = usersSnap.docs.filter((d) => d.data().role !== "learner");
+  const userById = new Map(
+    usersSnap.docs.map((d) => [d.id, mapUser(d.id, d.data())]),
+  );
+
+  const countByWorkspace = new Map<string, number>();
+  const uniqueUserIds = new Set<string>();
+  for (const doc of membersSnap.docs) {
+    const workspaceId = String(doc.data().workspaceId ?? "");
+    const userId = String(doc.data().userId ?? "");
+    if (!workspaceId) continue;
+    countByWorkspace.set(workspaceId, (countByWorkspace.get(workspaceId) ?? 0) + 1);
+    if (userId) uniqueUserIds.add(userId);
+  }
+
+  const byCreator = workspacesSnap.docs
+    .map((d) => {
+      const ws = d.data();
+      const ownerId = String(ws.ownerId ?? "");
+      const owner = userById.get(ownerId);
+      return {
+        workspaceId: d.id,
+        workspaceName: String(ws.name ?? "教材"),
+        ownerId,
+        ownerEmail: owner?.email ?? ownerId,
+        ownerDisplayName: owner?.displayName,
+        participantCount: countByWorkspace.get(d.id) ?? 0,
+      };
+    })
+    .sort((a, b) => b.participantCount - a.participantCount);
+
+  return {
+    creatorCount: creators.length,
+    totalParticipants: membersSnap.size,
+    uniqueParticipants: uniqueUserIds.size,
+    byCreator,
+  };
+}
+
+export async function fetchMyWorkspaceParticipants(
+  ownerId: string,
+): Promise<MyWorkspaceParticipantOverview | null> {
+  const ws = await getWorkspaceByOwner(ownerId);
+  if (!ws) return null;
+  const participants = await listMembersForWorkspace(ws.id);
+  return {
+    workspaceId: ws.id,
+    workspaceName: ws.name,
+    participantCount: participants.length,
+    participants,
+  };
 }
 
 export async function listRecentGuestLearners(limit = 20): Promise<GuestLearnerSummary[]> {

@@ -1,12 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
+  fetchCreatorParticipantOverview,
+  fetchMyWorkspaceParticipants,
   fetchUserStats,
   listRecentGuestLearners,
   listUsersByRole,
+  type CreatorParticipantOverview,
   type GuestLearnerSummary,
+  type MyWorkspaceParticipantOverview,
   type UserStats,
 } from "@/lib/users/admin-stats";
 import type { UserProfile } from "@/lib/users/types";
@@ -40,23 +46,30 @@ function StatCard({
 }
 
 export default function AdminUsersPage() {
+  const [uid, setUid] = useState("");
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [creatorOverview, setCreatorOverview] = useState<CreatorParticipantOverview | null>(null);
+  const [myWorkspace, setMyWorkspace] = useState<MyWorkspaceParticipantOverview | null>(null);
   const [creators, setCreators] = useState<UserProfile[]>([]);
   const [learners, setLearners] = useState<UserProfile[]>([]);
   const [guests, setGuests] = useState<GuestLearnerSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (ownerId: string) => {
     setErr("");
     try {
-      const [s, c, l, g] = await Promise.all([
+      const [s, overview, mine, c, l, g] = await Promise.all([
         fetchUserStats(),
+        fetchCreatorParticipantOverview(),
+        ownerId ? fetchMyWorkspaceParticipants(ownerId) : Promise.resolve(null),
         listUsersByRole("creator"),
         listUsersByRole("learner"),
         listRecentGuestLearners(30),
       ]);
       setStats(s);
+      setCreatorOverview(overview);
+      setMyWorkspace(mine);
       setCreators(c);
       setLearners(l);
       setGuests(g);
@@ -66,13 +79,18 @@ export default function AdminUsersPage() {
   }, []);
 
   useEffect(() => {
-    void (async () => {
-      try {
-        await reload();
-      } finally {
-        setLoading(false);
-      }
-    })();
+    const unsub = subscribeAuth((user) => {
+      const nextUid = user?.uid ?? "";
+      setUid(nextUid);
+      void (async () => {
+        try {
+          await reload(nextUid);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    });
+    return unsub;
   }, [reload]);
 
   const learnerTotal =
@@ -83,12 +101,99 @@ export default function AdminUsersPage() {
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
 
-      {stats ? (
+      {stats && creatorOverview ? (
         <>
           <section className="admin-card">
-            <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.75rem" }}>利用者の概要</h2>
+            <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.35rem" }}>管理者として見る</h2>
+            <p className="admin-hint" style={{ marginTop: 0, marginBottom: "0.85rem" }}>
+              Study Park 全体のクリエイター数と、各クリエイターの教材に参加している人数です。
+            </p>
             <div className="admin-stat-grid">
-              <StatCard label="クリエイター" value={stats.creators} sub="教材を作成する登録ユーザー" />
+              <StatCard
+                label="クリエイター"
+                value={creatorOverview.creatorCount}
+                sub="教材を作成する登録ユーザー"
+              />
+              <StatCard
+                label="教材参加者（合計）"
+                value={creatorOverview.totalParticipants}
+                sub="クリエイター教材への参加記録の合計"
+              />
+              <StatCard
+                label="教材参加者（重複除く）"
+                value={creatorOverview.uniqueParticipants}
+                sub="複数の教材に参加しても1人として数える"
+              />
+            </div>
+          </section>
+
+          <section className="admin-card">
+            <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.5rem" }}>
+              クリエイター別の参加者（{creatorOverview.byCreator.length} 教室）
+            </h2>
+            {creatorOverview.byCreator.length === 0 ? (
+              <p className="admin-msg">まだワークスペースがありません。</p>
+            ) : (
+              <ul className="admin-list">
+                {creatorOverview.byCreator.map((row) => (
+                  <li key={row.workspaceId} className="admin-list-item">
+                    <span>
+                      <strong>{row.workspaceName}</strong>
+                      <span style={{ marginLeft: "0.5rem", color: "var(--admin-muted)" }}>
+                        {row.ownerDisplayName ? `${row.ownerDisplayName} · ` : ""}
+                        {row.ownerEmail}
+                      </span>
+                    </span>
+                    <span>{row.participantCount} 人</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {myWorkspace ? (
+            <section className="admin-card">
+              <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.35rem" }}>
+                あなたの教材として見る
+              </h2>
+              <p className="admin-hint" style={{ marginTop: 0, marginBottom: "0.85rem" }}>
+                管理者兼クリエイターとして、ご自身の教材「{myWorkspace.workspaceName}」に参加している人です。
+              </p>
+              <div className="admin-stat-grid">
+                <StatCard
+                  label="教材に参加している人"
+                  value={myWorkspace.participantCount}
+                  sub="あなたの招待コードで参加した学習者"
+                />
+              </div>
+              {myWorkspace.participantCount === 0 ? (
+                <p className="admin-msg" style={{ marginTop: "0.75rem" }}>
+                  まだ参加している人はいません。招待コードを共有して参加を促しましょう。
+                </p>
+              ) : (
+                <ul className="admin-list" style={{ marginTop: "0.75rem" }}>
+                  {myWorkspace.participants.map((m) => (
+                    <li key={m.id} className="admin-list-item">
+                      <span>参加者（{m.userId.slice(0, 8)}…）</span>
+                      <span>{formatDate(m.createdAt)} 参加</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p style={{ marginTop: "0.75rem" }}>
+                <Link href="/creator/learners" className="admin-link">
+                  クリエイター画面で詳しく見る →
+                </Link>
+              </p>
+            </section>
+          ) : null}
+
+          <section className="admin-card">
+            <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.35rem" }}>学習者の全体像</h2>
+            <p className="admin-hint" style={{ marginTop: 0, marginBottom: "0.85rem" }}>
+              登録学習者と、登録なしでコンテンツを利用した端末の数です。
+            </p>
+            <div className="admin-stat-grid">
               <StatCard
                 label="学習者（合計）"
                 value={learnerTotal}
@@ -107,7 +212,6 @@ export default function AdminUsersPage() {
             </div>
             <p className="admin-hint" style={{ marginTop: "0.85rem", marginBottom: 0 }}>
               登録なしの利用者は、九九・県庁所在地・公開教材（/play）などをログインなしで開いた端末を数えています。
-              同一人物が登録アカウントと登録なしの両方で利用した場合、両方にカウントされることがあります。
             </p>
             <button
               type="button"
@@ -116,7 +220,7 @@ export default function AdminUsersPage() {
               disabled={loading}
               onClick={() => {
                 setLoading(true);
-                void reload().finally(() => setLoading(false));
+                void reload(uid).finally(() => setLoading(false));
               }}
             >
               再読み込み
