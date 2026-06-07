@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CreatorShell } from "@/components/creator/CreatorShell";
+import { listMembersForWorkspace } from "@/lib/workspaces/members";
+import type { WorkspaceMemberDoc } from "@/lib/workspaces/types";
 import { formatBytes, usagePercent } from "@/lib/billing/usage";
 import { listBillingTiers } from "@/lib/billing/tiers";
 import type { BillingTierDoc } from "@/lib/billing/types";
@@ -13,6 +15,7 @@ import { subscribeAuth } from "@/lib/firebase/auth-client";
 
 export default function CreatorDashboardPage() {
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
+  const [members, setMembers] = useState<WorkspaceMemberDoc[]>([]);
   const [purchaseStatus, setPurchaseStatus] = useState<string>("none");
   const [tiers, setTiers] = useState<BillingTierDoc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,11 @@ export default function CreatorDashboardPage() {
           setPurchaseStatus(profile?.appPurchase.status ?? "none");
           setWs(workspace);
           setTiers(tierList);
+          if (workspace) {
+            setMembers(await listMembersForWorkspace(workspace.id));
+          } else {
+            setMembers([]);
+          }
         } finally {
           setLoading(false);
         }
@@ -67,6 +75,31 @@ export default function CreatorDashboardPage() {
         <p style={{ fontSize: "0.9rem", color: "var(--admin-muted)" }}>
           URL ID: <code>{ws.slug}</code> · 招待コード:{" "}
           <strong style={{ letterSpacing: "0.12em" }}>{ws.inviteCode}</strong>
+        </p>
+      </section>
+
+      <section className="admin-card" style={{ marginBottom: "1rem" }}>
+        <h2 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
+          教材に参加している人（{members.length}）
+        </h2>
+        {members.length === 0 ? (
+          <p className="admin-msg" style={{ marginTop: "0.5rem" }}>
+            まだ参加している人はいません。招待コードを共有して、教材への参加を促しましょう。
+          </p>
+        ) : (
+          <ul className="admin-list" style={{ marginTop: "0.5rem" }}>
+            {members.slice(0, 5).map((m) => (
+              <li key={m.id} className="admin-list-item">
+                <span>参加者（{m.userId.slice(0, 8)}…）</span>
+                <span>{new Date(m.createdAt).toLocaleDateString("ja-JP")} 参加</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p style={{ marginTop: "0.75rem" }}>
+          <Link href="/creator/learners" className="admin-link">
+            参加している人をすべて見る →
+          </Link>
         </p>
       </section>
 

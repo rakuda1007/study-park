@@ -529,10 +529,46 @@ body {
   margin: 0;
 }
 
+.home-footer__session {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
 .home-footer__status {
-  margin: 0 0 0.65rem;
+  margin: 0;
   font-size: 0.8rem;
   color: var(--home-muted);
+}
+
+.home-footer .session-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.home-footer .session-mode-badge--admin {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+}
+
+.home-footer .session-mode-badge--creator {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+}
+
+.home-footer .session-mode-badge--learner {
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
 }
 
 .home-footer__links {

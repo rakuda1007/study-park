@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
+import { sessionModeMeta } from "@/lib/auth/session-display";
 import {
   homePathForSession,
   resolveAuthSession,
@@ -9,18 +11,6 @@ import {
   waitForAuthReady,
   type AuthSessionKind,
 } from "@/lib/firebase/auth-client";
-
-const SESSION_LABEL: Record<AuthSessionKind, string> = {
-  admin: "管理者",
-  creator: "クリエイター（教材オーナー）",
-  learner: "学習者",
-};
-
-const DASHBOARD_LABEL: Record<AuthSessionKind, string> = {
-  admin: "コンテンツ一覧へ",
-  creator: "教材一覧へ",
-  learner: "学習者ホームへ",
-};
 
 export function HomeAuthNav() {
   const [ready, setReady] = useState(false);
@@ -59,18 +49,20 @@ export function HomeAuthNav() {
   }
 
   if (session) {
+    const meta = sessionModeMeta(session);
     const dashboardHref = homePathForSession(session);
     return (
       <nav className="home-footer__nav" aria-label="アカウント">
-        <p className="home-footer__status">
-          ログイン中（{SESSION_LABEL[session]}）
-        </p>
+        <div className="home-footer__session">
+          <SessionModeBadge kind={session} />
+          <p className="home-footer__status">{meta.homeStatus}</p>
+        </div>
         <div className="home-footer__links">
           <Link href={dashboardHref} className="home-footer__link">
-            {DASHBOARD_LABEL[session]}
+            {meta.dashboardLinkLabel}
           </Link>
           <Link href="/login" className="home-footer__link">
-            別アカウントでログイン
+            別のアカウントでログイン
           </Link>
         </div>
       </nav>

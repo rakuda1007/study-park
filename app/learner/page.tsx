@@ -13,8 +13,9 @@ import { listPublishedContentsForMember } from "@/lib/workspaces/content-firesto
 import { getWorkspace } from "@/lib/workspaces/firestore";
 import { listWorkspacesForLearner } from "@/lib/workspaces/members";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
+import { LearnerShell } from "@/components/learner/LearnerShell";
 import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
-import { signOutUser, subscribeAuth } from "@/lib/firebase/auth-client";
+import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifest from "@/public/content-manifest.json";
 
 type Row = {
@@ -100,35 +101,21 @@ export default function LearnerHomePage() {
   );
 
   return (
-    <div className="admin-shell" style={{ padding: "1.5rem" }}>
-      <header className="admin-header">
-        <h1 className="admin-title">学習者ホーム</h1>
-        <nav className="admin-nav">
-          <Link href="/?park=1" className="admin-link">
-            Study Park トップ
-          </Link>
-          <button
-            type="button"
-            className="admin-btn"
-            onClick={() => void signOutUser().then(() => (window.location.href = "/"))}
-          >
-            ログアウト
-          </button>
-        </nav>
-      </header>
-
-      <p className="admin-msg" style={{ marginBottom: "1rem" }}>
-        九九・県庁所在地は <Link href="/?park=1">トップページ</Link> から無料で利用できます。
-        招待された教材はこのページから学習してください。
+    <LearnerShell>
+      <p className="admin-msg learner-welcome-msg">
+        ここから、参加している教材を選んで学習できます。九九・県庁所在地は{" "}
+        <Link href="/?park=1">トップページ</Link> からいつでも無料で利用できます。
       </p>
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
       {!loading && rows.length === 0 ? (
         <section className="admin-card">
-          <p>参加している教材がありません。</p>
+          <p>まだ参加している教材がありません。</p>
           <p>
-            <Link href="/signup/learner">招待コードで参加</Link>
+            クリエイターから届いた招待コードがあれば、
+            <Link href="/signup/learner"> こちらから参加</Link>
+            できます。
           </p>
         </section>
       ) : null}
@@ -151,6 +138,6 @@ export default function LearnerHomePage() {
           )}
         </section>
       ))}
-    </div>
+    </LearnerShell>
   );
 }

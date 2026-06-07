@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SessionModeBar } from "@/components/auth/SessionModeBar";
+import { CreatorLearnerSummary } from "@/components/creator/CreatorLearnerSummary";
 import { useCreatorTheme } from "@/components/creator/CreatorThemeProvider";
 import type { CreatorTheme } from "@/lib/creator/theme";
 import { signOutUser } from "@/lib/firebase/auth-client";
@@ -23,8 +25,14 @@ export function CreatorShell({
 
   return (
     <div className="admin-shell">
-      <header className="admin-header">
-        <h1 className="admin-title">{title}</h1>
+      <header className="admin-header admin-header--stacked">
+        <div className="admin-header__lead">
+          <SessionModeBar
+            kind="creator"
+            extra={<CreatorLearnerSummary compact />}
+          />
+          <h1 className="admin-title">{title}</h1>
+        </div>
         <nav className="admin-nav" aria-label="クリエイターメニュー">
           <label className="admin-theme-toggle" htmlFor="creator-theme">
             <span className="admin-theme-toggle__label">表示</span>
@@ -45,7 +53,7 @@ export function CreatorShell({
             教材一覧
           </Link>
           <Link href="/creator/learners" className="admin-link">
-            学習者
+            参加している人
           </Link>
           <Link href="/" className="admin-link" title="ログアウトせず公園トップを表示">
             Study Park トップ

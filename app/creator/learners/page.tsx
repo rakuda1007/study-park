@@ -34,7 +34,7 @@ export default function CreatorLearnersPage() {
 
   if (loading) {
     return (
-      <CreatorShell title="学習者">
+      <CreatorShell title="参加している人">
         <p className="admin-loading">読み込み中…</p>
       </CreatorShell>
     );
@@ -56,15 +56,19 @@ export default function CreatorLearnersPage() {
             <br />
             上記で招待コードを入力して参加します。公開を「リンク共有」にした教材はログインなしでも学習できます。
           </p>
-          <h2 style={{ fontSize: "1rem", margin: "1.25rem 0 0.5rem" }}>参加済み（{members.length}）</h2>
+          <h2 style={{ fontSize: "1rem", margin: "1.25rem 0 0.5rem" }}>
+            教材に参加している人（{members.length}）
+          </h2>
           {members.length === 0 ? (
-            <p className="admin-msg">まだ学習者がいません。</p>
+            <p className="admin-msg">
+              まだ参加している人はいません。招待コードを共有して、教材への参加を促しましょう。
+            </p>
           ) : (
             <ul className="admin-list">
               {members.map((m) => (
                 <li key={m.id} className="admin-list-item">
-                  <span>UID: {m.userId}</span>
-                  <span>{new Date(m.createdAt).toLocaleDateString("ja-JP")}</span>
+                  <span>参加者（{m.userId.slice(0, 8)}…）</span>
+                  <span>{new Date(m.createdAt).toLocaleDateString("ja-JP")} 参加</span>
                 </li>
               ))}
             </ul>

@@ -34,10 +34,138 @@
   border-top: 1px solid var(--admin-border);
 }
 
+.admin-header--stacked {
+  align-items: flex-start;
+}
+
+.admin-header__lead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
 .admin-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
+}
+
+.session-mode-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.session-mode-bar__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--admin-muted);
+}
+
+.session-mode-bar__extra {
+  margin-top: 0.15rem;
+}
+
+.session-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.session-mode-badge--admin {
+  color: #7c2d12;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
+}
+
+.session-mode-badge--creator {
+  color: #1e3a8a;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+}
+
+.session-mode-badge--learner {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.session-mode-learner-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--admin-accent);
+  background: rgba(107, 140, 255, 0.1);
+  border: 1px solid rgba(107, 140, 255, 0.25);
+  text-decoration: none;
+}
+
+.session-mode-learner-chip:hover {
+  background: rgba(107, 140, 255, 0.18);
+}
+
+.session-mode-learner-chip strong {
+  font-weight: 800;
+}
+
+.session-mode-learner-summary {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--admin-text);
+}
+
+.session-mode-learner-summary a {
+  color: var(--admin-accent);
+  text-decoration: none;
+}
+
+.session-mode-learner-summary a:hover {
+  text-decoration: underline;
+}
+
+.session-mode-learner-summary__note {
+  color: var(--admin-muted);
+  font-size: 0.82rem;
+}
+
+.learner-welcome-msg {
+  margin-bottom: 1rem;
+}
+
+.admin-root--light .session-mode-badge--admin {
+  color: #9a3412;
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.admin-root--light .session-mode-badge--creator {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.admin-root--light .session-mode-badge--learner {
+  color: #15803d;
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.admin-root--light .session-mode-learner-chip {
+  color: #3d5fc4;
+  background: #eef0fb;
+  border-color: #c5d0f5;
 }
 
 .admin-nav {
