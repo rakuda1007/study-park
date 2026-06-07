@@ -152,7 +152,7 @@ export type ContentPeriodGroup<T> = {
   items: T[];
 };
 
-/** 作成年月ごとにグループ化（新しい月が上） */
+/** 作成年月ごとにグループ化（古い月が上） */
 export function groupByContentPeriod<T>(
   items: T[],
   getPeriod: (item: T) => ContentPeriod,
@@ -176,7 +176,7 @@ export function groupByContentPeriod<T>(
   }
   return [...buckets.values()]
     .sort(
-      (a, b) => contentPeriodToSortKey(b.period) - contentPeriodToSortKey(a.period),
+      (a, b) => contentPeriodToSortKey(a.period) - contentPeriodToSortKey(b.period),
     )
     .map((bucket) => ({
       key: contentPeriodKey(bucket.period),
