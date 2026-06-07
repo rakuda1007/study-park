@@ -1,3 +1,4 @@
+import { HomeGuestCta } from "@/components/home/HomeGuestCta";
 import { HomeNav } from "@/components/home/HomeNav";
 import { HomeTopbar } from "@/components/home/HomeTopbar";
 import { HomePwaLanding } from "@/components/home/HomePwaLanding";
@@ -36,6 +37,7 @@ export default function Home() {
             <p className="home-hero__lead">
               好きなコンテンツを選んで、今日からスタート。九九や県庁所在地は登録なしで今すぐ学べます。
             </p>
+            <HomeGuestCta />
           </div>
         </section>
 

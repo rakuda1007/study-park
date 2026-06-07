@@ -355,6 +355,39 @@ body {
   color: var(--home-muted);
 }
 
+.home-hero__cta-wrap {
+  margin-top: 1.1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.home-hero__cta {
+  display: inline-block;
+  padding: 0.85rem 1.85rem;
+  border-radius: 999px;
+  background: var(--home-warm);
+  color: #1a1f2e;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(232, 168, 46, 0.35);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.home-hero__cta:hover {
+  color: #1a1f2e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(232, 168, 46, 0.45);
+}
+
+.home-hero__cta:active {
+  transform: translateY(0);
+}
+
 .home-hero__note {
   margin: 0;
   font-size: 0.84rem;
