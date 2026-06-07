@@ -84,7 +84,7 @@ export async function createUserProfile(
   return mapUser(uid, snap.data() ?? payload);
 }
 
-export async function updateLearnerProfile(
+export async function updateUserProfile(
   uid: string,
   input: { familyName: string; givenName: string },
 ): Promise<void> {
@@ -101,12 +101,15 @@ export async function updateLearnerProfile(
   });
 }
 
+/** @deprecated updateUserProfile を使用 */
+export const updateLearnerProfile = updateUserProfile;
+
 /** 既存学習者で姓名未登録の場合に初期値を入れる（移行用） */
 export async function backfillLearnerNamesIfEmpty(uid: string): Promise<void> {
   const profile = await getUserProfile(uid);
   if (!profile || profile.role !== "learner") return;
   if (profile.familyName?.trim() || profile.givenName?.trim()) return;
-  await updateLearnerProfile(uid, { familyName: "奥田", givenName: "柑菜" });
+  await updateUserProfile(uid, { familyName: "奥田", givenName: "柑菜" });
 }
 
 export async function updateUserAppPurchase(

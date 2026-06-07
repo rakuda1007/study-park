@@ -7,16 +7,49 @@ export type ShellMenuItem = {
   label: string;
   href: string;
   title?: string;
+  /** この項目の直前に区切り線を表示 */
+  dividerBefore?: boolean;
 };
 
 type Props = {
   items: ShellMenuItem[];
+  /** 区切り線の下（フッター直上）に表示する項目 */
+  bottomItems?: ShellMenuItem[];
   footer?: React.ReactNode;
   ariaLabel?: string;
 };
 
+function MenuLinks({
+  items,
+  onNavigate,
+}: {
+  items: ShellMenuItem[];
+  onNavigate: () => void;
+}) {
+  return (
+    <>
+      {items.map((item) => (
+        <li
+          key={`${item.href}-${item.label}`}
+          className={item.dividerBefore ? "shell-menu__item--divider" : undefined}
+        >
+          <Link
+            href={item.href}
+            className="shell-menu__link"
+            title={item.title}
+            onClick={onNavigate}
+          >
+            {item.label}
+          </Link>
+        </li>
+      ))}
+    </>
+  );
+}
+
 export function ShellHamburgerMenu({
   items,
+  bottomItems = [],
   footer,
   ariaLabel = "メニュー",
 }: Props) {
@@ -42,6 +75,10 @@ export function ShellHamburgerMenu({
     };
   }, [open]);
 
+  function close() {
+    setOpen(false);
+  }
+
   return (
     <div className="shell-menu" ref={rootRef}>
       <button
@@ -61,19 +98,13 @@ export function ShellHamburgerMenu({
       {open ? (
         <nav id={panelId} className="shell-menu__panel" aria-label={ariaLabel}>
           <ul className="shell-menu__list">
-            {items.map((item) => (
-              <li key={`${item.href}-${item.label}`}>
-                <Link
-                  href={item.href}
-                  className="shell-menu__link"
-                  title={item.title}
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            <MenuLinks items={items} onNavigate={close} />
           </ul>
+          {bottomItems.length > 0 ? (
+            <ul className="shell-menu__list shell-menu__list--bottom">
+              <MenuLinks items={bottomItems} onNavigate={close} />
+            </ul>
+          ) : null}
           {footer ? <div className="shell-menu__footer">{footer}</div> : null}
         </nav>
       ) : null}

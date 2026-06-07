@@ -8,11 +8,14 @@ import { useCreatorTheme } from "@/components/creator/CreatorThemeProvider";
 import type { CreatorTheme } from "@/lib/creator/theme";
 import { signOutUser } from "@/lib/firebase/auth-client";
 
-const CREATOR_MENU_ITEMS = [
+const CREATOR_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
   { label: "参加者", href: "/creator/learners" },
   { label: "利用状況", href: "/creator/usage" },
+  { label: "学習者ホーム", href: "/learner" },
 ];
+
+const CREATOR_MENU_BOTTOM = [{ label: "プロフィール", href: "/creator/profile" }];
 
 export function CreatorShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -37,7 +40,8 @@ export function CreatorShell({ children }: { children: React.ReactNode }) {
             ログアウト
           </button>
           <ShellHamburgerMenu
-            items={CREATOR_MENU_ITEMS}
+            items={CREATOR_MENU_MAIN}
+            bottomItems={CREATOR_MENU_BOTTOM}
             ariaLabel="クリエイターメニュー"
             footer={
               <label className="admin-theme-toggle" htmlFor="creator-theme">

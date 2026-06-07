@@ -1,15 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
 import { ShellHamburgerMenu } from "@/components/shell/ShellHamburgerMenu";
-import { signOutUser } from "@/lib/firebase/auth-client";
+import {
+  resolveAuthSession,
+  signOutUser,
+  subscribeAuth,
+  type AuthSessionKind,
+} from "@/lib/firebase/auth-client";
 
-const LEARNER_MENU_ITEMS = [
+const LEARNER_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
   { label: "学習者ホーム", href: "/learner" },
-  { label: "プロフィール", href: "/learner/profile" },
 ];
+
+const LEARNER_MENU_BOTTOM = [{ label: "プロフィール", href: "/learner/profile" }];
 
 export function LearnerShell({
   title = "あなたの学習",
@@ -19,6 +26,16 @@ export function LearnerShell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [badgeKind, setBadgeKind] = useState<AuthSessionKind>("learner");
+
+  useEffect(() => {
+    const unsub = subscribeAuth((user) => {
+      void resolveAuthSession(user).then((kind) => {
+        if (kind) setBadgeKind(kind);
+      });
+    });
+    return unsub;
+  }, []);
 
   async function logout() {
     await signOutUser();
@@ -30,13 +47,17 @@ export function LearnerShell({
       <header className="admin-header shell-header">
         <div className="shell-header__title-row">
           <h1 className="admin-title shell-header__title">{title}</h1>
-          <SessionModeBadge kind="learner" />
+          <SessionModeBadge kind={badgeKind} />
         </div>
         <div className="shell-header__actions">
           <button type="button" className="admin-btn" onClick={() => void logout()}>
             ログアウト
           </button>
-          <ShellHamburgerMenu items={LEARNER_MENU_ITEMS} ariaLabel="学習メニュー" />
+          <ShellHamburgerMenu
+            items={LEARNER_MENU_MAIN}
+            bottomItems={LEARNER_MENU_BOTTOM}
+            ariaLabel="学習メニュー"
+          />
         </div>
       </header>
       {children}

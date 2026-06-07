@@ -8,12 +8,15 @@ import { useAdminTheme } from "@/components/admin/AdminThemeProvider";
 import type { AdminTheme } from "@/lib/admin/theme";
 import { signOutAdmin } from "@/lib/firebase/auth-client";
 
-const ADMIN_MENU_ITEMS = [
+const ADMIN_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
   { label: "コンテンツ一覧", href: "/admin/contents" },
   { label: "学習者招待", href: "/admin/invitations" },
-  { label: "利用者", href: "/admin/users" },
+  { label: "利用者一覧", href: "/admin/users" },
+  { label: "学習者ホーム", href: "/learner" },
 ];
+
+const ADMIN_MENU_BOTTOM = [{ label: "プロフィール", href: "/admin/profile" }];
 
 export function AdminShell({
   title,
@@ -44,7 +47,8 @@ export function AdminShell({
             ログアウト
           </button>
           <ShellHamburgerMenu
-            items={ADMIN_MENU_ITEMS}
+            items={ADMIN_MENU_MAIN}
+            bottomItems={ADMIN_MENU_BOTTOM}
             ariaLabel="管理メニュー"
             footer={
               <label className="admin-theme-toggle" htmlFor="admin-theme">

@@ -10,7 +10,7 @@ import {
 import type { ContentManifest } from "@/lib/content/types";
 import { listPublicSubjects } from "@/lib/content/public-firestore";
 import { listPublishedContentsForMember } from "@/lib/workspaces/content-firestore";
-import { getWorkspace } from "@/lib/workspaces/firestore";
+import { getWorkspace, getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import { listWorkspacesForLearner } from "@/lib/workspaces/members";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 import { LearnerShell } from "@/components/learner/LearnerShell";
@@ -67,20 +67,32 @@ export default function LearnerHomePage() {
         if (!user) return;
         try {
           await backfillLearnerNamesIfEmpty(user.uid);
-          const [memberships, subjects] = await Promise.all([
+          const [memberships, subjects, ownedWs] = await Promise.all([
             listWorkspacesForLearner(user.uid),
             listPublicSubjects(),
+            getWorkspaceByOwner(user.uid),
           ]);
           setSubjectNames(buildSubjectNameMap(manifest, subjects));
           const data: Row[] = [];
+          const seen = new Set<string>();
           for (const m of memberships) {
             const ws = await getWorkspace(m.workspaceId);
             if (!ws) continue;
+            seen.add(m.workspaceId);
             const contents = await listPublishedContentsForMember(m.workspaceId);
             data.push({
               workspaceId: m.workspaceId,
               workspaceName: ws.name,
               workspaceSlug: ws.slug,
+              contents,
+            });
+          }
+          if (ownedWs && !seen.has(ownedWs.id)) {
+            const contents = await listPublishedContentsForMember(ownedWs.id);
+            data.push({
+              workspaceId: ownedWs.id,
+              workspaceName: ownedWs.name,
+              workspaceSlug: ownedWs.slug,
               contents,
             });
           }

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getUserProfile } from "@/lib/users/firestore";
-import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
+import { isAdminUser, subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 
 export function LearnerGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -18,13 +18,18 @@ export function LearnerGate({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
       unsub = subscribeAuth(async (user) => {
         if (!user) {
-          router.replace("/signup/learner");
+          router.replace("/login?next=/learner");
           setAllowed(false);
           setReady(true);
           return;
         }
-        const profile = await getUserProfile(user.uid);
-        if (!profile || profile.role !== "learner") {
+        const [profile, admin] = await Promise.all([
+          getUserProfile(user.uid),
+          isAdminUser(user),
+        ]);
+        const canPreview =
+          admin || profile?.role === "learner" || profile?.role === "creator";
+        if (!canPreview) {
           router.replace("/signup/learner");
           setAllowed(false);
           setReady(true);

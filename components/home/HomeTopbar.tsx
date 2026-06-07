@@ -15,39 +15,50 @@ import {
   type AuthSessionKind,
 } from "@/lib/firebase/auth-client";
 
-function menuItemsForSession(session: AuthSessionKind | null): ShellMenuItem[] {
+type HomeMenuConfig = {
+  items: ShellMenuItem[];
+  bottomItems: ShellMenuItem[];
+};
+
+function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
   if (!session) {
-    return [
-      { label: "ログイン", href: "/login" },
-      { label: "学習者登録", href: "/signup/learner" },
-      { label: "教材を作る", href: "/signup/creator" },
-    ];
+    return {
+      items: [
+        { label: "ログイン", href: "/login" },
+        { label: "学習者登録", href: "/signup/learner" },
+        { label: "教材を作る", href: "/signup/creator" },
+      ],
+      bottomItems: [],
+    };
   }
 
   const meta = sessionModeMeta(session);
   const items: ShellMenuItem[] = [];
+  const bottomItems: ShellMenuItem[] = [];
 
   if (session === "admin") {
     items.push(
       { label: "コンテンツ一覧", href: "/admin/contents" },
       { label: "学習者招待", href: "/admin/invitations" },
-      { label: "利用者", href: "/admin/users" },
+      { label: "利用者一覧", href: "/admin/users" },
+      { label: "学習者ホーム", href: "/learner" },
     );
-  } else {
+    bottomItems.push({ label: "プロフィール", href: "/admin/profile" });
+  } else if (session === "creator") {
     items.push({ label: meta.dashboardLinkLabel, href: homePathForSession(session) });
-  }
-
-  if (session === "creator") {
     items.push(
       { label: "参加者", href: "/creator/learners" },
       { label: "利用状況", href: "/creator/usage" },
+      { label: "学習者ホーム", href: "/learner" },
     );
+    bottomItems.push({ label: "プロフィール", href: "/creator/profile" });
   } else if (session === "learner") {
-    items.push({ label: "プロフィール", href: "/learner/profile" });
+    items.push({ label: meta.dashboardLinkLabel, href: homePathForSession(session) });
+    bottomItems.push({ label: "プロフィール", href: "/learner/profile" });
   }
 
-  items.push({ label: "別のアカウントでログイン", href: "/login" });
-  return items;
+  bottomItems.push({ label: "別のアカウントでログイン", href: "/login" });
+  return { items, bottomItems };
 }
 
 export function HomeTopbar() {
@@ -77,7 +88,7 @@ export function HomeTopbar() {
     };
   }, []);
 
-  const menuItems = useMemo(() => menuItemsForSession(session), [session]);
+  const menu = useMemo(() => menuItemsForSession(session), [session]);
 
   async function logout() {
     await signOutUser();
@@ -117,7 +128,11 @@ export function HomeTopbar() {
               ログイン
             </Link>
           )}
-          <ShellHamburgerMenu items={menuItems} ariaLabel="Study Park メニュー" />
+          <ShellHamburgerMenu
+            items={menu.items}
+            bottomItems={menu.bottomItems}
+            ariaLabel="Study Park メニュー"
+          />
         </div>
       </div>
     </header>

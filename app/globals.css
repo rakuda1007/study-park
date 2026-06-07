@@ -258,6 +258,14 @@ body {
   color: var(--home-accent);
 }
 
+.home .shell-menu__list--bottom {
+  border-top: 1px solid var(--home-border);
+}
+
+.home .shell-menu__item--divider .shell-menu__link {
+  border-top: 1px solid var(--home-border);
+}
+
 .home-hero {
   padding: 1rem 1.25rem 1.5rem;
   background: #fff;
