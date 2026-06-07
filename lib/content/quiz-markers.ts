@@ -9,7 +9,12 @@ export function defaultQuizBlankMarker(index: number): string {
   return `（${index + 1}）`;
 }
 
-/** エディタの空欄記号挿入用（①〜⑳） */
-export function listQuizBlankMarkers(count = QUIZ_BLANK_MARKER_COUNT): string[] {
-  return Array.from({ length: count }, (_, i) => defaultQuizBlankMarker(i));
+/** 問題文に挿入する空欄記号（「①」形式） */
+export function quizBlankMarkerForInsert(index: number): string {
+  return `「${defaultQuizBlankMarker(index)}」`;
+}
+
+/** エディタの空欄記号挿入用（「①」〜「⑳」） */
+export function listQuizBlankMarkersForInsert(count = QUIZ_BLANK_MARKER_COUNT): string[] {
+  return Array.from({ length: count }, (_, i) => quizBlankMarkerForInsert(i));
 }

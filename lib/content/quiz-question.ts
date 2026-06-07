@@ -3,6 +3,21 @@ import type { LessonBlock, QuizQuestion } from "./types";
 /** 新規クイズ問題の本文デフォルト（空欄記号はエディタから挿入） */
 export const DEFAULT_QUIZ_QUESTION_BODY = "";
 
+/** 旧デフォルト本文（読み込み時に空へ正規化する） */
+export const LEGACY_DEFAULT_QUIZ_QUESTION_BODY = "①②③④⑤⑥⑦⑧";
+
+export function stripLegacyDefaultQuizBody(text: string): string {
+  return text === LEGACY_DEFAULT_QUIZ_QUESTION_BODY ? "" : text;
+}
+
+function normalizeParagraphBlocks(blocks: LessonBlock[]): LessonBlock[] {
+  return blocks.map((block) =>
+    block.kind === "paragraph"
+      ? { ...block, text: stripLegacyDefaultQuizBody(block.text) }
+      : block,
+  );
+}
+
 /** 段落ブロックから template 文字列を生成（空欄記号は段落内に含める） */
 export function templateFromBlocks(blocks: LessonBlock[]): string {
   return blocks
@@ -13,11 +28,15 @@ export function templateFromBlocks(blocks: LessonBlock[]): string {
 
 export function normalizeQuizQuestion(q: QuizQuestion): QuizQuestion {
   if (q.blocks && q.blocks.length > 0) {
-    return { ...q, template: templateFromBlocks(q.blocks) || q.template };
+    const blocks = normalizeParagraphBlocks(q.blocks);
+    const template = templateFromBlocks(blocks) || stripLegacyDefaultQuizBody(q.template);
+    return { ...q, blocks, template };
   }
+  const text = stripLegacyDefaultQuizBody(q.template);
   return {
     ...q,
-    blocks: [{ kind: "paragraph", text: q.template }],
+    template: text,
+    blocks: [{ kind: "paragraph", text }],
   };
 }
 

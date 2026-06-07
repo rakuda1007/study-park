@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RichTextContent } from "@/lib/content/rich-text-react";
 import { RICH_TEXT_HELP } from "@/lib/content/rich-text";
-import { listQuizBlankMarkers } from "@/lib/content/quiz-markers";
+import { listQuizBlankMarkersForInsert } from "@/lib/content/quiz-markers";
 
 type Props = {
   id?: string;
@@ -41,21 +41,22 @@ function wrapSelection(
   });
 }
 
-function insertAtCursor(
-  textarea: HTMLTextAreaElement,
+function insertAtRange(
+  textarea: HTMLTextAreaElement | null,
   value: string,
   onChange: (v: string) => void,
   insert: string,
+  start: number,
+  end: number,
 ) {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
   const next = value.slice(0, start) + insert + value.slice(end);
   onChange(next);
   const pos = start + insert.length;
   requestAnimationFrame(() => {
-    textarea.focus();
-    textarea.setSelectionRange(pos, pos);
+    textarea?.focus();
+    textarea?.setSelectionRange(pos, pos);
   });
+  return { start: pos, end: pos };
 }
 
 function insertBulletLine(
@@ -90,12 +91,28 @@ export function RichTextArea({
   showBlankMarkers = false,
 }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  const selectionRef = useRef({ start: 0, end: 0 });
   const [previewOpen, setPreviewOpen] = useState(false);
   const [markerSelect, setMarkerSelect] = useState("");
 
   useEffect(() => {
     if (!value.trim()) setPreviewOpen(false);
   }, [value]);
+
+  const captureSelection = () => {
+    const ta = ref.current;
+    if (!ta) return;
+    selectionRef.current = {
+      start: ta.selectionStart,
+      end: ta.selectionEnd,
+    };
+  };
+
+  const insertBlankMarker = (marker: string) => {
+    const { start, end } = selectionRef.current;
+    const nextPos = insertAtRange(ref.current, value, onChange, marker, start, end);
+    selectionRef.current = nextPos;
+  };
 
   const run = (fn: (ta: HTMLTextAreaElement) => void) => {
     const ta = ref.current;
@@ -156,21 +173,36 @@ export function RichTextArea({
           >
             ・リスト
           </button>
+          {showBlankMarkers
+            ? listQuizBlankMarkersForInsert(8).map((marker) => (
+                <button
+                  key={marker}
+                  type="button"
+                  className="admin-btn admin-btn--compact admin-rich-marker-btn"
+                  title={`空欄記号 ${marker} を挿入`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => insertBlankMarker(marker)}
+                >
+                  {marker}
+                </button>
+              ))
+            : null}
           {showBlankMarkers ? (
             <select
               className="admin-rich-marker-select"
               value={markerSelect}
-              title="空欄記号（①②…）をカーソル位置に挿入"
-              aria-label="空欄記号を挿入"
+              title="空欄記号（「⑨」〜「⑳」）をカーソル位置に挿入"
+              aria-label="空欄記号を挿入（⑨以降）"
+              onPointerDown={captureSelection}
               onChange={(e) => {
                 const marker = e.target.value;
                 if (!marker) return;
-                run((ta) => insertAtCursor(ta, value, onChange, marker));
+                insertBlankMarker(marker);
                 setMarkerSelect("");
               }}
             >
-              <option value="">空欄</option>
-              {listQuizBlankMarkers().map((marker) => (
+              <option value="">⑨+</option>
+              {listQuizBlankMarkersForInsert().slice(8).map((marker) => (
                 <option key={marker} value={marker}>
                   {marker}
                 </option>
@@ -184,6 +216,11 @@ export function RichTextArea({
           className={resizable ? "admin-rich-textarea--resizable" : undefined}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onSelect={captureSelection}
+          onKeyUp={captureSelection}
+          onMouseUp={captureSelection}
+          onClick={captureSelection}
+          onFocus={captureSelection}
           rows={rows}
         />
         {showHint ? <p className="admin-field-hint">{RICH_TEXT_HELP}</p> : null}

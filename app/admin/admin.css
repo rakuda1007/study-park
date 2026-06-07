@@ -648,6 +648,12 @@
   margin-top: 0.5rem;
 }
 
+.admin-rich-marker-btn {
+  min-width: 2.75rem;
+  padding-inline: 0.35rem;
+  font-size: 0.75rem;
+}
+
 .admin-rich-marker-select {
   padding: 0.35rem 0.45rem;
   border-radius: 8px;
@@ -657,7 +663,7 @@
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
-  min-width: 3.75rem;
+  min-width: 3.25rem;
 }
 
 .admin-rich-marker-select:hover,
