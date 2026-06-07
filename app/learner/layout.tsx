@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LearnerGate } from "@/components/learner/LearnerGate";
+import { LearnerThemeProvider } from "@/components/learner/LearnerThemeProvider";
 import "../admin/admin.css";
 
 export const metadata: Metadata = {
@@ -10,9 +10,5 @@ export const metadata: Metadata = {
 export default function LearnerLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="admin-root">
-      <LearnerGate>{children}</LearnerGate>
-    </div>
-  );
+  return <LearnerThemeProvider>{children}</LearnerThemeProvider>;
 }

@@ -50,8 +50,8 @@ export function HomeAuthNav() {
 
   if (!ready) {
     return (
-      <nav className="home-auth-nav" aria-label="アカウント">
-        <span className="home-auth-nav__status" role="status">
+      <nav className="home-footer__nav" aria-label="アカウント">
+        <span className="home-footer__status" role="status">
           アカウント確認中…
         </span>
       </nav>
@@ -61,21 +61,35 @@ export function HomeAuthNav() {
   if (session) {
     const dashboardHref = homePathForSession(session);
     return (
-      <nav className="home-auth-nav" aria-label="アカウント">
-        <p className="home-auth-nav__status">
+      <nav className="home-footer__nav" aria-label="アカウント">
+        <p className="home-footer__status">
           ログイン中（{SESSION_LABEL[session]}）
         </p>
-        <Link href={dashboardHref}>{DASHBOARD_LABEL[session]}</Link>
-        <Link href="/login">別アカウントでログイン</Link>
+        <div className="home-footer__links">
+          <Link href={dashboardHref} className="home-footer__link">
+            {DASHBOARD_LABEL[session]}
+          </Link>
+          <Link href="/login" className="home-footer__link">
+            別アカウントでログイン
+          </Link>
+        </div>
       </nav>
     );
   }
 
   return (
-    <nav className="home-auth-nav" aria-label="アカウント">
-      <Link href="/login">ログイン</Link>
-      <Link href="/signup/creator">教材を作る（クリエイター）</Link>
-      <Link href="/signup/learner">学習者登録</Link>
+    <nav className="home-footer__nav" aria-label="アカウント">
+      <div className="home-footer__links">
+        <Link href="/login" className="home-footer__link">
+          ログイン
+        </Link>
+        <Link href="/signup/creator" className="home-footer__link">
+          教材を作る（クリエイター）
+        </Link>
+        <Link href="/signup/learner" className="home-footer__link">
+          学習者登録
+        </Link>
+      </div>
     </nav>
   );
 }

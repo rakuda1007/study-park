@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { HomeSubjectMenu } from "@/lib/content/manifest-home";
 import { mergeHomeMenus } from "@/lib/content/merge-menus";
 import {
@@ -16,16 +16,32 @@ type MenuItem = {
   ready: boolean;
 };
 
+const ITEM_HINTS: Record<string, string> = {
+  九九: "くり返し練習で身につける",
+  県庁所在地: "47都道府県をマスター",
+};
+
+function subjectAccentClass(subject: string): string {
+  if (subject === "算数") return "home-subject--math";
+  if (subject === "社会") return "home-subject--social";
+  if (subject === "理科") return "home-subject--science";
+  return "home-subject--default";
+}
+
 function MenuItemButton({ item }: { item: MenuItem }) {
+  const hint = ITEM_HINTS[item.label];
   const inner = (
     <>
-      <span className="menu-item-label">{item.label}</span>
+      <span className="menu-item__body">
+        <span className="menu-item-label">{item.label}</span>
+        {hint ? <span className="menu-item-hint">{hint}</span> : null}
+      </span>
       {item.ready ? (
         <span className="menu-item-arrow" aria-hidden="true">
           →
         </span>
       ) : (
-        <span className="menu-item-badge">工事中</span>
+        <span className="menu-item-badge">準備中</span>
       )}
     </>
   );
@@ -48,10 +64,18 @@ function MenuItemButton({ item }: { item: MenuItem }) {
 function SubjectSection({ group }: { group: HomeSubjectMenu }) {
   const readyCount = group.items.filter((item) => item.ready).length;
 
+  const accentClass = subjectAccentClass(group.subject);
+
   if (group.items.length === 1) {
     return (
-      <section className="home-subject" aria-labelledby={`subject-${group.subject}`}>
+      <section
+        className={`home-subject ${accentClass}`}
+        aria-labelledby={`subject-${group.subject}`}
+      >
         <h2 id={`subject-${group.subject}`} className="home-subject-name">
+          <span className="home-subject-icon" aria-hidden="true">
+            {group.subject.slice(0, 1)}
+          </span>
           {group.subject}
         </h2>
         <ul className="home-item-list">
@@ -64,9 +88,12 @@ function SubjectSection({ group }: { group: HomeSubjectMenu }) {
   }
 
   return (
-    <details className="home-subject home-subject-dropdown" open>
+    <details className={`home-subject home-subject-dropdown ${accentClass}`} open>
       <summary className="home-subject-dropdown-trigger">
         <span id={`subject-${group.subject}`} className="home-subject-name">
+          <span className="home-subject-icon" aria-hidden="true">
+            {group.subject.slice(0, 1)}
+          </span>
           {group.subject}
         </span>
         <span className="home-subject-dropdown-meta">
