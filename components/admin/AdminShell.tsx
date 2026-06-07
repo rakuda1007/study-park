@@ -1,18 +1,29 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AdminNav } from "@/components/admin/AdminNav";
-import { SessionModeBar } from "@/components/auth/SessionModeBar";
+import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
+import { ShellBrandLink } from "@/components/shell/ShellBrandLink";
+import { ShellHamburgerMenu } from "@/components/shell/ShellHamburgerMenu";
+import { useAdminTheme } from "@/components/admin/AdminThemeProvider";
+import type { AdminTheme } from "@/lib/admin/theme";
 import { signOutAdmin } from "@/lib/firebase/auth-client";
+
+const ADMIN_MENU_ITEMS = [
+  { label: "トップ", href: "/", title: "Study Park トップ" },
+  { label: "コンテンツ一覧", href: "/admin/contents" },
+  { label: "学習者招待", href: "/admin/invitations" },
+  { label: "利用者", href: "/admin/users" },
+];
 
 export function AdminShell({
   title,
   children,
 }: {
-  title: string;
+  title?: string;
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { theme, setTheme } = useAdminTheme();
 
   async function logout() {
     await signOutAdmin();
@@ -21,17 +32,39 @@ export function AdminShell({
 
   return (
     <div className="admin-shell">
-      <header className="admin-header admin-header--stacked">
-        <div className="admin-header__lead">
-          <SessionModeBar kind="admin" />
-          <h1 className="admin-title">{title}</h1>
+      <header className="admin-header shell-header">
+        <div className="shell-header__title-row">
+          <h1 className="admin-title shell-header__title">
+            <ShellBrandLink href="/" />
+          </h1>
+          <SessionModeBadge kind="admin" />
         </div>
-        <AdminNav onLogout={() => void logout()} showThemeToggle />
+        <div className="shell-header__actions">
+          <button type="button" className="admin-btn" onClick={() => void logout()}>
+            ログアウト
+          </button>
+          <ShellHamburgerMenu
+            items={ADMIN_MENU_ITEMS}
+            ariaLabel="管理メニュー"
+            footer={
+              <label className="admin-theme-toggle" htmlFor="admin-theme">
+                <span className="admin-theme-toggle__label">表示</span>
+                <select
+                  id="admin-theme"
+                  className="admin-theme-select"
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value as AdminTheme)}
+                >
+                  <option value="light">通常</option>
+                  <option value="dark">ダーク</option>
+                </select>
+              </label>
+            }
+          />
+        </div>
       </header>
+      {title ? <h2 className="shell-page-heading">{title}</h2> : null}
       {children}
-      <footer className="admin-footer">
-        <AdminNav onLogout={() => void logout()} />
-      </footer>
     </div>
   );
 }

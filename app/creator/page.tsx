@@ -1,23 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CreatorContentsSection } from "@/components/creator/CreatorContentsSection";
 import { CreatorShell } from "@/components/creator/CreatorShell";
-import { listMembersForWorkspace } from "@/lib/workspaces/members";
-import type { WorkspaceMemberDoc } from "@/lib/workspaces/types";
-import { formatBytes, usagePercent } from "@/lib/billing/usage";
-import { listBillingTiers } from "@/lib/billing/tiers";
-import type { BillingTierDoc } from "@/lib/billing/types";
-import { getUserProfile } from "@/lib/users/firestore";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 
 export default function CreatorDashboardPage() {
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
-  const [members, setMembers] = useState<WorkspaceMemberDoc[]>([]);
-  const [purchaseStatus, setPurchaseStatus] = useState<string>("none");
-  const [tiers, setTiers] = useState<BillingTierDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,19 +16,7 @@ export default function CreatorDashboardPage() {
       void (async () => {
         if (!user) return;
         try {
-          const [profile, workspace, tierList] = await Promise.all([
-            getUserProfile(user.uid),
-            getWorkspaceByOwner(user.uid),
-            listBillingTiers(),
-          ]);
-          setPurchaseStatus(profile?.appPurchase.status ?? "none");
-          setWs(workspace);
-          setTiers(tierList);
-          if (workspace) {
-            setMembers(await listMembersForWorkspace(workspace.id));
-          } else {
-            setMembers([]);
-          }
+          setWs(await getWorkspaceByOwner(user.uid));
         } finally {
           setLoading(false);
         }
@@ -48,7 +27,7 @@ export default function CreatorDashboardPage() {
 
   if (loading) {
     return (
-      <CreatorShell title="ダッシュボード">
+      <CreatorShell>
         <p className="admin-loading">読み込み中…</p>
       </CreatorShell>
     );
@@ -56,7 +35,7 @@ export default function CreatorDashboardPage() {
 
   if (!ws) {
     return (
-      <CreatorShell title="ダッシュボード">
+      <CreatorShell>
         <p className="admin-msg admin-msg--error">
           ワークスペースがありません。一度ログアウトし、クリエイター登録からやり直してください。
         </p>
@@ -64,139 +43,17 @@ export default function CreatorDashboardPage() {
     );
   }
 
-  const storagePct = usagePercent(ws.storageBytesUsed, ws.storageBytesLimit);
-  const questionPct = usagePercent(ws.questionCount, ws.questionCountLimit);
-  const currentTier = tiers.find((t) => t.id === ws.planId);
-
   return (
-    <CreatorShell title="ダッシュボード">
-      <section className="admin-card" style={{ marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1.1rem", margin: "0 0 0.5rem" }}>{ws.name}</h2>
-        <p style={{ fontSize: "0.9rem", color: "var(--admin-muted)" }}>
-          URL ID: <code>{ws.slug}</code> · 招待コード:{" "}
-          <strong style={{ letterSpacing: "0.12em" }}>{ws.inviteCode}</strong>
-        </p>
-      </section>
-
-      <section className="admin-card" style={{ marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>
-          教材に参加している人（{members.length}）
-        </h2>
-        {members.length === 0 ? (
-          <p className="admin-msg" style={{ marginTop: "0.5rem" }}>
-            まだ参加している人はいません。招待コードを共有して、教材への参加を促しましょう。
-          </p>
-        ) : (
-          <ul className="admin-list" style={{ marginTop: "0.5rem" }}>
-            {members.slice(0, 5).map((m) => (
-              <li key={m.id} className="admin-list-item">
-                <span>参加者（{m.userId.slice(0, 8)}…）</span>
-                <span>{new Date(m.createdAt).toLocaleDateString("ja-JP")} 参加</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <p style={{ marginTop: "0.75rem" }}>
-          <Link href="/creator/learners" className="admin-link">
-            参加している人をすべて見る →
-          </Link>
-        </p>
-      </section>
-
-      <section className="admin-card" style={{ marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1rem", margin: "0 0 0.75rem" }}>無料枠での作成</h2>
-        <p style={{ margin: 0, fontSize: "0.9rem" }}>
-          無料枠の範囲内で教材の作成・公開ができます。上限を超えると上位プラン（月額）への変更が必要です。
-          {ws.planId === "included" ? " 無料枠では広告が表示されます。" : ""}
-        </p>
-        {purchaseStatus === "active" ? (
-          <p className="admin-msg" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-            クリエイター版（買い切り）: 購入済み
-          </p>
-        ) : null}
-      </section>
-
-      <section className="admin-card" style={{ marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1rem", margin: "0 0 0.75rem" }}>利用状況</h2>
-        <p style={{ margin: "0.25rem 0" }}>
-          プラン: <strong>{currentTier?.displayName ?? ws.planId}</strong>（
-          {ws.subscriptionStatus === "active" ? "サブスク有効" : "サブスクなし"}）
-        </p>
-        <p style={{ margin: "0.25rem 0" }}>
-          ストレージ: {formatBytes(ws.storageBytesUsed)} / {formatBytes(ws.storageBytesLimit)}（
-          {storagePct}%）
-        </p>
-        <div
-          style={{
-            height: 8,
-            background: "#e8eaf5",
-            borderRadius: 4,
-            marginBottom: "0.75rem",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              width: `${storagePct}%`,
-              height: "100%",
-              background: storagePct >= 90 ? "#dc2626" : "#5058b8",
-            }}
-          />
-        </div>
-        <p style={{ margin: "0.25rem 0" }}>
-          登録問題数: {ws.questionCount} / {ws.questionCountLimit} 問（{questionPct}%）
-        </p>
-        <div
-          style={{
-            height: 8,
-            background: "#e8eaf5",
-            borderRadius: 4,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              width: `${questionPct}%`,
-              height: "100%",
-              background: questionPct >= 90 ? "#dc2626" : "#5058b8",
-            }}
-          />
-        </div>
-        <p className="admin-msg" style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
-          上限超過時は新規問題・画像追加をブロックします。月額プランは Stripe の Price ID を
-          Firestore <code>billingTiers</code> に設定して接続します。
-        </p>
-      </section>
-
+    <CreatorShell>
       <section className="admin-card">
-        <h2 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>プラン一覧（上限は可変）</h2>
-        <table className="admin-table" style={{ width: "100%", fontSize: "0.88rem" }}>
-          <thead>
-            <tr>
-              <th>ティア</th>
-              <th>ストレージ</th>
-              <th>問題数</th>
-              <th>Stripe</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tiers.map((t) => (
-              <tr key={t.id}>
-                <td>{t.displayName}</td>
-                <td>{formatBytes(t.storageBytesLimit)}</td>
-                <td>{t.questionCountLimit} 問</td>
-                <td>{t.stripePriceId ? "設定済" : "未設定"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h2 className="admin-card__heading">{ws.name}</h2>
+        <p className="admin-card__meta">
+          URL ID: <code>{ws.slug}</code> · 招待コード:{" "}
+          <strong className="admin-invite-code">{ws.inviteCode}</strong>
+        </p>
       </section>
 
-      <p style={{ marginTop: "1rem" }}>
-        <Link href="/creator/contents" className="admin-btn admin-btn--primary">
-          教材を編集する
-        </Link>
-      </p>
+      <CreatorContentsSection />
     </CreatorShell>
   );
 }

@@ -140,7 +140,7 @@
   font-size: 0.82rem;
 }
 
-.learner-header__title-row {
+.shell-header__title-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -148,8 +148,143 @@
   min-width: 0;
 }
 
-.learner-header__title {
+.shell-header__title {
   margin: 0;
+}
+
+.shell-brand-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.shell-brand-link:hover {
+  color: var(--admin-accent);
+}
+
+.shell-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.shell-page-heading {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.shell-menu {
+  position: relative;
+}
+
+.shell-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel);
+  color: var(--admin-text);
+  cursor: pointer;
+}
+
+.shell-menu__toggle:hover {
+  border-color: var(--admin-accent);
+}
+
+.shell-menu__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  width: 1rem;
+}
+
+.shell-menu__bars span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.shell-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 40;
+  min-width: 11rem;
+  padding: 0.35rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.shell-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shell-menu__link {
+  display: block;
+  padding: 0.55rem 1rem;
+  color: var(--admin-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.shell-menu__link:hover {
+  background: rgba(107, 140, 255, 0.08);
+  color: var(--admin-accent);
+}
+
+.shell-menu__footer {
+  padding: 0.5rem 1rem 0.35rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-card__heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.admin-card__meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--admin-muted);
+}
+
+.admin-invite-code {
+  letter-spacing: 0.12em;
+}
+
+.admin-invite-code--large {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.admin-progress {
+  height: 8px;
+  background: #e8eaf5;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.admin-progress__bar {
+  height: 100%;
+}
+
+.admin-root--dark .admin-progress {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .learner-welcome-msg {

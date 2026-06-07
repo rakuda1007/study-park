@@ -66,6 +66,8 @@ body {
 }
 
 .home-topbar {
+  position: relative;
+  z-index: 50;
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--home-border);
   backdrop-filter: blur(10px);
@@ -79,23 +81,169 @@ body {
   padding: 0.85rem 1.25rem;
 }
 
-.home-brand {
-  display: inline-flex;
+.home-topbar__header {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem;
-  text-decoration: none;
-  color: inherit;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.home-brand__logo {
-  display: block;
-  border-radius: 10px;
+.home-topbar__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
 }
 
-.home-brand__name {
-  font-size: 1.05rem;
+.home-topbar__title {
+  margin: 0;
+  font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+.home-topbar__brand {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-topbar__brand:hover {
+  color: var(--home-accent);
+}
+
+.home-topbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.home-topbar__auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--home-border);
+  background: var(--home-card);
+  color: var(--home-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.home-topbar__auth-btn:hover {
+  border-color: var(--home-accent);
+  color: var(--home-accent);
+}
+
+.home-topbar__auth-muted {
+  font-size: 0.875rem;
+  color: var(--home-muted);
+}
+
+.home .session-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.home .session-mode-badge--admin {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+}
+
+.home .session-mode-badge--creator {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+}
+
+.home .session-mode-badge--learner {
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+}
+
+.home .shell-menu {
+  position: relative;
+}
+
+.home .shell-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--home-border);
+  background: var(--home-card);
+  color: var(--home-ink);
+  cursor: pointer;
+}
+
+.home .shell-menu__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  width: 1rem;
+}
+
+.home .shell-menu__bars span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.home .shell-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 100;
+  min-width: 11rem;
+  padding: 0.35rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--home-border);
+  background: var(--home-card);
+  box-shadow: 0 8px 24px rgba(26, 31, 46, 0.12);
+}
+
+.home .shell-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home .shell-menu__link {
+  display: block;
+  padding: 0.55rem 1rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.home .shell-menu__toggle:hover {
+  border-color: var(--home-accent);
+}
+
+.home .shell-menu__link {
+  color: var(--home-ink);
+}
+
+.home .shell-menu__link:hover {
+  background: var(--home-accent-soft);
+  color: var(--home-accent);
 }
 
 .home-hero {

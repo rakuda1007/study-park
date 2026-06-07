@@ -116,7 +116,7 @@ export function homePathForSession(kind: AuthSessionKind): string {
     case "admin":
       return "/admin/contents";
     case "creator":
-      return "/creator/contents";
+      return "/creator";
     case "learner":
       return "/learner";
   }

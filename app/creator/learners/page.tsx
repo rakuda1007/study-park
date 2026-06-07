@@ -34,20 +34,19 @@ export default function CreatorLearnersPage() {
 
   if (loading) {
     return (
-      <CreatorShell title="参加している人">
+      <CreatorShell>
         <p className="admin-loading">読み込み中…</p>
       </CreatorShell>
     );
   }
 
   return (
-    <CreatorShell title="学習者">
+    <CreatorShell>
+      <h2 className="shell-page-heading">参加者</h2>
       {ws ? (
         <section className="admin-card">
-          <h2 style={{ fontSize: "1rem", margin: "0 0 0.5rem" }}>招待コード</h2>
-          <p style={{ fontSize: "1.5rem", letterSpacing: "0.2em", fontWeight: 700 }}>
-            {ws.inviteCode}
-          </p>
+          <h3 className="admin-card__heading">招待コード</h3>
+          <p className="admin-invite-code admin-invite-code--large">{ws.inviteCode}</p>
           <p className="admin-msg" style={{ marginTop: "0.75rem" }}>
             学習者登録ページ:{" "}
             <a href={absoluteSiteUrl("/signup/learner")} target="_blank" rel="noreferrer">
@@ -56,9 +55,9 @@ export default function CreatorLearnersPage() {
             <br />
             上記で招待コードを入力して参加します。公開を「リンク共有」にした教材はログインなしでも学習できます。
           </p>
-          <h2 style={{ fontSize: "1rem", margin: "1.25rem 0 0.5rem" }}>
+          <h3 className="admin-card__heading" style={{ marginTop: "1.25rem" }}>
             教材に参加している人（{members.length}）
-          </h2>
+          </h3>
           {members.length === 0 ? (
             <p className="admin-msg">
               まだ参加している人はいません。招待コードを共有して、教材への参加を促しましょう。

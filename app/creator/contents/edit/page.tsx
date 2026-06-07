@@ -159,7 +159,7 @@ function EditInner() {
   async function onDelete() {
     if (!doc || !ws || !confirm(`「${doc.title}」を削除しますか？`)) return;
     await deleteWorkspaceContent(ws.id, doc.id);
-    window.location.href = "/creator/contents";
+    window.location.href = "/creator";
   }
 
   function addQuestion() {
@@ -193,14 +193,15 @@ function EditInner() {
 
   if (!id) {
     return (
-      <CreatorShell title="編集">
+      <CreatorShell>
         <p className="admin-msg admin-msg--error">id がありません。</p>
       </CreatorShell>
     );
   }
 
   return (
-    <CreatorShell title={doc ? `編集: ${doc.title}` : "編集"}>
+    <CreatorShell>
+      <h2 className="shell-page-heading">{doc ? `編集: ${doc.title}` : "編集"}</h2>
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
       {msg ? <p className="admin-msg admin-msg--ok">{msg}</p> : null}
@@ -323,7 +324,7 @@ function EditInner() {
             <button type="button" className="admin-btn" onClick={() => void onDelete()}>
               削除
             </button>
-            <Link href="/creator/contents" className="admin-link">
+            <Link href="/creator" className="admin-link">
               一覧へ
             </Link>
           </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { HomeAuthNav } from "@/components/home/HomeAuthNav";
 import { HomeNav } from "@/components/home/HomeNav";
+import { HomeTopbar } from "@/components/home/HomeTopbar";
 import { HomePwaLanding } from "@/components/home/HomePwaLanding";
 import type { ContentManifest } from "@/lib/content/types";
 import contentManifest from "@/public/content-manifest.json";
@@ -11,21 +11,7 @@ export default function Home() {
   return (
     <HomePwaLanding>
       <main className="home">
-        <header className="home-topbar">
-          <div className="home-topbar__inner">
-            <Link href="/" className="home-brand">
-              <img
-                src="/study-park-logo.png?v=8"
-                alt=""
-                width={40}
-                height={40}
-                className="home-brand__logo"
-                decoding="async"
-              />
-              <span className="home-brand__name">Study Park</span>
-            </Link>
-          </div>
-        </header>
+        <HomeTopbar />
 
         <section className="home-hero">
           <div className="home-hero__banner">
@@ -65,11 +51,6 @@ export default function Home() {
           <HomeNav manifest={manifest} />
         </div>
 
-        <footer className="home-footer">
-          <div className="home-footer__inner">
-            <HomeAuthNav />
-          </div>
-        </footer>
       </main>
     </HomePwaLanding>
   );

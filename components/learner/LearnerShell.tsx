@@ -20,9 +20,9 @@ export function LearnerShell({
 
   return (
     <div className="admin-shell">
-      <header className="admin-header learner-header">
-        <div className="learner-header__title-row">
-          <h1 className="admin-title learner-header__title">{title}</h1>
+      <header className="admin-header shell-header">
+        <div className="shell-header__title-row">
+          <h1 className="admin-title shell-header__title">{title}</h1>
           <SessionModeBadge kind="learner" />
         </div>
         <nav className="admin-nav" aria-label="学習メニュー">
