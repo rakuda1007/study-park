@@ -644,6 +644,10 @@
   margin-bottom: 0.35rem;
 }
 
+.admin-rich-preview-toggle {
+  margin-top: 0.5rem;
+}
+
 .admin-rich-preview {
   padding: 0.75rem;
   border: 1px solid var(--admin-border);

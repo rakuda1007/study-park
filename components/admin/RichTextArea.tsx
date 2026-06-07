@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RichTextContent } from "@/lib/content/rich-text-react";
 import { RICH_TEXT_HELP } from "@/lib/content/rich-text";
 
@@ -11,7 +11,7 @@ type Props = {
   onChange: (value: string) => void;
   rows?: number;
   previewClass?: string;
-  /** プレビュー欄を表示しない（コンパクトな行内編集向け） */
+  /** プレビュー機能を有効にする（ボタンで表示切替。常時表示にはしない） */
   showPreview?: boolean;
   /** 右下をドラッグして入力欄の大きさを変えられる */
   resizable?: boolean;
@@ -69,6 +69,11 @@ export function RichTextArea({
   showHint = true,
 }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    if (!value.trim()) setPreviewOpen(false);
+  }, [value]);
 
   const run = (fn: (ta: HTMLTextAreaElement) => void) => {
     const ta = ref.current;
@@ -139,8 +144,18 @@ export function RichTextArea({
           rows={rows}
         />
         {showHint ? <p className="admin-field-hint">{RICH_TEXT_HELP}</p> : null}
+        {showPreview && value.trim() ? (
+          <button
+            type="button"
+            className="admin-btn admin-btn--compact admin-rich-preview-toggle"
+            aria-expanded={previewOpen}
+            onClick={() => setPreviewOpen((open) => !open)}
+          >
+            {previewOpen ? "プレビューを隠す" : "プレビューを表示"}
+          </button>
+        ) : null}
       </div>
-      {showPreview && value.trim() ? (
+      {showPreview && previewOpen && value.trim() ? (
         <div className="admin-rich-preview" aria-label="プレビュー">
           <p className="admin-rich-preview-label">プレビュー</p>
           <div className="admin-rich-preview-body">
