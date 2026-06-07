@@ -648,6 +648,24 @@
   margin-top: 0.5rem;
 }
 
+.admin-rich-marker-select {
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel);
+  color: var(--admin-text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  min-width: 3.75rem;
+}
+
+.admin-rich-marker-select:hover,
+.admin-rich-marker-select:focus-visible {
+  border-color: var(--admin-accent);
+  outline: none;
+}
+
 .admin-rich-preview {
   padding: 0.75rem;
   border: 1px solid var(--admin-border);

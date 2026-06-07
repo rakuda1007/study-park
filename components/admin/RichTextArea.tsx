@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RichTextContent } from "@/lib/content/rich-text-react";
 import { RICH_TEXT_HELP } from "@/lib/content/rich-text";
+import { listQuizBlankMarkers } from "@/lib/content/quiz-markers";
 
 type Props = {
   id?: string;
@@ -17,6 +18,8 @@ type Props = {
   resizable?: boolean;
   /** 記法のヒント文を表示する */
   showHint?: boolean;
+  /** 空欄記号（①②…）の挿入 UI を表示する */
+  showBlankMarkers?: boolean;
 };
 
 function wrapSelection(
@@ -32,6 +35,23 @@ function wrapSelection(
   const next = value.slice(0, start) + before + selected + after + value.slice(end);
   onChange(next);
   const pos = start + before.length + selected.length + after.length;
+  requestAnimationFrame(() => {
+    textarea.focus();
+    textarea.setSelectionRange(pos, pos);
+  });
+}
+
+function insertAtCursor(
+  textarea: HTMLTextAreaElement,
+  value: string,
+  onChange: (v: string) => void,
+  insert: string,
+) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const next = value.slice(0, start) + insert + value.slice(end);
+  onChange(next);
+  const pos = start + insert.length;
   requestAnimationFrame(() => {
     textarea.focus();
     textarea.setSelectionRange(pos, pos);
@@ -67,9 +87,11 @@ export function RichTextArea({
   showPreview = true,
   resizable = false,
   showHint = true,
+  showBlankMarkers = false,
 }: Props) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [markerSelect, setMarkerSelect] = useState("");
 
   useEffect(() => {
     if (!value.trim()) setPreviewOpen(false);
@@ -134,6 +156,27 @@ export function RichTextArea({
           >
             ・リスト
           </button>
+          {showBlankMarkers ? (
+            <select
+              className="admin-rich-marker-select"
+              value={markerSelect}
+              title="空欄記号（①②…）をカーソル位置に挿入"
+              aria-label="空欄記号を挿入"
+              onChange={(e) => {
+                const marker = e.target.value;
+                if (!marker) return;
+                run((ta) => insertAtCursor(ta, value, onChange, marker));
+                setMarkerSelect("");
+              }}
+            >
+              <option value="">空欄</option>
+              {listQuizBlankMarkers().map((marker) => (
+                <option key={marker} value={marker}>
+                  {marker}
+                </option>
+              ))}
+            </select>
+          ) : null}
         </div>
         <textarea
           id={id}

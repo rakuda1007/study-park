@@ -39,7 +39,8 @@ export function QuizQuestionBodyEditor({ contentId, workspaceId, blocks, onChang
   return (
     <div className="admin-lesson-blocks">
       <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-        問題文（「（①）」で空欄）。太字・サイズ・箇条書きが使えます。段落のほか「＋ 画像」で図を挿入できます。
+        問題文に空欄を入れるときは、ツールバーの「空欄」から ①②… を挿入してください。太字・サイズ・箇条書きも使えます。段落のほか「＋
+        画像」で図を挿入できます。
       </p>
       {blocks.map((block, bi) => (
         <div key={`quiz-block-${bi}`} className="admin-block-wrap">
@@ -83,6 +84,7 @@ export function QuizQuestionBodyEditor({ contentId, workspaceId, blocks, onChang
                 onChange={(text) => updateBlock(bi, { kind: "paragraph", text })}
                 rows={5}
                 previewClass="question-paragraph"
+                showBlankMarkers
               />
             </div>
           ) : null}
