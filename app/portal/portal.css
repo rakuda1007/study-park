@@ -22,14 +22,20 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   padding: 0.85rem 1.25rem;
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--portal-border);
   backdrop-filter: blur(10px);
+}
+
+.portal-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
 }
 
 .portal-brand {

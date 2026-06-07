@@ -75,25 +75,27 @@ export default function PortalPage() {
   return (
     <div className="portal">
       <header className="portal-header">
-        <Link href="/portal" className="portal-brand">
-          <img
-            src="/study-park-logo.png?v=8"
-            alt=""
-            width={40}
-            height={40}
-            className="portal-brand__logo"
-            decoding="async"
-          />
-          <span className="portal-brand__name">Study Park</span>
-        </Link>
-        <nav className="portal-header-nav" aria-label="ポータルメニュー">
-          <Link href="/login" className="portal-header-link">
-            ログイン
+        <div className="portal-header__inner">
+          <Link href="/portal" className="portal-brand">
+            <img
+              src="/study-park-logo.png?v=8"
+              alt=""
+              width={40}
+              height={40}
+              className="portal-brand__logo"
+              decoding="async"
+            />
+            <span className="portal-brand__name">Study Park</span>
           </Link>
-          <Link href="/signup" className="portal-header-btn">
-            新規登録
-          </Link>
-        </nav>
+          <nav className="portal-header-nav" aria-label="ポータルメニュー">
+            <Link href="/login" className="portal-header-link">
+              ログイン
+            </Link>
+            <Link href="/signup" className="portal-header-btn">
+              新規登録
+            </Link>
+          </nav>
+        </div>
       </header>
 
       <section className="portal-hero">
