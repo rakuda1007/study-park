@@ -5,6 +5,9 @@ import { RichTextContent } from "@/lib/content/rich-text-react";
 import { RICH_TEXT_HELP } from "@/lib/content/rich-text";
 import { listQuizBlankMarkersForInsert } from "@/lib/content/quiz-markers";
 
+/** ツールバーに並べる空欄記号の数（①〜⑮） */
+const VISIBLE_QUIZ_BLANK_MARKER_COUNT = 15;
+
 type Props = {
   id?: string;
   label: string;
@@ -93,7 +96,6 @@ export function RichTextArea({
   const ref = useRef<HTMLTextAreaElement>(null);
   const selectionRef = useRef({ start: 0, end: 0 });
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [markerSelect, setMarkerSelect] = useState("");
 
   useEffect(() => {
     if (!value.trim()) setPreviewOpen(false);
@@ -125,63 +127,63 @@ export function RichTextArea({
       <div className="admin-field">
         <label htmlFor={id}>{label}</label>
         <div className="admin-rich-toolbar" role="toolbar" aria-label="書式">
-          <button
-            type="button"
-            className="admin-btn admin-btn--compact"
-            title="太字（**文字**）"
-            onClick={() =>
-              run((ta) => wrapSelection(ta, value, onChange, "**", "**"))
-            }
-          >
-            <strong>B</strong>
-          </button>
-          <button
-            type="button"
-            className="admin-btn admin-btn--compact"
-            title="下線（__文字__）"
-            onClick={() =>
-              run((ta) => wrapSelection(ta, value, onChange, "__", "__"))
-            }
-          >
-            <span className="rich-text-underline">U</span>
-          </button>
-          <button
-            type="button"
-            className="admin-btn admin-btn--compact"
-            title="大きい文字（^^文字^^）"
-            onClick={() =>
-              run((ta) => wrapSelection(ta, value, onChange, "^^", "^^"))
-            }
-          >
-            <span className="rich-text-large">大</span>
-          </button>
-          <button
-            type="button"
-            className="admin-btn admin-btn--compact"
-            title="小さい文字（<<文字>>）"
-            onClick={() =>
-              run((ta) => wrapSelection(ta, value, onChange, "<<", ">>"))
-            }
-          >
-            <span className="rich-text-small">小</span>
-          </button>
-          <button
-            type="button"
-            className="admin-btn admin-btn--compact"
-            title="箇条書き（行頭に - ）"
-            onClick={() => run((ta) => insertBulletLine(ta, value, onChange))}
-          >
-            ・リスト
-          </button>
+          <div className="admin-rich-format-group">
+            <button
+              type="button"
+              className="admin-btn admin-btn--compact"
+              title="太字（**文字**）"
+              onClick={() =>
+                run((ta) => wrapSelection(ta, value, onChange, "**", "**"))
+              }
+            >
+              <strong>B</strong>
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn--compact"
+              title="下線（__文字__）"
+              onClick={() =>
+                run((ta) => wrapSelection(ta, value, onChange, "__", "__"))
+              }
+            >
+              <span className="rich-text-underline">U</span>
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn--compact"
+              title="大きい文字（^^文字^^）"
+              onClick={() =>
+                run((ta) => wrapSelection(ta, value, onChange, "^^", "^^"))
+              }
+            >
+              <span className="rich-text-large">大</span>
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn--compact"
+              title="小さい文字（<<文字>>）"
+              onClick={() =>
+                run((ta) => wrapSelection(ta, value, onChange, "<<", ">>"))
+              }
+            >
+              <span className="rich-text-small">小</span>
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn--compact"
+              title="箇条書き（行頭に - ）"
+              onClick={() => run((ta) => insertBulletLine(ta, value, onChange))}
+            >
+              ・リスト
+            </button>
+          </div>
           {showBlankMarkers ? (
             <div className="admin-rich-marker-group" role="group" aria-label="空欄記号">
-              {listQuizBlankMarkersForInsert(8).map((marker, index) => (
+              {listQuizBlankMarkersForInsert(VISIBLE_QUIZ_BLANK_MARKER_COUNT).map((marker) => (
                 <button
                   key={marker}
                   type="button"
-                  className={`admin-btn admin-btn--compact admin-rich-marker-btn${
-                    index === 7 ? " admin-rich-marker-btn--eighth" : ""
-                  }`}
+                  className="admin-btn admin-btn--compact admin-rich-marker-btn"
                   title={`空欄記号 ${marker} を挿入`}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => insertBlankMarker(marker)}
@@ -189,26 +191,6 @@ export function RichTextArea({
                   {marker}
                 </button>
               ))}
-              <select
-                className="admin-rich-marker-more"
-                value={markerSelect}
-                title="空欄記号（「⑨」〜「⑳」）をカーソル位置に挿入"
-                aria-label="空欄記号を挿入（⑨以降）"
-                onPointerDown={captureSelection}
-                onChange={(e) => {
-                  const marker = e.target.value;
-                  if (!marker) return;
-                  insertBlankMarker(marker);
-                  setMarkerSelect("");
-                }}
-              >
-                <option value="">more</option>
-                {listQuizBlankMarkersForInsert().slice(8).map((marker) => (
-                  <option key={marker} value={marker}>
-                    {marker}
-                  </option>
-                ))}
-              </select>
             </div>
           ) : null}
         </div>

@@ -638,19 +638,24 @@
 }
 
 .admin-rich-toolbar {
-  container-type: inline-size;
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 0.35rem;
 }
 
+.admin-rich-format-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .admin-rich-marker-group {
-  display: inline-flex;
-  flex-wrap: nowrap;
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  flex-shrink: 0;
 }
 
 .admin-rich-preview-toggle {
@@ -658,42 +663,9 @@
 }
 
 .admin-rich-marker-btn {
-  min-width: 2.75rem;
-  padding-inline: 0.35rem;
+  min-width: 2.5rem;
+  padding-inline: 0.3rem;
   font-size: 0.75rem;
-}
-
-.admin-rich-marker-more {
-  flex-shrink: 0;
-  width: auto;
-  min-width: 3.6rem;
-  padding: 0.35rem 1.25rem 0.35rem 0.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--admin-border);
-  background-color: var(--admin-panel);
-  color: var(--admin-muted);
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%239aa3b5' d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.4rem center;
-}
-
-.admin-rich-marker-more:hover,
-.admin-rich-marker-more:focus-visible {
-  border-color: var(--admin-accent);
-  color: var(--admin-text);
-  outline: none;
-}
-
-@container (max-width: 34rem) {
-  .admin-rich-marker-btn--eighth {
-    display: none;
-  }
 }
 
 .admin-rich-preview {

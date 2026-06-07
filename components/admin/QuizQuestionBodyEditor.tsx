@@ -39,7 +39,7 @@ export function QuizQuestionBodyEditor({ contentId, workspaceId, blocks, onChang
   return (
     <div className="admin-lesson-blocks">
       <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-        問題文に空欄を入れるときは、ツールバーから「①」「②」… を挿入してください（⑨以降は「more」）。太字・サイズ・箇条書きも使えます。段落のほか「＋
+        問題文に空欄を入れるときは、ツールバーから「①」「②」…「⑮」を挿入してください。太字・サイズ・箇条書きも使えます。段落のほか「＋
         画像」で図を挿入できます。
       </p>
       {blocks.map((block, bi) => (
