@@ -1,11 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { workspacePlayHref } from "@/lib/content/urls";
 import { SLUG_PATTERN } from "@/lib/content/types";
+import {
+  CONTENT_PERIOD_FILTER_ALL,
+  contentMatchesPeriodFilter,
+  formatContentPeriod,
+  resolveContentPeriod,
+} from "@/lib/content/period";
 import type { ContentType } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
@@ -27,6 +34,7 @@ export default function CreatorContentsPage() {
   const [newType, setNewType] = useState<ContentType>("quiz");
   const [newSlug, setNewSlug] = useState("");
   const [newTitle, setNewTitle] = useState("");
+  const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
 
   const reload = useCallback(async (workspaceId: string) => {
     await ensureWorkspaceSubjects(workspaceId);
@@ -87,6 +95,11 @@ export default function CreatorContentsPage() {
     }
   }
 
+  const filteredItems = useMemo(
+    () => items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
+    [items, periodFilter],
+  );
+
   if (loading) {
     return (
       <CreatorShell title="教材一覧">
@@ -124,11 +137,20 @@ export default function CreatorContentsPage() {
             </div>
           </form>
 
-          <ul className="admin-list" style={{ marginTop: "1rem" }}>
-            {items.map((c) => (
+          <div className="admin-list-toolbar" style={{ marginTop: "1rem" }}>
+            <h2 style={{ fontSize: "1rem", margin: 0 }}>一覧（{filteredItems.length}件）</h2>
+            <ContentPeriodFilter
+              contents={items}
+              value={periodFilter}
+              onChange={setPeriodFilter}
+            />
+          </div>
+
+          <ul className="admin-list" style={{ marginTop: "0.75rem" }}>
+            {filteredItems.map((c) => (
               <li key={c.id} className="admin-list-item">
                 <div>
-                  <strong>{c.title}</strong>（{c.type} / {c.status} / {c.visibility}）
+                  <strong>{c.title}</strong>（{formatContentPeriod(resolveContentPeriod(c))} / {c.type} / {c.status} / {c.visibility}）
                   <br />
                   <code>{workspacePlayHref(ws.slug, c.slug)}</code>
                 </div>
@@ -141,8 +163,12 @@ export default function CreatorContentsPage() {
               </li>
             ))}
           </ul>
-          {items.length === 0 ? (
-            <p className="admin-msg">まだ教材がありません。上のフォームから作成してください。</p>
+          {filteredItems.length === 0 ? (
+            <p className="admin-msg">
+              {items.length === 0
+                ? "まだ教材がありません。上のフォームから作成してください。"
+                : "選択した期間の教材はありません。"}
+            </p>
           ) : null}
         </>
       ) : null}

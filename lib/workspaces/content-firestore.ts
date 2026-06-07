@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { countQuestionsInContents } from "@/lib/billing/usage";
+import { currentContentPeriod, mapStoredContentPeriod } from "@/lib/content/period";
 import { DEFAULT_QUIZ_BLANK_ANSWERS } from "@/lib/content/quiz-answers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "@/lib/content/quiz-question";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
@@ -50,6 +51,8 @@ export type WorkspaceContentDoc = ContentDoc & {
 
 function mapContent(workspaceId: string, id: string, data: Record<string, unknown>): WorkspaceContentDoc {
   const vis = data.visibility as ContentVisibility;
+  const createdAt = tsToIso(data.createdAt);
+  const period = mapStoredContentPeriod(data, createdAt);
   return {
     workspaceId,
     id,
@@ -65,7 +68,9 @@ function mapContent(workspaceId: string, id: string, data: Record<string, unknow
     intro: data.intro ? String(data.intro) : undefined,
     lesson: data.lesson as ContentDoc["lesson"],
     quiz: data.quiz as ContentDoc["quiz"],
-    createdAt: tsToIso(data.createdAt),
+    periodYear: period.year,
+    periodMonth: period.month,
+    createdAt,
     updatedAt: tsToIso(data.updatedAt),
     publishedAt: data.publishedAt ? tsToIso(data.publishedAt) : undefined,
     updatedBy: data.updatedBy ? String(data.updatedBy) : undefined,
@@ -123,6 +128,7 @@ export async function createWorkspaceContent(
   input: CreateWorkspaceContentInput,
 ): Promise<string> {
   const now = serverTimestamp();
+  const period = currentContentPeriod();
   const base = {
     subjectId: input.subjectId,
     type: input.type,
@@ -133,6 +139,8 @@ export async function createWorkspaceContent(
     ready: false,
     visibility: input.visibility ?? ("members" as const),
     intro: input.intro ?? "",
+    periodYear: period.year,
+    periodMonth: period.month,
     updatedBy: input.updatedBy,
     createdAt: now,
     updatedAt: now,
@@ -190,6 +198,8 @@ export async function updateWorkspaceContent(
       | "lesson"
       | "quiz"
       | "visibility"
+      | "periodYear"
+      | "periodMonth"
     >
   > & { updatedBy: string },
 ): Promise<void> {

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   createContent,
@@ -18,6 +19,12 @@ import {
   updateLegacyContent,
   type MenuEntryRef,
 } from "@/lib/content/legacy-contents";
+import {
+  CONTENT_PERIOD_FILTER_ALL,
+  contentMatchesPeriodFilter,
+  formatContentPeriod,
+  resolveContentPeriod,
+} from "@/lib/content/period";
 import type { ContentDoc, ContentType, LegacyContentDoc, SubjectDoc } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
@@ -47,6 +54,7 @@ export default function AdminContentsPage() {
   const [newSubjectId, setNewSubjectId] = useState("math");
   const [creating, setCreating] = useState(false);
   const [reorderingKey, setReorderingKey] = useState<string | null>(null);
+  const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
 
   const reload = useCallback(async () => {
     await ensureDefaultSubjects();
@@ -122,17 +130,24 @@ export default function AdminContentsPage() {
     }
   }
 
-  const totalCount = contents.length + legacyContents.length;
+  const filteredContents = useMemo(
+    () => contents.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
+    [contents, periodFilter],
+  );
+  const showLegacy = periodFilter === CONTENT_PERIOD_FILTER_ALL;
+  const totalCount = filteredContents.length + (showLegacy ? legacyContents.length : 0);
 
   const groupedRows = subjects
     .map((subject) => {
       const rows: AdminMenuRow[] = [
-        ...contents
+        ...filteredContents
           .filter((c) => c.subjectId === subject.id)
           .map((doc) => ({ kind: "content" as const, doc })),
-        ...legacyContents
-          .filter((l) => l.subjectId === subject.id)
-          .map((doc) => ({ kind: "legacy" as const, doc })),
+        ...(showLegacy
+          ? legacyContents
+              .filter((l) => l.subjectId === subject.id)
+              .map((doc) => ({ kind: "legacy" as const, doc }))
+          : []),
       ].sort((a, b) => a.doc.order - b.doc.order);
       return { subject, rows };
     })
@@ -224,7 +239,14 @@ export default function AdminContentsPage() {
       </section>
 
       <section className="admin-card">
-        <h2>一覧（{totalCount}件）</h2>
+        <div className="admin-list-toolbar">
+          <h2>一覧（{totalCount}件）</h2>
+          <ContentPeriodFilter
+            contents={contents}
+            value={periodFilter}
+            onChange={setPeriodFilter}
+          />
+        </div>
         <p className="admin-hint">
           <strong>Firestore（/play?slug=）</strong> の「下書き」はトップに出ません（招待用は
           /admin/invitations のワークスペース側）。
@@ -233,7 +255,11 @@ export default function AdminContentsPage() {
           トップ表示オフにするとログアウト後のトップから消えます（工事中表示）。
         </p>
         {groupedRows.length === 0 ? (
-          <p className="admin-hint">コンテンツがまだありません。</p>
+          <p className="admin-hint">
+            {contents.length === 0
+              ? "コンテンツがまだありません。"
+              : "選択した期間のコンテンツはありません。"}
+          </p>
         ) : (
           groupedRows.map(({ subject, rows }) => (
             <div key={subject.id} className="admin-subject-group">
@@ -250,7 +276,7 @@ export default function AdminContentsPage() {
                     row.kind === "content" ? row.doc.title : row.doc.label;
                   const meta =
                     row.kind === "content"
-                      ? `${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}`
+                      ? `${formatContentPeriod(resolveContentPeriod(row.doc))} · ${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}`
                       : `静的アプリ · ${row.doc.href} · 順序 ${index + 1}`;
 
                   const badge =

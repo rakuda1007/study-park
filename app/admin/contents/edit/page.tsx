@@ -37,6 +37,7 @@ import type {
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { contentPlayHref } from "@/lib/content/urls";
 import { listLegacyContents } from "@/lib/content/legacy-contents";
+import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { RichTextArea } from "@/components/admin/RichTextArea";
 import {
   blankAnswersToInput,
@@ -65,6 +66,8 @@ function EditContentInner() {
   const [subjectId, setSubjectId] = useState("");
   const [status, setStatus] = useState<ContentStatus>("draft");
   const [ready, setReady] = useState(false);
+  const [periodYear, setPeriodYear] = useState(new Date().getFullYear());
+  const [periodMonth, setPeriodMonth] = useState(new Date().getMonth() + 1);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [sections, setSections] = useState<LessonSection[]>([]);
 
@@ -89,6 +92,8 @@ function EditContentInner() {
     setSubjectId(c.subjectId);
     setStatus(c.status);
     setReady(c.ready);
+    setPeriodYear(c.periodYear);
+    setPeriodMonth(c.periodMonth);
     setQuestions((c.quiz?.questions ?? []).map(normalizeQuizQuestion));
     setSections(c.lesson?.sections ?? []);
   }, [id]);
@@ -128,6 +133,8 @@ function EditContentInner() {
         subjectId,
         status,
         ready: readyForSite,
+        periodYear,
+        periodMonth,
         updatedBy: uid,
       });
       if (doc.type === "quiz") {
@@ -283,6 +290,12 @@ function EditContentInner() {
                 </select>
               </div>
             </div>
+            <ContentPeriodFields
+              year={periodYear}
+              month={periodMonth}
+              onYearChange={setPeriodYear}
+              onMonthChange={setPeriodMonth}
+            />
             <RichTextArea
               id="intro"
               label="はじめに / リード文"

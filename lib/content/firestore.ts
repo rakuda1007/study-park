@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { currentContentPeriod, mapStoredContentPeriod } from "./period";
 import { DEFAULT_QUIZ_BLANK_ANSWERS } from "./quiz-answers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "./quiz-question";
 import { defaultQuizBlankMarker } from "./quiz-markers";
@@ -45,6 +46,8 @@ function mapSubject(id: string, data: Record<string, unknown>): SubjectDoc {
 }
 
 function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
+  const createdAt = tsToIso(data.createdAt);
+  const period = mapStoredContentPeriod(data, createdAt);
   return {
     id,
     subjectId: String(data.subjectId ?? ""),
@@ -57,7 +60,9 @@ function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
     intro: data.intro ? String(data.intro) : undefined,
     lesson: data.lesson as ContentDoc["lesson"],
     quiz: data.quiz as ContentDoc["quiz"],
-    createdAt: tsToIso(data.createdAt),
+    periodYear: period.year,
+    periodMonth: period.month,
+    createdAt,
     updatedAt: tsToIso(data.updatedAt),
     publishedAt: data.publishedAt ? tsToIso(data.publishedAt) : undefined,
     updatedBy: data.updatedBy ? String(data.updatedBy) : undefined,
@@ -103,6 +108,7 @@ export type CreateContentInput = {
 
 export async function createContent(input: CreateContentInput): Promise<string> {
   const now = serverTimestamp();
+  const period = currentContentPeriod();
   const base = {
     subjectId: input.subjectId,
     type: input.type,
@@ -112,6 +118,8 @@ export async function createContent(input: CreateContentInput): Promise<string> 
     order: Date.now(),
     ready: false,
     intro: input.intro ?? "",
+    periodYear: period.year,
+    periodMonth: period.month,
     updatedBy: input.updatedBy,
     createdAt: now,
     updatedAt: now,
@@ -171,6 +179,8 @@ export async function updateContent(
       | "intro"
       | "lesson"
       | "quiz"
+      | "periodYear"
+      | "periodMonth"
     >
   > & { updatedBy: string },
 ): Promise<void> {

@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { LessonSectionsEditor } from "@/components/admin/LessonSectionsEditor";
 import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEditor";
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
+import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
@@ -53,6 +54,8 @@ function EditInner() {
   const [status, setStatus] = useState<ContentStatus>("draft");
   const [ready, setReady] = useState(false);
   const [visibility, setVisibility] = useState<ContentVisibility>("members");
+  const [periodYear, setPeriodYear] = useState(new Date().getFullYear());
+  const [periodMonth, setPeriodMonth] = useState(new Date().getMonth() + 1);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [sections, setSections] = useState<LessonSection[]>([]);
   const [showAds, setShowAds] = useState(false);
@@ -88,6 +91,8 @@ function EditInner() {
     setStatus(c.status);
     setReady(c.ready);
     setVisibility(c.visibility);
+    setPeriodYear(c.periodYear);
+    setPeriodMonth(c.periodMonth);
     setQuestions((c.quiz?.questions ?? []).map(normalizeQuizQuestion));
     setSections(c.lesson?.sections ?? []);
   }, [id, uid]);
@@ -128,6 +133,8 @@ function EditInner() {
         status,
         ready: readyForSite,
         visibility,
+        periodYear,
+        periodMonth,
         updatedBy: uid,
       });
       if (doc.type === "quiz") {
@@ -213,6 +220,12 @@ function EditInner() {
               <label htmlFor="slug">slug</label>
               <input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} />
             </div>
+            <ContentPeriodFields
+              year={periodYear}
+              month={periodMonth}
+              onYearChange={setPeriodYear}
+              onMonthChange={setPeriodMonth}
+            />
             <div className="admin-field">
               <label htmlFor="visibility">公開範囲</label>
               <select

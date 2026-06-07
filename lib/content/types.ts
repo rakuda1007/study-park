@@ -69,6 +69,9 @@ export type ContentDoc = {
     quizKind: QuizKind;
     questions: QuizQuestion[];
   };
+  /** 一覧絞り込み用の作成年月 */
+  periodYear: number;
+  periodMonth: number;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

@@ -9,6 +9,7 @@ import {
   where,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { mapStoredContentPeriod } from "./period";
 import type { ContentDoc, LegacyContentDoc, SubjectDoc } from "./types";
 
 function mapSubject(id: string, data: Record<string, unknown>): SubjectDoc {
@@ -20,6 +21,8 @@ function mapSubject(id: string, data: Record<string, unknown>): SubjectDoc {
 }
 
 function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
+  const createdAt = String(data.createdAt ?? data.updatedAt ?? "");
+  const period = mapStoredContentPeriod(data, createdAt);
   return {
     id,
     subjectId: String(data.subjectId ?? ""),
@@ -32,7 +35,9 @@ function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
     intro: data.intro ? String(data.intro) : undefined,
     lesson: data.lesson as ContentDoc["lesson"],
     quiz: data.quiz as ContentDoc["quiz"],
-    createdAt: String(data.createdAt ?? data.updatedAt ?? ""),
+    periodYear: period.year,
+    periodMonth: period.month,
+    createdAt,
     updatedAt: String(data.updatedAt ?? ""),
   };
 }
