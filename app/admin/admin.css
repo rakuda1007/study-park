@@ -638,10 +638,19 @@
 }
 
 .admin-rich-toolbar {
+  container-type: inline-size;
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 0.35rem;
+}
+
+.admin-rich-marker-group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .admin-rich-preview-toggle {
@@ -654,22 +663,37 @@
   font-size: 0.75rem;
 }
 
-.admin-rich-marker-select {
-  padding: 0.35rem 0.45rem;
+.admin-rich-marker-more {
+  flex-shrink: 0;
+  width: auto;
+  min-width: 2.85rem;
+  max-width: 3.1rem;
+  padding: 0.35rem 1.15rem 0.35rem 0.45rem;
   border-radius: 8px;
   border: 1px solid var(--admin-border);
   background: var(--admin-panel);
-  color: var(--admin-text);
+  color: var(--admin-muted);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 600;
   cursor: pointer;
-  min-width: 3.25rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%239aa3b5' d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.35rem center;
 }
 
-.admin-rich-marker-select:hover,
-.admin-rich-marker-select:focus-visible {
+.admin-rich-marker-more:hover,
+.admin-rich-marker-more:focus-visible {
   border-color: var(--admin-accent);
+  color: var(--admin-text);
   outline: none;
+}
+
+@container (max-width: 34rem) {
+  .admin-rich-marker-btn--eighth {
+    display: none;
+  }
 }
 
 .admin-rich-preview {

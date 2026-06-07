@@ -173,41 +173,43 @@ export function RichTextArea({
           >
             ・リスト
           </button>
-          {showBlankMarkers
-            ? listQuizBlankMarkersForInsert(8).map((marker) => (
+          {showBlankMarkers ? (
+            <div className="admin-rich-marker-group" role="group" aria-label="空欄記号">
+              {listQuizBlankMarkersForInsert(8).map((marker, index) => (
                 <button
                   key={marker}
                   type="button"
-                  className="admin-btn admin-btn--compact admin-rich-marker-btn"
+                  className={`admin-btn admin-btn--compact admin-rich-marker-btn${
+                    index === 7 ? " admin-rich-marker-btn--eighth" : ""
+                  }`}
                   title={`空欄記号 ${marker} を挿入`}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => insertBlankMarker(marker)}
                 >
                   {marker}
                 </button>
-              ))
-            : null}
-          {showBlankMarkers ? (
-            <select
-              className="admin-rich-marker-select"
-              value={markerSelect}
-              title="空欄記号（「⑨」〜「⑳」）をカーソル位置に挿入"
-              aria-label="空欄記号を挿入（⑨以降）"
-              onPointerDown={captureSelection}
-              onChange={(e) => {
-                const marker = e.target.value;
-                if (!marker) return;
-                insertBlankMarker(marker);
-                setMarkerSelect("");
-              }}
-            >
-              <option value="">⑨+</option>
-              {listQuizBlankMarkersForInsert().slice(8).map((marker) => (
-                <option key={marker} value={marker}>
-                  {marker}
-                </option>
               ))}
-            </select>
+              <select
+                className="admin-rich-marker-more"
+                value={markerSelect}
+                title="空欄記号（「⑨」〜「⑳」）をカーソル位置に挿入"
+                aria-label="空欄記号を挿入（⑨以降）"
+                onPointerDown={captureSelection}
+                onChange={(e) => {
+                  const marker = e.target.value;
+                  if (!marker) return;
+                  insertBlankMarker(marker);
+                  setMarkerSelect("");
+                }}
+              >
+                <option value="">more</option>
+                {listQuizBlankMarkersForInsert().slice(8).map((marker) => (
+                  <option key={marker} value={marker}>
+                    {marker}
+                  </option>
+                ))}
+              </select>
+            </div>
           ) : null}
         </div>
         <textarea
