@@ -34,6 +34,9 @@ export function AdminNav({ onLogout, showThemeToggle = false }: Props) {
       <Link href="/admin/invitations" className="admin-link">
         学習者招待
       </Link>
+      <Link href="/admin/users" className="admin-link">
+        利用者
+      </Link>
       <Link href="/" className="admin-link" title="ログアウトせず公園トップを表示">
         Study Park トップ
       </Link>

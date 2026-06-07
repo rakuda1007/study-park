@@ -576,6 +576,9 @@
   }
 
   function init() {
+    if (typeof window.recordStudyParkGuestUse === "function") {
+      window.recordStudyParkGuestUse("kencho");
+    }
     els.speech = $("speech");
     els.charPanel = $("characterPanel");
     els.charSingle = $("charSingle");

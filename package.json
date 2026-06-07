@@ -6,8 +6,8 @@
     "node": ">=20 <21"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack && node scripts/cleanRscTxt.mjs",
+    "dev": "node scripts/generate-firebase-web-config.mjs && next dev --turbopack",
+    "build": "node scripts/generate-firebase-web-config.mjs && next build --turbopack && node scripts/cleanRscTxt.mjs",
     "start": "next start",
     "lint": "eslint .",
     "format": "prettier --write .",

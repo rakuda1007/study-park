@@ -17,6 +17,7 @@ import {
   canLearnerAccessWorkspace,
   canLearnerAccessWorkspaceById,
 } from "@/lib/workspaces/members";
+import { recordGuestContentUse } from "@/lib/users/guest-learner";
 
 function PlayInner() {
   const params = useSearchParams();
@@ -41,14 +42,14 @@ function PlayInner() {
       setNotFound(false);
       setDenied(false);
       try {
-        if (wsSlug || workspaceId) {
-          await waitForAuthReady();
-          const uid = await new Promise<string | null>((resolve) => {
-            const unsub = subscribeAuth((user) => {
-              unsub();
-              resolve(user?.uid ?? null);
-            });
+        await waitForAuthReady();
+        const uid = await new Promise<string | null>((resolve) => {
+          const unsub = subscribeAuth((user) => {
+            unsub();
+            resolve(user?.uid ?? null);
           });
+        });
+        if (wsSlug || workspaceId) {
           const doc = workspaceId
             ? await getPublishedWorkspaceContentInWorkspace(workspaceId, slug)
             : await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid);
@@ -66,6 +67,12 @@ function PlayInner() {
           }
           setContent(doc);
           setShowAds(await getWorkspaceShowAds(doc.workspaceId));
+          if (!uid) {
+            const ref = workspaceId
+              ? `play:wid=${workspaceId}&slug=${slug}`
+              : `play:ws=${wsSlug}&slug=${slug}`;
+            void recordGuestContentUse(ref);
+          }
         } else {
           const doc = await getPublishedContentBySlug(slug);
           if (cancelled) return;
@@ -74,6 +81,9 @@ function PlayInner() {
           } else {
             setContent(doc);
             setShowAds(false);
+            if (!uid) {
+              void recordGuestContentUse(`play:slug=${slug}`);
+            }
           }
         }
       } catch (e) {

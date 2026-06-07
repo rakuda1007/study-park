@@ -742,6 +742,9 @@
   }
 
   function init() {
+    if (typeof window.recordStudyParkGuestUse === "function") {
+      window.recordStudyParkGuestUse("kuku");
+    }
     els.characterPanel = $("characterPanel");
     els.charImg = $("charImg");
     els.charLabel = $("charLabel");
