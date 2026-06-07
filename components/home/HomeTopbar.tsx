@@ -42,6 +42,8 @@ function menuItemsForSession(session: AuthSessionKind | null): ShellMenuItem[] {
       { label: "参加者", href: "/creator/learners" },
       { label: "利用状況", href: "/creator/usage" },
     );
+  } else if (session === "learner") {
+    items.push({ label: "プロフィール", href: "/learner/profile" });
   }
 
   items.push({ label: "別のアカウントでログイン", href: "/login" });
@@ -100,9 +102,16 @@ export function HomeTopbar() {
               …
             </span>
           ) : session ? (
-            <button type="button" className="home-topbar__auth-btn" onClick={() => void logout()}>
-              ログアウト
-            </button>
+            <>
+              {session === "learner" ? (
+                <Link href="/learner" className="home-topbar__auth-btn home-topbar__auth-btn--primary">
+                  学習者ホーム
+                </Link>
+              ) : null}
+              <button type="button" className="home-topbar__auth-btn" onClick={() => void logout()}>
+                ログアウト
+              </button>
+            </>
           ) : (
             <Link href="/login" className="home-topbar__auth-btn">
               ログイン

@@ -5,6 +5,10 @@ export type UserRole = "creator" | "learner";
 export type UserProfile = {
   uid: string;
   email: string;
+  /** 姓 */
+  familyName?: string;
+  /** 名 */
+  givenName?: string;
   displayName?: string;
   role: UserRole;
   appPurchase: {

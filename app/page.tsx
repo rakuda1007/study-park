@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { HomeNav } from "@/components/home/HomeNav";
 import { HomeTopbar } from "@/components/home/HomeTopbar";
 import { HomePwaLanding } from "@/components/home/HomePwaLanding";
@@ -36,13 +35,6 @@ export default function Home() {
           <div className="home-hero__below">
             <p className="home-hero__lead">
               好きなコンテンツを選んで、今日からスタート。九九や県庁所在地は登録なしで今すぐ学べます。
-            </p>
-            <p className="home-hero__note">
-              教室の教材は
-              <Link href="/signup/learner">学習者登録</Link>
-              後に
-              <Link href="/learner">学習者ホーム</Link>
-              からどうぞ。
             </p>
           </div>
         </section>

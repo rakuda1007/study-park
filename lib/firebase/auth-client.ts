@@ -59,7 +59,13 @@ export async function signUpWithEmail(
   email: string,
   password: string,
   role: UserRole,
-  opts?: { displayName?: string; workspaceName?: string; workspaceSlug?: string },
+  opts?: {
+    displayName?: string;
+    familyName?: string;
+    givenName?: string;
+    workspaceName?: string;
+    workspaceSlug?: string;
+  },
 ): Promise<User> {
   try {
     const cred = await createUserWithEmailAndPassword(
@@ -70,7 +76,11 @@ export async function signUpWithEmail(
     const user = cred.user;
     const existing = await getUserProfile(user.uid);
     if (!existing) {
-      await createUserProfile(user.uid, email.trim(), role, opts?.displayName);
+      await createUserProfile(user.uid, email.trim(), role, {
+        displayName: opts?.displayName,
+        familyName: opts?.familyName,
+        givenName: opts?.givenName,
+      });
     }
     if (role === "creator") {
       await createWorkspaceForCreator(

@@ -16,6 +16,7 @@ import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { backfillLearnerNamesIfEmpty } from "@/lib/users/firestore";
 import contentManifest from "@/public/content-manifest.json";
 
 type Row = {
@@ -65,6 +66,7 @@ export default function LearnerHomePage() {
       void (async () => {
         if (!user) return;
         try {
+          await backfillLearnerNamesIfEmpty(user.uid);
           const [memberships, subjects] = await Promise.all([
             listWorkspacesForLearner(user.uid),
             listPublicSubjects(),
