@@ -48,6 +48,21 @@
   color: #3d4460;
 }
 
+.auth-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #6b7289;
+}
+
+.auth-required {
+  margin-left: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #b42318;
+  letter-spacing: 0.02em;
+}
+
 .auth-field input {
   width: 100%;
   padding: 0.6rem 0.75rem;

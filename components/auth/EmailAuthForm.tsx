@@ -32,7 +32,12 @@ export function EmailAuthForm({ submitLabel, onSubmit, children }: Props) {
       {error ? <p className="auth-msg--error">{error}</p> : null}
       {children}
       <div className="auth-field">
-        <label htmlFor="auth-email">メールアドレス</label>
+        <label htmlFor="auth-email">
+          メールアドレス
+          <span className="auth-required" aria-hidden>
+            必須
+          </span>
+        </label>
         <input
           id="auth-email"
           type="email"
@@ -43,7 +48,12 @@ export function EmailAuthForm({ submitLabel, onSubmit, children }: Props) {
         />
       </div>
       <div className="auth-field">
-        <label htmlFor="auth-password">パスワード</label>
+        <label htmlFor="auth-password">
+          パスワード
+          <span className="auth-required" aria-hidden>
+            必須
+          </span>
+        </label>
         <input
           id="auth-password"
           type="password"

@@ -81,18 +81,52 @@ export async function isWorkspaceSlugTaken(slug: string, excludeId?: string): Pr
   return isGlobalWorkspaceSlugTaken(slug, excludeId);
 }
 
+/** ワークスペース名などから URL ID を自動生成（重複時は連番を付与） */
+export async function resolveUniqueWorkspaceSlug(
+  nameOrSlug: string,
+  ownerId: string,
+): Promise<string> {
+  let base = normalizeWorkspaceSlug(nameOrSlug);
+  if (!isValidWorkspaceSlug(base)) {
+    base = normalizeWorkspaceSlug(`creator-${ownerId.slice(0, 8)}`);
+  }
+  if (!isValidWorkspaceSlug(base)) {
+    base = "my-content";
+  }
+  if (!(await isWorkspaceSlugTaken(base))) return base;
+  for (let i = 2; i <= 99; i++) {
+    const suffix = `-${i}`;
+    const candidate = `${base.slice(0, 40 - suffix.length)}${suffix}`;
+    if (isValidWorkspaceSlug(candidate) && !(await isWorkspaceSlugTaken(candidate))) {
+      return candidate;
+    }
+  }
+  const fallback = normalizeWorkspaceSlug(`creator-${ownerId.slice(0, 8)}`);
+  if (isValidWorkspaceSlug(fallback) && !(await isWorkspaceSlugTaken(fallback))) {
+    return fallback;
+  }
+  throw new Error("URL ID を自動作成できませんでした。しばらく待ってから再度お試しください。");
+}
+
 /** クリエイター登録時にワークスペースを1件作成 */
 export async function createWorkspaceForCreator(
   ownerId: string,
   name: string,
-  slugInput: string,
+  slugInput?: string,
 ): Promise<WorkspaceDoc> {
-  const slug = normalizeWorkspaceSlug(slugInput);
-  if (!isValidWorkspaceSlug(slug)) {
-    throw new Error("ワークスペース URL 用の ID は英小文字・数字・ハイフン（2〜40文字）で指定してください。");
-  }
-  if (await isWorkspaceSlugTaken(slug)) {
-    throw new Error("この URL ID は既に使われています。別の ID を選んでください。");
+  let slug: string;
+  if (slugInput?.trim()) {
+    slug = normalizeWorkspaceSlug(slugInput);
+    if (!isValidWorkspaceSlug(slug)) {
+      throw new Error(
+        "ワークスペース URL 用の ID は英小文字・数字・ハイフン（2〜40文字）で指定してください。",
+      );
+    }
+    if (await isWorkspaceSlugTaken(slug)) {
+      throw new Error("この URL ID は既に使われています。別の ID を選んでください。");
+    }
+  } else {
+    slug = await resolveUniqueWorkspaceSlug(name, ownerId);
   }
 
   const existing = await getWorkspaceByOwner(ownerId);

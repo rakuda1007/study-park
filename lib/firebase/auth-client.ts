@@ -83,11 +83,7 @@ export async function signUpWithEmail(
       });
     }
     if (role === "creator") {
-      await createWorkspaceForCreator(
-        user.uid,
-        opts?.workspaceName ?? "マイ教材",
-        opts?.workspaceSlug ?? `creator-${user.uid.slice(0, 8)}`,
-      );
+      await createWorkspaceForCreator(user.uid, opts?.workspaceName ?? "マイ教材", opts?.workspaceSlug);
     }
     return user;
   } catch (e) {
