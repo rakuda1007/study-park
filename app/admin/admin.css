@@ -274,8 +274,25 @@
 }
 
 .admin-subject-group h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.9rem;
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  color: var(--admin-text);
+  font-weight: 700;
+}
+
+.admin-period-group {
+  margin: 0 0 1rem 0.5rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--admin-border);
+}
+
+.admin-period-group:last-child {
+  margin-bottom: 0;
+}
+
+.admin-period-group h4 {
+  margin: 0 0 0.45rem;
+  font-size: 0.85rem;
   color: var(--admin-muted);
   font-weight: 600;
 }

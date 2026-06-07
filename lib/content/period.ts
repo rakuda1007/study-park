@@ -145,3 +145,42 @@ export function contentPeriodYearOptions(
   }
   return years;
 }
+
+export type ContentPeriodGroup<T> = {
+  key: string;
+  label: string;
+  items: T[];
+};
+
+/** 作成年月ごとにグループ化（新しい月が上） */
+export function groupByContentPeriod<T>(
+  items: T[],
+  getPeriod: (item: T) => ContentPeriod,
+): ContentPeriodGroup<T>[] {
+  const buckets = new Map<
+    string,
+    { label: string; period: ContentPeriod; items: T[] }
+  >();
+  for (const item of items) {
+    const period = getPeriod(item);
+    const key = contentPeriodKey(period);
+    const bucket = buckets.get(key);
+    if (bucket) bucket.items.push(item);
+    else {
+      buckets.set(key, {
+        label: formatContentPeriod(period),
+        period,
+        items: [item],
+      });
+    }
+  }
+  return [...buckets.values()]
+    .sort(
+      (a, b) => contentPeriodToSortKey(b.period) - contentPeriodToSortKey(a.period),
+    )
+    .map((bucket) => ({
+      key: contentPeriodKey(bucket.period),
+      label: bucket.label,
+      items: bucket.items,
+    }));
+}

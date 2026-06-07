@@ -24,7 +24,7 @@ import {
   CONTENT_PERIOD_FILTER_ALL,
   contentMatchesPeriodFilter,
   currentContentPeriod,
-  formatContentPeriod,
+  groupByContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
 import type { ContentDoc, ContentType, LegacyContentDoc, SubjectDoc } from "@/lib/content/types";
@@ -36,6 +36,12 @@ import type { ContentManifest } from "@/lib/content/types";
 type AdminMenuRow =
   | { kind: "content"; doc: ContentDoc }
   | { kind: "legacy"; doc: LegacyContentDoc };
+
+type AdminSubjectGroup = {
+  subject: SubjectDoc;
+  allRows: AdminMenuRow[];
+  sections: { key: string; label: string; rows: AdminMenuRow[] }[];
+};
 
 function rowKey(row: AdminMenuRow): string {
   return `${row.kind}:${row.doc.id}`;
@@ -143,21 +149,40 @@ export default function AdminContentsPage() {
   const showLegacy = periodFilter === CONTENT_PERIOD_FILTER_ALL;
   const totalCount = filteredContents.length + (showLegacy ? legacyContents.length : 0);
 
-  const groupedRows = subjects
+  const groupedRows: AdminSubjectGroup[] = subjects
     .map((subject) => {
-      const rows: AdminMenuRow[] = [
-        ...filteredContents
-          .filter((c) => c.subjectId === subject.id)
+      const contentRows = filteredContents
+        .filter((c) => c.subjectId === subject.id)
+        .map((doc) => ({ kind: "content" as const, doc }))
+        .sort((a, b) => a.doc.order - b.doc.order);
+      const legacyRows: AdminMenuRow[] = showLegacy
+        ? legacyContents
+            .filter((l) => l.subjectId === subject.id)
+            .map((doc) => ({ kind: "legacy" as const, doc }))
+            .sort((a, b) => a.doc.order - b.doc.order)
+        : [];
+      const allRows = [...contentRows, ...legacyRows].sort(
+        (a, b) => a.doc.order - b.doc.order,
+      );
+      const periodGroups = groupByContentPeriod(
+        contentRows.map((row) => row.doc),
+        (doc) => resolveContentPeriod(doc),
+      ).map((group) => ({
+        key: group.key,
+        label: group.label,
+        rows: group.items
+          .sort((a, b) => a.order - b.order)
           .map((doc) => ({ kind: "content" as const, doc })),
-        ...(showLegacy
-          ? legacyContents
-              .filter((l) => l.subjectId === subject.id)
-              .map((doc) => ({ kind: "legacy" as const, doc }))
+      }));
+      const sections = [
+        ...periodGroups,
+        ...(legacyRows.length > 0
+          ? [{ key: "legacy", label: "静的アプリ", rows: legacyRows }]
           : []),
-      ].sort((a, b) => a.doc.order - b.doc.order);
-      return { subject, rows };
+      ];
+      return { subject, allRows, sections };
     })
-    .filter((g) => g.rows.length > 0);
+    .filter((g) => g.sections.length > 0);
 
   async function onReorder(
     subjectId: string,
@@ -274,23 +299,27 @@ export default function AdminContentsPage() {
               : "選択した期間のコンテンツはありません。"}
           </p>
         ) : (
-          groupedRows.map(({ subject, rows }) => (
+          groupedRows.map(({ subject, allRows, sections }) => (
             <div key={subject.id} className="admin-subject-group">
               <h3>{subject.name}</h3>
-              <ul className="admin-list">
-                {rows.map((row, index) => {
+              {sections.map((section) => (
+                <div key={section.key} className="admin-period-group">
+                  <h4>{section.label}</h4>
+                  <ul className="admin-list">
+                    {section.rows.map((row) => {
                   const key = rowKey(row);
                   const busy = reorderingKey === key;
-                  const isFirst = index === 0;
-                  const isLast = index === rows.length - 1;
+                  const index = allRows.findIndex((r) => rowKey(r) === key);
+                  const isFirst = index <= 0;
+                  const isLast = index < 0 || index >= allRows.length - 1;
                   const ref: MenuEntryRef = { kind: row.kind, id: row.doc.id };
 
                   const title =
                     row.kind === "content" ? row.doc.title : row.doc.label;
                   const meta =
                     row.kind === "content"
-                      ? `${formatContentPeriod(resolveContentPeriod(row.doc))} · ${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}`
-                      : `静的アプリ · ${row.doc.href} · 順序 ${index + 1}`;
+                      ? `${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}`
+                      : `${row.doc.href} · 順序 ${index + 1}`;
 
                   const badge =
                     row.kind === "legacy" ? (
@@ -467,8 +496,10 @@ export default function AdminContentsPage() {
                       </div>
                     </li>
                   );
-                })}
-              </ul>
+                    })}
+                  </ul>
+                </div>
+              ))}
             </div>
           ))
         )}

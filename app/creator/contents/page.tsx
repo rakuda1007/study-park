@@ -12,7 +12,7 @@ import {
   CONTENT_PERIOD_FILTER_ALL,
   contentMatchesPeriodFilter,
   currentContentPeriod,
-  formatContentPeriod,
+  groupByContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
 import type { ContentType } from "@/lib/content/types";
@@ -105,6 +105,16 @@ export default function CreatorContentsPage() {
     () => items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
     [items, periodFilter],
   );
+  const groupedItems = useMemo(
+    () =>
+      groupByContentPeriod(filteredItems, (item) => resolveContentPeriod(item)).map(
+        (group) => ({
+          ...group,
+          items: group.items.sort((a, b) => a.order - b.order),
+        }),
+      ),
+    [filteredItems],
+  );
 
   if (loading) {
     return (
@@ -161,23 +171,30 @@ export default function CreatorContentsPage() {
             />
           </div>
 
-          <ul className="admin-list" style={{ marginTop: "0.75rem" }}>
-            {filteredItems.map((c) => (
-              <li key={c.id} className="admin-list-item">
-                <div>
-                  <strong>{c.title}</strong>（{formatContentPeriod(resolveContentPeriod(c))} / {c.type} / {c.status} / {c.visibility}）
-                  <br />
-                  <code>{workspacePlayHref(ws.slug, c.slug)}</code>
-                </div>
-                <Link
-                  href={`/creator/contents/edit?id=${encodeURIComponent(c.id)}`}
-                  className="admin-btn"
-                >
-                  編集
-                </Link>
-              </li>
+          <div style={{ marginTop: "0.75rem" }}>
+            {groupedItems.map((group) => (
+              <div key={group.key} className="admin-period-group">
+                <h4>{group.label}</h4>
+                <ul className="admin-list">
+                  {group.items.map((c) => (
+                    <li key={c.id} className="admin-list-item">
+                      <div>
+                        <strong>{c.title}</strong>（{c.type} / {c.status} / {c.visibility}）
+                        <br />
+                        <code>{workspacePlayHref(ws.slug, c.slug)}</code>
+                      </div>
+                      <Link
+                        href={`/creator/contents/edit?id=${encodeURIComponent(c.id)}`}
+                        className="admin-btn"
+                      >
+                        編集
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
           {filteredItems.length === 0 ? (
             <p className="admin-msg">
               {items.length === 0
