@@ -46,6 +46,11 @@ export function mapStoredContentPeriod(
   });
 }
 
+export type ContentPeriodRange = {
+  start: ContentPeriod;
+  end: ContentPeriod;
+};
+
 export function contentPeriodKey(period: ContentPeriod): string {
   return `${period.year}-${String(period.month).padStart(2, "0")}`;
 }
@@ -59,16 +64,58 @@ export function parseContentPeriodKey(key: string): ContentPeriod | null {
   return { year, month };
 }
 
+export function contentPeriodToSortKey(period: ContentPeriod): number {
+  return period.year * 12 + period.month;
+}
+
+export function normalizeContentPeriodRange(range: ContentPeriodRange): ContentPeriodRange {
+  const startKey = contentPeriodToSortKey(range.start);
+  const endKey = contentPeriodToSortKey(range.end);
+  if (startKey <= endKey) return range;
+  return { start: range.end, end: range.start };
+}
+
+export function contentPeriodRangeKey(range: ContentPeriodRange): string {
+  const normalized = normalizeContentPeriodRange(range);
+  return `${contentPeriodKey(normalized.start)}..${contentPeriodKey(normalized.end)}`;
+}
+
+/** 単月（旧形式）と開始..終了の両方を解釈 */
+export function parseContentPeriodRangeKey(key: string): ContentPeriodRange | null {
+  const rangeMatch = /^(\d{4}-\d{2})\.\.(\d{4}-\d{2})$/.exec(key);
+  if (rangeMatch) {
+    const start = parseContentPeriodKey(rangeMatch[1]);
+    const end = parseContentPeriodKey(rangeMatch[2]);
+    if (!start || !end) return null;
+    return normalizeContentPeriodRange({ start, end });
+  }
+  const single = parseContentPeriodKey(key);
+  if (!single) return null;
+  return { start: single, end: single };
+}
+
 export function formatContentPeriod(period: ContentPeriod): string {
   return `${period.year}年${period.month}月`;
 }
 
+export function formatContentPeriodRange(range: ContentPeriodRange): string {
+  const normalized = normalizeContentPeriodRange(range);
+  const startLabel = formatContentPeriod(normalized.start);
+  const endLabel = formatContentPeriod(normalized.end);
+  if (startLabel === endLabel) return startLabel;
+  return `${startLabel}〜${endLabel}`;
+}
+
 export function contentMatchesPeriodFilter(doc: ContentDoc, filter: string): boolean {
   if (filter === CONTENT_PERIOD_FILTER_ALL) return true;
-  const target = parseContentPeriodKey(filter);
-  if (!target) return true;
-  const period = resolveContentPeriod(doc);
-  return period.year === target.year && period.month === target.month;
+  const range = parseContentPeriodRangeKey(filter);
+  if (!range) return true;
+  const normalized = normalizeContentPeriodRange(range);
+  const key = contentPeriodToSortKey(resolveContentPeriod(doc));
+  return (
+    key >= contentPeriodToSortKey(normalized.start) &&
+    key <= contentPeriodToSortKey(normalized.end)
+  );
 }
 
 export function listContentPeriodOptions(

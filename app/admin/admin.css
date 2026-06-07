@@ -670,6 +670,21 @@
   min-width: 5.5rem;
 }
 
+.admin-content-period-filter__range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.35rem 0.5rem;
+}
+
+.admin-content-period-filter__range-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+  padding-bottom: 0.45rem;
+  white-space: nowrap;
+}
+
 .admin-rich-toolbar {
   display: flex;
   flex-wrap: wrap;

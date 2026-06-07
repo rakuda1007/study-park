@@ -3,11 +3,13 @@
 import { useEffect, useRef } from "react";
 import {
   CONTENT_PERIOD_FILTER_ALL,
-  contentPeriodKey,
+  contentPeriodRangeKey,
   contentPeriodYearOptions,
   currentContentPeriod,
   listContentPeriodOptions,
   parseContentPeriodKey,
+  parseContentPeriodRangeKey,
+  type ContentPeriod,
 } from "@/lib/content/period";
 import type { ContentDoc } from "@/lib/content/types";
 
@@ -49,18 +51,26 @@ function emitChange(
   if (storageKey) storeFilter(storageKey, value);
 }
 
+function defaultRange(contents: ContentDoc[]): { start: ContentPeriod; end: ContentPeriod } {
+  const existingOptions = listContentPeriodOptions(contents);
+  const fallback = currentContentPeriod();
+  const latest =
+    existingOptions.length > 0
+      ? parseContentPeriodKey(existingOptions[0].value) ?? fallback
+      : fallback;
+  return { start: latest, end: latest };
+}
+
 export function ContentPeriodFilter({ contents, value, onChange, storageKey }: Props) {
   const restored = useRef(false);
-  const existingOptions = listContentPeriodOptions(contents);
-  const defaultPeriod =
-    existingOptions.length > 0
-      ? parseContentPeriodKey(existingOptions[0].value) ?? currentContentPeriod()
-      : currentContentPeriod();
+  const defaults = defaultRange(contents);
   const parsed =
-    value === CONTENT_PERIOD_FILTER_ALL ? null : parseContentPeriodKey(value);
+    value === CONTENT_PERIOD_FILTER_ALL ? null : parseContentPeriodRangeKey(value);
   const mode: FilterMode = value === CONTENT_PERIOD_FILTER_ALL ? "all" : "period";
-  const year = parsed?.year ?? defaultPeriod.year;
-  const month = parsed?.month ?? defaultPeriod.month;
+  const startYear = parsed?.start.year ?? defaults.start.year;
+  const startMonth = parsed?.start.month ?? defaults.start.month;
+  const endYear = parsed?.end.year ?? defaults.end.year;
+  const endMonth = parsed?.end.month ?? defaults.end.month;
   const years = contentPeriodYearOptions();
 
   useEffect(() => {
@@ -71,6 +81,17 @@ export function ContentPeriodFilter({ contents, value, onChange, storageKey }: P
       onChange(stored);
     }
   }, [storageKey, value, onChange]);
+
+  function emitRange(
+    nextStart: ContentPeriod,
+    nextEnd: ContentPeriod,
+  ): void {
+    emitChange(
+      onChange,
+      storageKey,
+      contentPeriodRangeKey({ start: nextStart, end: nextEnd }),
+    );
+  }
 
   return (
     <div className="admin-content-period-filter" role="group" aria-label="表示期間">
@@ -85,7 +106,10 @@ export function ContentPeriodFilter({ contents, value, onChange, storageKey }: P
               emitChange(onChange, storageKey, CONTENT_PERIOD_FILTER_ALL);
               return;
             }
-            emitChange(onChange, storageKey, contentPeriodKey({ year, month }));
+            emitRange(
+              { year: startYear, month: startMonth },
+              { year: endYear, month: endMonth },
+            );
           }}
         >
           <option value="all">すべて</option>
@@ -94,45 +118,87 @@ export function ContentPeriodFilter({ contents, value, onChange, storageKey }: P
       </div>
       {mode === "period" ? (
         <>
-          <div className="admin-field admin-content-period-filter__part">
-            <label htmlFor="content-period-filter-year">年</label>
-            <select
-              id="content-period-filter-year"
-              value={year}
-              onChange={(e) =>
-                emitChange(
-                  onChange,
-                  storageKey,
-                  contentPeriodKey({ year: Number(e.target.value), month }),
-                )
-              }
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}年
-                </option>
-              ))}
-            </select>
+          <div className="admin-content-period-filter__range">
+            <span className="admin-content-period-filter__range-label">開始</span>
+            <div className="admin-field admin-content-period-filter__part">
+              <label htmlFor="content-period-start-year">年</label>
+              <select
+                id="content-period-start-year"
+                value={startYear}
+                onChange={(e) =>
+                  emitRange(
+                    { year: Number(e.target.value), month: startMonth },
+                    { year: endYear, month: endMonth },
+                  )
+                }
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}年
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-field admin-content-period-filter__part">
+              <label htmlFor="content-period-start-month">月</label>
+              <select
+                id="content-period-start-month"
+                value={startMonth}
+                onChange={(e) =>
+                  emitRange(
+                    { year: startYear, month: Number(e.target.value) },
+                    { year: endYear, month: endMonth },
+                  )
+                }
+              >
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}月
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="admin-field admin-content-period-filter__part">
-            <label htmlFor="content-period-filter-month">月</label>
-            <select
-              id="content-period-filter-month"
-              value={month}
-              onChange={(e) =>
-                emitChange(
-                  onChange,
-                  storageKey,
-                  contentPeriodKey({ year, month: Number(e.target.value) }),
-                )
-              }
-            >
-              {MONTHS.map((m) => (
-                <option key={m} value={m}>
-                  {m}月
-                </option>
-              ))}
-            </select>
+          <div className="admin-content-period-filter__range">
+            <span className="admin-content-period-filter__range-label">終了</span>
+            <div className="admin-field admin-content-period-filter__part">
+              <label htmlFor="content-period-end-year">年</label>
+              <select
+                id="content-period-end-year"
+                value={endYear}
+                onChange={(e) =>
+                  emitRange(
+                    { year: startYear, month: startMonth },
+                    { year: Number(e.target.value), month: endMonth },
+                  )
+                }
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}年
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-field admin-content-period-filter__part">
+              <label htmlFor="content-period-end-month">月</label>
+              <select
+                id="content-period-end-month"
+                value={endMonth}
+                onChange={(e) =>
+                  emitRange(
+                    { year: startYear, month: startMonth },
+                    { year: endYear, month: Number(e.target.value) },
+                  )
+                }
+              >
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}月
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </>
       ) : null}
