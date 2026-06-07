@@ -25,9 +25,7 @@ function menuItemsForSession(session: AuthSessionKind | null): ShellMenuItem[] {
   }
 
   const meta = sessionModeMeta(session);
-  const items: ShellMenuItem[] = [
-    { label: meta.dashboardLinkLabel, href: homePathForSession(session) },
-  ];
+  const items: ShellMenuItem[] = [];
 
   if (session === "admin") {
     items.push(
@@ -35,7 +33,11 @@ function menuItemsForSession(session: AuthSessionKind | null): ShellMenuItem[] {
       { label: "学習者招待", href: "/admin/invitations" },
       { label: "利用者", href: "/admin/users" },
     );
-  } else if (session === "creator") {
+  } else {
+    items.push({ label: meta.dashboardLinkLabel, href: homePathForSession(session) });
+  }
+
+  if (session === "creator") {
     items.push(
       { label: "参加者", href: "/creator/learners" },
       { label: "利用状況", href: "/creator/usage" },
