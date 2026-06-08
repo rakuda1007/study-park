@@ -122,6 +122,12 @@ export default function SignupLearnerPage() {
 
       {joinMsg ? <p className="auth-msg--ok">{joinMsg}</p> : null}
       <p className="auth-links auth-links--center">
+        {mode === "login" ? (
+          <>
+            <Link href="/login/forgot">パスワードをお忘れの方</Link>
+            <br />
+          </>
+        ) : null}
         <Link href="/signup">戻る</Link> · <Link href="/">トップへ</Link>
       </p>
     </AuthSignupPageShell>

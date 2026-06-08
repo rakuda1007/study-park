@@ -61,6 +61,10 @@ export default function AdminLoginPage() {
         </button>
       </form>
       <p style={{ marginTop: "1rem" }}>
+        <Link href="/login/forgot" className="admin-link">
+          パスワードをお忘れの方
+        </Link>
+        <br />
         <Link href="/" className="admin-link">
           トップへ戻る
         </Link>

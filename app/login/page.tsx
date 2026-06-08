@@ -23,6 +23,8 @@ export default function LoginPage() {
           }}
         />
         <p className="auth-links">
+          <Link href="/login/forgot">パスワードをお忘れの方</Link>
+          <br />
           アカウントをお持ちでない方は{" "}
           <Link href="/signup">新規登録</Link>
           <br />

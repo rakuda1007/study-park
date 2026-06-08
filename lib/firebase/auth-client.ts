@@ -4,10 +4,12 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   type User,
 } from "firebase/auth";
+import { absoluteSiteUrl } from "@/lib/site-url";
 import { doc, getDoc } from "firebase/firestore";
 import { createUserProfile, getUserProfile } from "@/lib/users/firestore";
 import type { UserRole } from "@/lib/users/types";
@@ -44,6 +46,22 @@ function mapAuthError(e: unknown): Error {
   }
   if (e instanceof Error) return e;
   return new Error("認証に失敗しました。");
+}
+
+/** パスワード再設定メールを送信（登録の有無は応答に含めない） */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const trimmed = email.trim();
+  if (!trimmed) {
+    throw new Error("メールアドレスを入力してください。");
+  }
+  try {
+    await sendPasswordResetEmail(getFirebaseAuth(), trimmed, {
+      url: absoluteSiteUrl("/login"),
+      handleCodeInApp: false,
+    });
+  } catch (e) {
+    throw mapAuthError(e);
+  }
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<User> {
