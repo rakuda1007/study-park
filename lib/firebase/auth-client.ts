@@ -44,7 +44,7 @@ function mapAuthError(e: unknown): Error {
   }
   if (code === "auth/unauthorized-continue-uri") {
     return new Error(
-      "このサイトのドメインが Firebase の承認済みドメインに登録されていません。管理者に連絡してください。",
+      "このサイトのドメインが Firebase の承認済みドメインに登録されていません。Authentication → Settings → 承認済みドメインに、現在アクセスしているホスト名を追加してください。",
     );
   }
   if (code === "permission-denied") {
@@ -56,12 +56,35 @@ function mapAuthError(e: unknown): Error {
   return new Error("認証に失敗しました。");
 }
 
-/** 再設定完了後に戻す URL（アクセス中のオリジンを優先） */
-function passwordResetContinueUrl(): string {
-  if (typeof window !== "undefined") {
-    return new URL("/login", window.location.origin).href;
+function authErrorCode(e: unknown): string {
+  return e && typeof e === "object" && "code" in e ? String((e as { code: string }).code) : "";
+}
+
+/** 再設定完了後に戻すオリジン（承認済みドメインと揃える） */
+function passwordResetContinueOrigin(): string {
+  if (typeof window === "undefined") {
+    return absoluteSiteUrl("/login").replace(/\/login\/?$/, "");
   }
-  return absoluteSiteUrl("/login");
+
+  const { hostname, port, protocol } = window.location;
+
+  // 127.0.0.1 は Firebase 既定の承認済みに無いことが多い → localhost に寄せる
+  if (hostname === "127.0.0.1") {
+    const p = port ? `:${port}` : "";
+    return `${protocol}//localhost${p}`;
+  }
+
+  // www 付きで開いていると continueUrl のホストが未登録になりやすい → apex へ
+  if (hostname === "www.study.tennis-community.com") {
+    return "https://study.tennis-community.com";
+  }
+
+  return window.location.origin;
+}
+
+/** 再設定完了後に戻す URL */
+function passwordResetContinueUrl(): string {
+  return new URL("/login", passwordResetContinueOrigin()).href;
 }
 
 /** パスワード再設定メールを送信（登録の有無は応答に含めない） */
@@ -70,12 +93,28 @@ export async function requestPasswordReset(email: string): Promise<void> {
   if (!trimmed) {
     throw new Error("メールアドレスを入力してください。");
   }
+  const auth = getFirebaseAuth();
+  const continueUrl = passwordResetContinueUrl();
   try {
-    await sendPasswordResetEmail(getFirebaseAuth(), trimmed, {
-      url: passwordResetContinueUrl(),
+    await sendPasswordResetEmail(auth, trimmed, {
+      url: continueUrl,
       handleCodeInApp: false,
     });
   } catch (e) {
+    // continueUrl のドメイン未登録時は URL なしで再送（メール自体は届く）
+    if (authErrorCode(e) === "auth/unauthorized-continue-uri") {
+      try {
+        await sendPasswordResetEmail(auth, trimmed);
+        return;
+      } catch (retryErr) {
+        if (typeof window !== "undefined") {
+          throw new Error(
+            `パスワード再設定メールを送信できませんでした。Firebase の承認済みドメインに「${window.location.hostname}」を追加してください。`,
+          );
+        }
+        throw mapAuthError(retryErr);
+      }
+    }
     throw mapAuthError(e);
   }
 }
