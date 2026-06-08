@@ -10,8 +10,10 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { buildSubjectNameMap, subjectSortOrder } from "@/lib/content/subject-names";
+import { DEFAULT_SUBJECTS } from "@/lib/content/subject-defaults";
 import type { ContentManifest, SubjectDoc } from "@/lib/content/types";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { WorkspaceSubjectDoc, WorkspaceSubjectStatus } from "./types";
@@ -31,7 +33,20 @@ function mapSubject(id: string, data: Record<string, unknown>): WorkspaceSubject
     name: String(data.name ?? id),
     order: Number(data.order ?? 999),
     status,
+    enabledInForm: data.enabledInForm === false ? false : true,
   };
+}
+
+function subjectsForForm(
+  subjects: WorkspaceSubjectDoc[],
+  currentSubjectId?: string,
+): WorkspaceSubjectDoc[] {
+  const enabled = subjects.filter((s) => s.enabledInForm !== false);
+  if (!currentSubjectId || enabled.some((s) => s.id === currentSubjectId)) {
+    return enabled;
+  }
+  const current = subjects.find((s) => s.id === currentSubjectId);
+  return current ? [...enabled, current] : enabled;
 }
 
 export async function listWorkspaceSubjects(
@@ -41,6 +56,83 @@ export async function listWorkspaceSubjects(
   return snap.docs
     .map((d) => mapSubject(d.id, d.data()))
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "ja"));
+}
+
+/** コンテンツ作成フォーム用（表示ONの教科のみ。編集中の教科は常に含む） */
+export async function listWorkspaceSubjectsForForm(
+  workspaceId: string,
+  currentSubjectId?: string,
+): Promise<WorkspaceSubjectDoc[]> {
+  const subjects = await listWorkspaceSubjects(workspaceId);
+  return subjectsForForm(subjects, currentSubjectId);
+}
+
+export async function createWorkspaceSubject(
+  workspaceId: string,
+  input: { id: string; name: string; order?: number; enabledInForm?: boolean },
+): Promise<void> {
+  const ref = doc(getFirestoreClient(), "workspaces", workspaceId, "subjects", input.id);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    throw new Error("この教科 ID は既に使われています。");
+  }
+  await setDoc(ref, {
+    name: input.name.trim(),
+    order: input.order ?? 999,
+    status: "draft",
+    enabledInForm: input.enabledInForm !== false,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateWorkspaceSubject(
+  workspaceId: string,
+  subjectId: string,
+  patch: { name?: string; order?: number; enabledInForm?: boolean },
+): Promise<void> {
+  const ref = doc(getFirestoreClient(), "workspaces", workspaceId, "subjects", subjectId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("教科が見つかりません。");
+  }
+  const data: Record<string, unknown> = { updatedAt: serverTimestamp() };
+  if (patch.name !== undefined) data.name = patch.name.trim();
+  if (patch.order !== undefined) data.order = patch.order;
+  if (patch.enabledInForm !== undefined) data.enabledInForm = patch.enabledInForm;
+  await updateDoc(ref, data);
+}
+
+export async function deleteWorkspaceSubject(
+  workspaceId: string,
+  subjectId: string,
+): Promise<void> {
+  const ref = doc(getFirestoreClient(), "workspaces", workspaceId, "subjects", subjectId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const contentSnap = await getDocs(query(contentsCol(workspaceId), orderBy("order", "asc")));
+  if (contentSnap.docs.some((d) => String(d.data().subjectId ?? "") === subjectId)) {
+    throw new Error("この教科に紐づく教材があるため削除できません。");
+  }
+  await deleteDoc(ref);
+}
+
+/** ワークスペース内のデフォルト教科（算数・社会・理科）を用意 */
+export async function ensureWorkspaceSubjects(workspaceId: string): Promise<void> {
+  for (const s of DEFAULT_SUBJECTS) {
+    const ref = doc(getFirestoreClient(), "workspaces", workspaceId, "subjects", s.id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        name: s.name,
+        order: s.order,
+        status: "draft",
+        enabledInForm: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    }
+  }
 }
 
 export async function setWorkspaceSubjectStatus(

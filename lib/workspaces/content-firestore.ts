@@ -30,7 +30,9 @@ import type {
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentVisibility } from "./types";
 import { resolveWorkspaceBySlug } from "./members";
-import { listWorkspaceSubjects } from "./subjects-firestore";
+import { ensureWorkspaceSubjects, listWorkspaceSubjects } from "./subjects-firestore";
+
+export { ensureWorkspaceSubjects };
 import { updateWorkspaceUsageCounts } from "./firestore";
 
 function contentsCol(workspaceId: string) {
@@ -298,16 +300,3 @@ export async function listPublishedContentsForMember(
     );
 }
 
-/** ワークスペース内の教科（簡易: デフォルト教科を doc 化） */
-export async function ensureWorkspaceSubjects(workspaceId: string): Promise<void> {
-  const defaults = [
-    { id: "general", name: "教材", order: 1 },
-  ];
-  for (const s of defaults) {
-    const ref = doc(getFirestoreClient(), "workspaces", workspaceId, "subjects", s.id);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      await setDoc(ref, { name: s.name, order: s.order });
-    }
-  }
-}

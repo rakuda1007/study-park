@@ -11,6 +11,7 @@ import {
   isSlugTaken,
   listContents,
   listSubjects,
+  listSubjectsForForm,
 } from "@/lib/content/firestore";
 import {
   deleteLegacyContent,
@@ -49,6 +50,7 @@ function rowKey(row: AdminMenuRow): string {
 
 export default function AdminContentsPage() {
   const [subjects, setSubjects] = useState<SubjectDoc[]>([]);
+  const [formSubjects, setFormSubjects] = useState<SubjectDoc[]>([]);
   const [contents, setContents] = useState<ContentDoc[]>([]);
   const [legacyContents, setLegacyContents] = useState<LegacyContentDoc[]>([]);
   const [uid, setUid] = useState("");
@@ -69,16 +71,18 @@ export default function AdminContentsPage() {
   const reload = useCallback(async () => {
     await ensureDefaultSubjects();
     await ensureLegacyContentsFromManifest(contentManifestBase as ContentManifest);
-    const [s, c, l] = await Promise.all([
+    const [s, form, c, l] = await Promise.all([
       listSubjects(),
+      listSubjectsForForm(),
       listContents(),
       listLegacyContents(),
     ]);
     setSubjects(s);
+    setFormSubjects(form);
     setContents(c);
     setLegacyContents(l);
-    if (s.length && !s.some((x) => x.id === newSubjectId)) {
-      setNewSubjectId(s[0].id);
+    if (form.length && !form.some((x) => x.id === newSubjectId)) {
+      setNewSubjectId(form[0].id);
     }
   }, [newSubjectId]);
 
@@ -235,7 +239,7 @@ export default function AdminContentsPage() {
                 value={newSubjectId}
                 onChange={(e) => setNewSubjectId(e.target.value)}
               >
-                {subjects.map((s) => (
+                {formSubjects.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>

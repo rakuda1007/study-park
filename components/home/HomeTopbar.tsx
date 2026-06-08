@@ -41,6 +41,7 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
   if (session === "admin") {
     items.push(
       { label: "コンテンツ一覧", href: "/admin/contents" },
+      { label: "教科マスタ", href: "/admin/subjects" },
       { label: "学習者招待", href: "/admin/invitations" },
       { label: "利用者一覧", href: "/admin/users" },
       { label: "学習者ホーム", href: "/learner" },
@@ -49,6 +50,7 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
   } else if (session === "creator") {
     items.push({ label: meta.dashboardLinkLabel, href: homePathForSession(session) });
     items.push(
+      { label: "教科マスタ", href: "/creator/subjects" },
       { label: "参加者", href: "/creator/learners" },
       { label: "利用状況", href: "/creator/usage" },
       { label: "学習者ホーム", href: "/learner" },

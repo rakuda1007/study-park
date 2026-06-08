@@ -12,6 +12,7 @@ import { signOutAdmin } from "@/lib/firebase/auth-client";
 const ADMIN_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
   { label: "コンテンツ一覧", href: "/admin/contents" },
+  { label: "教科マスタ", href: "/admin/subjects" },
   { label: "学習者招待", href: "/admin/invitations" },
   { label: "利用者一覧", href: "/admin/users" },
   { label: "学習者ホーム", href: "/learner" },

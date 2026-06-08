@@ -23,8 +23,9 @@ import {
   listWorkspaceContents,
 } from "@/lib/workspaces/content-firestore";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
+import { listWorkspaceSubjectsForForm } from "@/lib/workspaces/subjects-firestore";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
-import type { WorkspaceDoc } from "@/lib/workspaces/types";
+import type { WorkspaceDoc, WorkspaceSubjectDoc } from "@/lib/workspaces/types";
 
 export function CreatorContentsSection() {
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
@@ -32,7 +33,9 @@ export function CreatorContentsSection() {
   const [uid, setUid] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [subjects, setSubjects] = useState<WorkspaceSubjectDoc[]>([]);
   const [newType, setNewType] = useState<ContentType>("quiz");
+  const [newSubjectId, setNewSubjectId] = useState("math");
   const [newSlug, setNewSlug] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
@@ -41,9 +44,16 @@ export function CreatorContentsSection() {
 
   const reload = useCallback(async (workspaceId: string) => {
     await ensureWorkspaceSubjects(workspaceId);
-    const list = await listWorkspaceContents(workspaceId);
+    const [list, formSubjects] = await Promise.all([
+      listWorkspaceContents(workspaceId),
+      listWorkspaceSubjectsForForm(workspaceId),
+    ]);
     setItems(list);
-  }, []);
+    setSubjects(formSubjects);
+    if (formSubjects.length && !formSubjects.some((s) => s.id === newSubjectId)) {
+      setNewSubjectId(formSubjects[0].id);
+    }
+  }, [newSubjectId]);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -84,7 +94,7 @@ export function CreatorContentsSection() {
     }
     try {
       const id = await createWorkspaceContent(ws.id, {
-        subjectId: "general",
+        subjectId: newSubjectId,
         type: newType,
         slug,
         title: newTitle.trim() || slug,
@@ -131,6 +141,17 @@ export function CreatorContentsSection() {
           <select value={newType} onChange={(e) => setNewType(e.target.value as ContentType)}>
             <option value="quiz">クイズ</option>
             <option value="lesson">レッスン</option>
+          </select>
+          <select
+            value={newSubjectId}
+            onChange={(e) => setNewSubjectId(e.target.value)}
+            aria-label="教科"
+          >
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
           </select>
           <input
             placeholder="スラッグ"

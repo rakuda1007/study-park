@@ -39,6 +39,8 @@ export type SubjectDoc = {
   id: string;
   name: string;
   order: number;
+  /** コンテンツ作成フォームのプルダウンに表示するか（未設定は true） */
+  enabledInForm?: boolean;
 };
 
 /** public/ 配下の静的クイズ・レッスン（従来の content-manifest 登録分） */

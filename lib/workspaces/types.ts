@@ -10,6 +10,8 @@ export type WorkspaceSubjectDoc = {
   name: string;
   order: number;
   status: WorkspaceSubjectStatus;
+  /** コンテンツ作成フォームのプルダウンに表示するか（未設定は true） */
+  enabledInForm?: boolean;
 };
 
 export type WorkspaceDoc = {

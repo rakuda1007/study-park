@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { DEFAULT_SUBJECTS } from "./subject-defaults";
 import { currentContentPeriod, mapStoredContentPeriod } from "./period";
 import { DEFAULT_QUIZ_BLANK_ANSWERS } from "./quiz-answers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "./quiz-question";
@@ -42,7 +43,20 @@ function mapSubject(id: string, data: Record<string, unknown>): SubjectDoc {
     id,
     name: String(data.name ?? ""),
     order: Number(data.order ?? 0),
+    enabledInForm: data.enabledInForm === false ? false : true,
   };
+}
+
+function subjectsForForm(
+  subjects: SubjectDoc[],
+  currentSubjectId?: string,
+): SubjectDoc[] {
+  const enabled = subjects.filter((s) => s.enabledInForm !== false);
+  if (!currentSubjectId || enabled.some((s) => s.id === currentSubjectId)) {
+    return enabled;
+  }
+  const current = subjects.find((s) => s.id === currentSubjectId);
+  return current ? [...enabled, current] : enabled;
 }
 
 function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
@@ -72,6 +86,61 @@ function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
 export async function listSubjects(): Promise<SubjectDoc[]> {
   const snap = await getDocs(collection(getFirestoreClient(), "subjects"));
   return snap.docs.map((d) => mapSubject(d.id, d.data())).sort((a, b) => a.order - b.order);
+}
+
+/** コンテンツ作成フォーム用（表示ONの教科のみ。編集中の教科は常に含む） */
+export async function listSubjectsForForm(
+  currentSubjectId?: string,
+): Promise<SubjectDoc[]> {
+  const subjects = await listSubjects();
+  return subjectsForForm(subjects, currentSubjectId);
+}
+
+export async function createSubject(input: {
+  id: string;
+  name: string;
+  order?: number;
+  enabledInForm?: boolean;
+}): Promise<void> {
+  const ref = doc(getFirestoreClient(), "subjects", input.id);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    throw new Error("この教科 ID は既に使われています。");
+  }
+  await setDoc(ref, {
+    name: input.name.trim(),
+    order: input.order ?? 999,
+    enabledInForm: input.enabledInForm !== false,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateSubject(
+  id: string,
+  patch: { name?: string; order?: number; enabledInForm?: boolean },
+): Promise<void> {
+  const ref = doc(getFirestoreClient(), "subjects", id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("教科が見つかりません。");
+  }
+  const data: Record<string, unknown> = { updatedAt: serverTimestamp() };
+  if (patch.name !== undefined) data.name = patch.name.trim();
+  if (patch.order !== undefined) data.order = patch.order;
+  if (patch.enabledInForm !== undefined) data.enabledInForm = patch.enabledInForm;
+  await updateDoc(ref, data);
+}
+
+export async function deleteSubject(id: string): Promise<void> {
+  const ref = doc(getFirestoreClient(), "subjects", id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const contents = await listContents();
+  if (contents.some((c) => c.subjectId === id)) {
+    throw new Error("この教科に紐づくコンテンツがあるため削除できません。");
+  }
+  await deleteDoc(ref);
 }
 
 export async function listContents(subjectId?: string): Promise<ContentDoc[]> {
@@ -275,16 +344,17 @@ export async function saveQuizQuestions(
 
 /** 初期教科データ（存在しなければ作成） */
 export async function ensureDefaultSubjects(): Promise<void> {
-  const defaults: SubjectDoc[] = [
-    { id: "math", name: "算数", order: 1 },
-    { id: "social", name: "社会", order: 2 },
-    { id: "science", name: "理科", order: 3 },
-  ];
-  for (const s of defaults) {
+  for (const s of DEFAULT_SUBJECTS) {
     const ref = doc(getFirestoreClient(), "subjects", s.id);
     const snap = await getDoc(ref);
     if (!snap.exists()) {
-      await setDoc(ref, { name: s.name, order: s.order });
+      await setDoc(ref, {
+        name: s.name,
+        order: s.order,
+        enabledInForm: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
     }
   }
 }

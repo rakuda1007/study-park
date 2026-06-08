@@ -16,6 +16,7 @@ import {
   isSlugTaken,
   listContents,
   listSubjects,
+  listSubjectsForForm,
   saveLessonSections,
   saveQuizQuestions,
   updateContent,
@@ -78,7 +79,8 @@ function EditContentInner() {
 
   const load = useCallback(async () => {
     if (!id) return;
-    const [s, c] = await Promise.all([listSubjects(), getContent(id)]);
+    const c = await getContent(id);
+    const s = await listSubjectsForForm(c?.subjectId);
     setSubjects(s);
     if (!c) {
       setErr("コンテンツが見つかりません。");

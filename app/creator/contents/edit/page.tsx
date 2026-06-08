@@ -35,7 +35,8 @@ import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 import type { ContentVisibility } from "@/lib/workspaces/types";
 import { syncWorkspaceAdFlag } from "@/lib/workspaces/ad-flags";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
-import type { WorkspaceDoc } from "@/lib/workspaces/types";
+import { listWorkspaceSubjectsForForm } from "@/lib/workspaces/subjects-firestore";
+import type { WorkspaceDoc, WorkspaceSubjectDoc } from "@/lib/workspaces/types";
 
 function EditInner() {
   const params = useSearchParams();
@@ -48,8 +49,10 @@ function EditInner() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
 
+  const [subjects, setSubjects] = useState<WorkspaceSubjectDoc[]>([]);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [subjectId, setSubjectId] = useState("math");
   const [intro, setIntro] = useState("");
   const [status, setStatus] = useState<ContentStatus>("draft");
   const [ready, setReady] = useState(false);
@@ -84,9 +87,12 @@ function EditInner() {
       setErr("コンテンツが見つかりません。");
       return;
     }
+    const formSubjects = await listWorkspaceSubjectsForForm(workspace.id, c.subjectId);
+    setSubjects(formSubjects);
     setDoc(c);
     setTitle(c.title);
     setSlug(c.slug);
+    setSubjectId(c.subjectId);
     setIntro(c.intro ?? "");
     setStatus(c.status);
     setReady(c.ready);
@@ -129,7 +135,7 @@ function EditInner() {
         title: title.trim(),
         slug: s,
         intro: intro.trim(),
-        subjectId: "general",
+        subjectId,
         status,
         ready: readyForSite,
         visibility,
@@ -217,9 +223,25 @@ function EditInner() {
               <label htmlFor="title">タイトル</label>
               <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
-            <div className="admin-field">
-              <label htmlFor="slug">slug</label>
-              <input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} />
+            <div className="admin-row">
+              <div className="admin-field" style={{ flex: "1 1 10rem" }}>
+                <label htmlFor="slug">slug</label>
+                <input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} />
+              </div>
+              <div className="admin-field" style={{ flex: "1 1 10rem" }}>
+                <label htmlFor="subject">教科</label>
+                <select
+                  id="subject"
+                  value={subjectId}
+                  onChange={(e) => setSubjectId(e.target.value)}
+                >
+                  {subjects.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <ContentPeriodFields
               year={periodYear}

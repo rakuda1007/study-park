@@ -17,6 +17,7 @@ function mapSubject(id: string, data: Record<string, unknown>): SubjectDoc {
     id,
     name: String(data.name ?? ""),
     order: Number(data.order ?? 0),
+    enabledInForm: data.enabledInForm === false ? false : true,
   };
 }
 
