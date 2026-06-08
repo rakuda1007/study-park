@@ -21,6 +21,8 @@ export default function SignupLearnerPage() {
     if (inviteCode.trim()) {
       const r = await joinWorkspaceByInviteCode(inviteCode, uid);
       setJoinMsg(`${r.workspaceName} に参加しました。`);
+      router.replace("/learner");
+      return;
     }
     const path = await resolvePostLoginPath(uid);
     router.replace(path);
@@ -89,7 +91,9 @@ export default function SignupLearnerPage() {
           className="auth-mode-toggle__btn"
           onClick={() => setMode(mode === "signup" ? "login" : "signup")}
         >
-          {mode === "signup" ? "既にアカウントがある場合はログイン" : "新規登録に切り替え"}
+          {mode === "signup"
+            ? "既にアカウントがある場合はログイン（クリエイターアカウント可）"
+            : "新規登録に切り替え"}
         </button>
       </p>
 

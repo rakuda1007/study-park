@@ -1,30 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  buildSubjectNameMap,
   subjectDisplayName,
   subjectSortOrder,
 } from "@/lib/content/subject-names";
 import type { ContentManifest } from "@/lib/content/types";
-import { listPublicSubjects } from "@/lib/content/public-firestore";
-import { listPublishedContentsForMember } from "@/lib/workspaces/content-firestore";
-import { getWorkspace, getWorkspaceByOwner } from "@/lib/workspaces/firestore";
-import { listWorkspacesForLearner } from "@/lib/workspaces/members";
+import { loadLearnerHomeRows, type LearnerHomeRow } from "@/lib/learner/home-rows";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
+import { JoinWorkspaceInviteForm } from "@/components/learner/JoinWorkspaceInviteForm";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { backfillLearnerNamesIfEmpty } from "@/lib/users/firestore";
 import contentManifest from "@/public/content-manifest.json";
-
-type Row = {
-  workspaceId: string;
-  workspaceName: string;
-  workspaceSlug: string;
-  contents: WorkspaceContentDoc[];
-};
 
 type SubjectGroup = {
   subjectId: string;
@@ -57,53 +47,35 @@ function groupBySubject(
 
 export default function LearnerHomePage() {
   const manifest = contentManifest as ContentManifest;
-  const [rows, setRows] = useState<Row[]>([]);
+  const [rows, setRows] = useState<LearnerHomeRow[]>([]);
   const [subjectNames, setSubjectNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState("");
+
+  const refreshRows = useCallback(
+    async (uid: string) => {
+      const data = await loadLearnerHomeRows(uid, manifest);
+      setRows(data.rows);
+      setSubjectNames(data.subjectNames);
+    },
+    [manifest],
+  );
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
       void (async () => {
         if (!user) return;
+        setUserId(user.uid);
         try {
           await backfillLearnerNamesIfEmpty(user.uid);
-          const [memberships, subjects, ownedWs] = await Promise.all([
-            listWorkspacesForLearner(user.uid),
-            listPublicSubjects(),
-            getWorkspaceByOwner(user.uid),
-          ]);
-          setSubjectNames(buildSubjectNameMap(manifest, subjects));
-          const data: Row[] = [];
-          const seen = new Set<string>();
-          for (const m of memberships) {
-            const ws = await getWorkspace(m.workspaceId);
-            if (!ws) continue;
-            seen.add(m.workspaceId);
-            const contents = await listPublishedContentsForMember(m.workspaceId);
-            data.push({
-              workspaceId: m.workspaceId,
-              workspaceName: ws.name,
-              workspaceSlug: ws.slug,
-              contents,
-            });
-          }
-          if (ownedWs && !seen.has(ownedWs.id)) {
-            const contents = await listPublishedContentsForMember(ownedWs.id);
-            data.push({
-              workspaceId: ownedWs.id,
-              workspaceName: ownedWs.name,
-              workspaceSlug: ownedWs.slug,
-              contents,
-            });
-          }
-          setRows(data);
+          await refreshRows(user.uid);
         } finally {
           setLoading(false);
         }
       })();
     });
     return unsub;
-  }, [manifest]);
+  }, [refreshRows]);
 
   const rowsWithGroups = useMemo(
     () =>
@@ -121,22 +93,35 @@ export default function LearnerHomePage() {
         <Link href="/?park=1">トップページ</Link> からいつでも無料で利用できます。
       </p>
 
+      {!loading && userId ? (
+        <JoinWorkspaceInviteForm
+          userId={userId}
+          onJoined={() => {
+            void refreshRows(userId);
+          }}
+        />
+      ) : null}
+
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
       {!loading && rows.length === 0 ? (
         <section className="admin-card">
-          <p>まだ参加している教材がありません。</p>
-          <p>
-            クリエイターから届いた招待コードがあれば、
-            <Link href="/signup/learner"> こちらから参加</Link>
-            できます。
-          </p>
+          <p>まだ参加している教材がありません。上のフォームから招待コードを入力して参加してください。</p>
         </section>
       ) : null}
 
       {rowsWithGroups.map((r) => (
         <section key={r.workspaceId} className="admin-card learner-workspace-card">
           <h2 className="learner-workspace-title">{r.workspaceName}</h2>
+          <p className="learner-workspace-meta">
+            {r.isOwnWorkspace ? (
+              <>自分が作った教材</>
+            ) : (
+              <>
+                提供：<strong>{r.ownerLabel}</strong>
+              </>
+            )}
+          </p>
           {r.subjectGroups.length === 0 ? (
             <p className="admin-msg">公開中の教材はまだありません。</p>
           ) : (

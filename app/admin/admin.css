@@ -582,15 +582,76 @@
 }
 
 /* 学習者ホーム */
-.learner-workspace-card .learner-workspace-title {
+.learner-join-card {
+  margin-bottom: 1rem;
+}
+
+.learner-join-card__title {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--admin-text);
+}
+
+.learner-join-card__lead {
   margin: 0 0 1rem;
-  padding-bottom: 0.65rem;
-  border-bottom: 1px solid var(--admin-border);
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--admin-muted);
+}
+
+.learner-join-form__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.learner-join-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.learner-join-form__input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  color: var(--admin-text);
+  background: var(--admin-surface);
+}
+
+.learner-join-form__btn {
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+
+.learner-workspace-card .learner-workspace-title {
+  margin: 0 0 0.35rem;
   font-size: 1.35rem;
   font-weight: 800;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--admin-text);
+}
+
+.learner-workspace-meta {
+  margin: 0 0 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 0.88rem;
+  color: var(--admin-muted);
+}
+
+.learner-workspace-meta strong {
+  color: var(--admin-text);
+  font-weight: 700;
 }
 
 .learner-subject-list {
