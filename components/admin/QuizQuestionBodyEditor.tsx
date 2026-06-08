@@ -4,15 +4,23 @@ import { ImageBlockEditor } from "@/components/admin/ImageBlockEditor";
 import { RichTextArea } from "@/components/admin/RichTextArea";
 import type { LessonBlock } from "@/lib/content/types";
 import { templateFromBlocks } from "@/lib/content/quiz-question";
+import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
 type Props = {
   contentId: string;
   workspaceId?: string;
+  workspace?: WorkspaceDoc | null;
   blocks: LessonBlock[];
   onChange: (blocks: LessonBlock[], template: string) => void;
 };
 
-export function QuizQuestionBodyEditor({ contentId, workspaceId, blocks, onChange }: Props) {
+export function QuizQuestionBodyEditor({
+  contentId,
+  workspaceId,
+  workspace,
+  blocks,
+  onChange,
+}: Props) {
   const sync = (next: LessonBlock[]) => {
     onChange(next, templateFromBlocks(next));
   };
@@ -93,6 +101,7 @@ export function QuizQuestionBodyEditor({ contentId, workspaceId, blocks, onChang
             <ImageBlockEditor
               contentId={contentId}
               workspaceId={workspaceId}
+              workspace={workspace}
               block={block}
               blockIndex={bi}
               onChange={(patch) => updateBlock(bi, { ...block, ...patch })}

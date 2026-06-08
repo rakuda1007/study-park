@@ -1,4 +1,9 @@
-import type { AppPurchaseStatus, BillingTierId, SubscriptionStatus } from "@/lib/billing/types";
+import type {
+  AccountPhase,
+  AppPurchaseStatus,
+  BillingTierId,
+  SubscriptionStatus,
+} from "@/lib/billing/types";
 
 /** 公開範囲（仕様書 §7） */
 export type ContentVisibility = "private" | "members" | "unlisted" | "public";
@@ -22,12 +27,15 @@ export type WorkspaceDoc = {
   slug: string;
   inviteCode: string;
   planId: BillingTierId;
+  accountPhase: AccountPhase;
+  /** お試し終了日（ISO）。スターター購入後は null */
+  trialEndsAt: string | null;
   subscriptionStatus: SubscriptionStatus;
   storageBytesUsed: number;
   storageBytesLimit: number;
   questionCount: number;
   questionCountLimit: number;
-  /** オーナーの買い切り状態のコピー（一覧表示用・ゲート用） */
+  /** オーナーのスターター購入状態のコピー（一覧表示用・ゲート用） */
   appPurchaseStatus: AppPurchaseStatus;
   createdAt: string;
   updatedAt: string;

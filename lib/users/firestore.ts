@@ -75,7 +75,7 @@ export async function createUserProfile(
     givenName,
     displayName,
     role,
-    appPurchase: { status: "none" as const },
+    appPurchase: { status: "none" as const, product: "starter" as const },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -120,6 +120,7 @@ export async function updateUserAppPurchase(
   await updateDoc(doc(getFirestoreClient(), "users", uid), {
     appPurchase: {
       status,
+      product: "starter",
       ...(status === "active"
         ? { purchasedAt: serverTimestamp(), provider: extra?.provider ?? "stripe" }
         : {}),

@@ -3,10 +3,12 @@
 import { ImageBlockEditor } from "@/components/admin/ImageBlockEditor";
 import { RichTextArea } from "@/components/admin/RichTextArea";
 import type { LessonBlock, LessonSection } from "@/lib/content/types";
+import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
 type Props = {
   contentId: string;
   workspaceId?: string;
+  workspace?: WorkspaceDoc | null;
   section: LessonSection;
   sectionIndex?: number;
   onChange: (section: LessonSection) => void;
@@ -16,6 +18,7 @@ type Props = {
 export function LessonSectionEditor({
   contentId,
   workspaceId,
+  workspace,
   section,
   onChange,
   onRemove,
@@ -119,6 +122,7 @@ export function LessonSectionEditor({
             <ImageBlockEditor
               contentId={contentId}
               workspaceId={workspaceId}
+              workspace={workspace}
               block={block}
               blockIndex={bi}
               onChange={(patch) => updateBlock(bi, { ...block, ...patch })}

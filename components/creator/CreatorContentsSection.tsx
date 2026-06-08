@@ -4,6 +4,8 @@ import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
+import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
+import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { workspacePlayHref } from "@/lib/content/urls";
 import { SLUG_PATTERN } from "@/lib/content/types";
@@ -22,7 +24,6 @@ import {
   isWorkspaceSlugTaken,
   listWorkspaceContents,
 } from "@/lib/workspaces/content-firestore";
-import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import { listWorkspaceSubjectsForForm } from "@/lib/workspaces/subjects-firestore";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 import type { WorkspaceDoc, WorkspaceSubjectDoc } from "@/lib/workspaces/types";
@@ -61,7 +62,10 @@ export function CreatorContentsSection() {
       void (async () => {
         if (!user) return;
         try {
-          const workspace = await getWorkspaceByOwner(user.uid);
+          let workspace = await syncCreatorBillingState(user.uid);
+          if (workspace) {
+            workspace = (await refreshWorkspaceUsageSnapshot(workspace.id)) ?? workspace;
+          }
           setWs(workspace);
           if (workspace) await reload(workspace.id);
         } catch (e) {
@@ -81,6 +85,11 @@ export function CreatorContentsSection() {
     const slug = newSlug.trim().toLowerCase();
     if (!SLUG_PATTERN.test(slug)) {
       setErr("スラッグは英小文字・数字・ハイフンのみです。");
+      return;
+    }
+    const createCheck = checkWorkspaceUsage(ws, "create_content");
+    if (!createCheck.ok) {
+      setErr(createCheck.reason);
       return;
     }
     const usage = checkWorkspaceUsage(ws, "add_question");

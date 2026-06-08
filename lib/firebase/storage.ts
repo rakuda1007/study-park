@@ -1,6 +1,7 @@
 "use client";
 
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { incrementWorkspaceStorageBytes } from "@/lib/workspaces/firestore";
 import { getFirebaseAuth } from "./auth-client";
 import { getStorageClient } from "./client";
 import { prepareImageForUpload } from "./prepare-image-upload";
@@ -93,6 +94,13 @@ export async function uploadLessonImage(
       UPLOAD_TIMEOUT_MS,
       "アップロードがタイムアウトしました。Firebase Storage が有効か、.env.local の STORAGE_BUCKET を確認してください。",
     );
+    if (workspaceId) {
+      try {
+        await incrementWorkspaceStorageBytes(workspaceId, prepared.size);
+      } catch {
+        /* 集計失敗はアップロード自体は成功扱い */
+      }
+    }
     return await withTimeout(
       getDownloadURL(storageRef),
       URL_TIMEOUT_MS,

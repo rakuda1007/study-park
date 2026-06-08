@@ -10,6 +10,8 @@ import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
+import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
+import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { workspacePlayHref } from "@/lib/content/urls";
 import {
@@ -70,7 +72,10 @@ function EditInner() {
 
   const load = useCallback(async () => {
     if (!id || !uid) return;
-    const workspace = await getWorkspaceByOwner(uid);
+    let workspace = await syncCreatorBillingState(uid);
+    if (workspace) {
+      workspace = (await refreshWorkspaceUsageSnapshot(workspace.id)) ?? workspace;
+    }
     setWs(workspace);
     if (workspace) {
       await syncWorkspaceAdFlag(workspace.id, workspace.planId);
@@ -126,6 +131,11 @@ function EditInner() {
     }
     if (await isWorkspaceSlugTaken(ws.id, s, doc.id)) {
       setErr("この slug は既に使われています。");
+      return;
+    }
+    const editCheck = checkWorkspaceUsage(ws, "edit_content");
+    if (!editCheck.ok) {
+      setErr(editCheck.reason);
       return;
     }
     setSaving(true);
@@ -309,6 +319,7 @@ function EditInner() {
                   <QuizQuestionBodyEditor
                     contentId={doc.id}
                     workspaceId={ws.id}
+                    workspace={ws}
                     blocks={q.blocks ?? [{ kind: "paragraph", text: q.template }]}
                     onChange={(blocks, template) =>
                       setQuestions((prev) =>
@@ -328,6 +339,7 @@ function EditInner() {
               <LessonSectionsEditor
                 contentId={doc.id}
                 workspaceId={ws.id}
+                workspace={ws}
                 sections={sections}
                 onChange={setSections}
               />

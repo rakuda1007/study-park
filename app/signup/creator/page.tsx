@@ -34,7 +34,7 @@ export default function SignupCreatorPage() {
   return (
     <AuthSignupPageShell
       title="自分で教材を作る　～クリエイター登録～"
-      lead="メールでアカウントを作成します。姓名とワークスペース名はあとから変更できます。"
+      lead="メールでアカウントを作成します。お試し（80問・100MB・最長2年）ですぐに教材づくりを始められます。"
     >
       <EmailAuthForm
         embedded

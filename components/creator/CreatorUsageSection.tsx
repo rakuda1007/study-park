@@ -1,13 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CreatorBillingBanner } from "@/components/creator/CreatorBillingBanner";
+import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
+import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { formatBytes, usagePercent } from "@/lib/billing/usage";
 import { listBillingTiers } from "@/lib/billing/tiers";
+import { getWorkspaceAccessState } from "@/lib/billing/workspace-access";
 import type { BillingTierDoc } from "@/lib/billing/types";
 import { getUserProfile } from "@/lib/users/firestore";
-import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+
+function formatTrialRemaining(trialEndsAt: string | null): string | null {
+  if (!trialEndsAt) return null;
+  const end = new Date(trialEndsAt);
+  const now = new Date();
+  const days = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (days < 0) return "お試し期間終了";
+  if (days === 0) return "お試し残り: 今日まで";
+  return `お試し残り: 約 ${days} 日`;
+}
+
+function tierPriceLabel(t: BillingTierDoc): string {
+  if (t.oneTimePriceLabel) return t.oneTimePriceLabel;
+  if (t.monthlyPriceLabel) return `${t.monthlyPriceLabel}/月`;
+  return "—";
+}
 
 export function CreatorUsageSection() {
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
@@ -20,12 +39,15 @@ export function CreatorUsageSection() {
       void (async () => {
         if (!user) return;
         try {
-          const [profile, workspace, tierList] = await Promise.all([
+          const [profile, tierList] = await Promise.all([
             getUserProfile(user.uid),
-            getWorkspaceByOwner(user.uid),
             listBillingTiers(),
           ]);
           setPurchaseStatus(profile?.appPurchase.status ?? "none");
+          let workspace = await syncCreatorBillingState(user.uid);
+          if (workspace) {
+            workspace = (await refreshWorkspaceUsageSnapshot(workspace.id)) ?? workspace;
+          }
           setWs(workspace);
           setTiers(tierList);
         } finally {
@@ -51,18 +73,35 @@ export function CreatorUsageSection() {
   const storagePct = usagePercent(ws.storageBytesUsed, ws.storageBytesLimit);
   const questionPct = usagePercent(ws.questionCount, ws.questionCountLimit);
   const currentTier = tiers.find((t) => t.id === ws.planId);
+  const trialRemaining = ws.planId === "trial" ? formatTrialRemaining(ws.trialEndsAt) : null;
+  const access = getWorkspaceAccessState(ws);
 
   return (
     <>
+      <CreatorBillingBanner ws={ws} purchaseStatus={purchaseStatus} />
+
       <section className="admin-card">
-        <h2 className="admin-card__heading">無料枠での作成</h2>
+        <h2 className="admin-card__heading">プラン</h2>
         <p style={{ margin: 0, fontSize: "0.9rem" }}>
-          無料枠の範囲内で教材の作成・公開ができます。上限を超えると上位プラン（月額）への変更が必要です。
-          {ws.planId === "included" ? " 無料枠では広告が表示されます。" : ""}
+          {ws.planId === "trial" ? (
+            <>
+              お試し期間中（80問・100MBまで）。スターター（¥980）で期限なく200問・100MBまで利用できます。
+              {trialRemaining ? ` ${trialRemaining}。` : ""}
+              お試し中は学習画面に広告が表示されます。
+            </>
+          ) : (
+            <>
+              スターターまたは月額プランの範囲内で教材の作成・公開ができます。上限を超えると上位プランへの変更が必要です。
+            </>
+          )}
         </p>
         {purchaseStatus === "active" ? (
           <p className="admin-msg" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
-            クリエイター版（買い切り）: 購入済み
+            スターター: 購入済み
+          </p>
+        ) : ws.planId === "trial" ? (
+          <p className="admin-msg" style={{ marginTop: "0.5rem", fontSize: "0.85rem" }}>
+            スターター（¥980）未購入
           </p>
         ) : null}
       </section>
@@ -71,7 +110,7 @@ export function CreatorUsageSection() {
         <h2 className="admin-card__heading">利用状況</h2>
         <p style={{ margin: "0.25rem 0" }}>
           プラン: <strong>{currentTier?.displayName ?? ws.planId}</strong>（
-          {ws.subscriptionStatus === "active" ? "サブスク有効" : "サブスクなし"}）
+          {ws.subscriptionStatus === "active" ? "月額契約中" : "月額なし"}）
         </p>
         <p style={{ margin: "0.25rem 0" }}>
           ストレージ: {formatBytes(ws.storageBytesUsed)} / {formatBytes(ws.storageBytesLimit)}（
@@ -98,30 +137,35 @@ export function CreatorUsageSection() {
             }}
           />
         </div>
+        {access.trialDaysRemaining != null ? (
+          <p style={{ margin: "0.5rem 0 0", fontSize: "0.85rem" }}>
+            お試し残り: 約 {access.trialDaysRemaining} 日
+          </p>
+        ) : null}
         <p className="admin-msg" style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
-          上限超過時は新規問題・画像追加をブロックします。月額プランは Stripe の Price ID を
-          Firestore <code>billingTiers</code> に設定して接続します。
+          上限超過時は新規問題・画像追加をブロックします。スターター・月額は Stripe の Price ID
+          設定後に Checkout を接続します。
         </p>
       </section>
 
       <section className="admin-card">
-        <h2 className="admin-card__heading">プラン一覧（上限は可変）</h2>
+        <h2 className="admin-card__heading">プラン一覧</h2>
         <table className="admin-table" style={{ width: "100%", fontSize: "0.88rem" }}>
           <thead>
             <tr>
-              <th>ティア</th>
+              <th>プラン</th>
+              <th>価格</th>
               <th>ストレージ</th>
               <th>問題数</th>
-              <th>Stripe</th>
             </tr>
           </thead>
           <tbody>
             {tiers.map((t) => (
               <tr key={t.id}>
                 <td>{t.displayName}</td>
+                <td>{tierPriceLabel(t)}</td>
                 <td>{formatBytes(t.storageBytesLimit)}</td>
                 <td>{t.questionCountLimit} 問</td>
-                <td>{t.stripePriceId ? "設定済" : "未設定"}</td>
               </tr>
             ))}
           </tbody>

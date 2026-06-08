@@ -7,15 +7,23 @@ import {
   moveLessonSection,
 } from "@/lib/content/lesson-section";
 import type { LessonSection } from "@/lib/content/types";
+import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
 type Props = {
   contentId: string;
   workspaceId?: string;
+  workspace?: WorkspaceDoc | null;
   sections: LessonSection[];
   onChange: (sections: LessonSection[]) => void;
 };
 
-export function LessonSectionsEditor({ contentId, workspaceId, sections, onChange }: Props) {
+export function LessonSectionsEditor({
+  contentId,
+  workspaceId,
+  workspace,
+  sections,
+  onChange,
+}: Props) {
   const updateSection = (index: number, patch: Partial<LessonSection>) => {
     onChange(sections.map((s, i) => (i === index ? { ...s, ...patch } : s)));
   };
@@ -98,6 +106,7 @@ export function LessonSectionsEditor({ contentId, workspaceId, sections, onChang
           <LessonSectionEditor
             contentId={contentId}
             workspaceId={workspaceId}
+            workspace={workspace}
             section={sec}
             onChange={(next) => updateSection(si, next)}
           />

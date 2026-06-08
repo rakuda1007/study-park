@@ -2,14 +2,17 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { LessonBlock } from "@/lib/content/types";
+import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { readClipboardImageFile } from "@/lib/firebase/prepare-image-upload";
 import { uploadLessonImage } from "@/lib/firebase/storage";
+import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
 type ImageBlock = Extract<LessonBlock, { kind: "image" }>;
 
 type Props = {
   contentId: string;
   workspaceId?: string;
+  workspace?: WorkspaceDoc | null;
   block: ImageBlock;
   blockIndex: number;
   onChange: (patch: Partial<ImageBlock>) => void;
@@ -19,6 +22,7 @@ type Props = {
 export function ImageBlockEditor({
   contentId,
   workspaceId,
+  workspace,
   block,
   blockIndex,
   onChange,
@@ -47,6 +51,14 @@ export function ImageBlockEditor({
       setUploading(true);
 
       try {
+        if (workspace) {
+          const size = file instanceof File ? file.size : await file.arrayBuffer().then((b) => b.byteLength);
+          const usage = checkWorkspaceUsage(workspace, "upload_image", { additionalBytes: size });
+          if (!usage.ok) {
+            setUploadErr(usage.reason);
+            return;
+          }
+        }
         const url = await uploadLessonImage(contentId, file, mime, workspaceId);
         if (seq !== uploadSeqRef.current) return;
         onChangeRef.current({ src: url });
@@ -59,7 +71,7 @@ export function ImageBlockEditor({
         }
       }
     },
-    [contentId],
+    [contentId, workspace, workspaceId],
   );
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

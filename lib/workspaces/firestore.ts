@@ -12,7 +12,8 @@ import {
   where,
   type Timestamp,
 } from "firebase/firestore";
-import { getBillingTier, limitsFromTier } from "@/lib/billing/tiers";
+import { defaultTrialEndsAt, getBillingTier, limitsFromTier } from "@/lib/billing/tiers";
+import { normalizePlanId } from "@/lib/billing/types";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import { getUserProfile } from "@/lib/users/firestore";
 import type { AppPurchaseStatus } from "@/lib/billing/types";
@@ -34,14 +35,41 @@ function tsToIso(v: unknown): string {
   return new Date().toISOString();
 }
 
+function inferAccountPhase(
+  data: Record<string, unknown>,
+  planId: WorkspaceDoc["planId"],
+): WorkspaceDoc["accountPhase"] {
+  if (data.accountPhase === "trial" || data.accountPhase === "starter" || data.accountPhase === "subscribed") {
+    return data.accountPhase;
+  }
+  if (data.subscriptionStatus === "active" && (planId === "s" || planId === "m" || planId === "l")) {
+    return "subscribed";
+  }
+  if (data.appPurchaseStatus === "active" || data.appPurchaseStatus === "pending") {
+    return "starter";
+  }
+  return "trial";
+}
+
+function resolveTrialEndsAt(data: Record<string, unknown>): string | null {
+  if (data.trialEndsAt === null) return null;
+  if (data.trialEndsAt) return tsToIso(data.trialEndsAt);
+  if (data.appPurchaseStatus === "active") return null;
+  const created = tsToIso(data.createdAt);
+  return defaultTrialEndsAt(created ? new Date(created) : new Date());
+}
+
 function mapWorkspace(id: string, data: Record<string, unknown>): WorkspaceDoc {
+  const planId = normalizePlanId(data.planId as string | undefined);
   return {
     id,
     ownerId: String(data.ownerId ?? ""),
     name: String(data.name ?? ""),
     slug: String(data.slug ?? ""),
     inviteCode: String(data.inviteCode ?? ""),
-    planId: (data.planId as WorkspaceDoc["planId"]) ?? "included",
+    planId,
+    accountPhase: inferAccountPhase(data, planId),
+    trialEndsAt: resolveTrialEndsAt(data),
     subscriptionStatus: (data.subscriptionStatus as WorkspaceDoc["subscriptionStatus"]) ?? "none",
     storageBytesUsed: Number(data.storageBytesUsed ?? 0),
     storageBytesLimit: Number(data.storageBytesLimit ?? 0),
@@ -134,7 +162,8 @@ export async function createWorkspaceForCreator(
 
   const user = await getUserProfile(ownerId);
   const purchaseStatus = user?.appPurchase.status ?? "none";
-  const tier = await getBillingTier("included");
+  const isStarter = purchaseStatus === "active";
+  const tier = await getBillingTier(isStarter ? "starter" : "trial");
   const limits = limitsFromTier(tier);
 
   const ref = doc(collection(getFirestoreClient(), "workspaces"));
@@ -144,6 +173,8 @@ export async function createWorkspaceForCreator(
     slug,
     inviteCode: generateInviteCode(),
     planId: limits.planId,
+    accountPhase: isStarter ? "starter" : "trial",
+    trialEndsAt: isStarter ? null : defaultTrialEndsAt(),
     subscriptionStatus: "none",
     storageBytesUsed: 0,
     storageBytesLimit: limits.storageBytesLimit,
@@ -185,10 +216,14 @@ export async function applyBillingTierToWorkspace(
 ): Promise<void> {
   const tier = await getBillingTier(tierId);
   const limits = limitsFromTier(tier);
+  const isSubscription = tierId === "s" || tierId === "m" || tierId === "l";
   await updateDoc(doc(getFirestoreClient(), "workspaces", workspaceId), {
     planId: limits.planId,
     storageBytesLimit: limits.storageBytesLimit,
     questionCountLimit: limits.questionCountLimit,
+    ...(isSubscription ? { accountPhase: "subscribed" as const } : {}),
+    ...(tierId === "starter" ? { accountPhase: "starter" as const, trialEndsAt: null } : {}),
+    ...(tierId === "trial" ? { accountPhase: "trial" as const } : {}),
     updatedAt: serverTimestamp(),
   });
   await syncWorkspaceAdFlag(workspaceId, tierId);
@@ -202,6 +237,19 @@ export async function updateWorkspaceUsageCounts(
   if (counts.questionCount !== undefined) patch.questionCount = counts.questionCount;
   if (counts.storageBytesUsed !== undefined) patch.storageBytesUsed = counts.storageBytesUsed;
   await updateDoc(doc(getFirestoreClient(), "workspaces", workspaceId), patch);
+}
+
+/** 画像アップロード後にストレージ使用量を加算 */
+export async function incrementWorkspaceStorageBytes(
+  workspaceId: string,
+  additionalBytes: number,
+): Promise<void> {
+  if (!Number.isFinite(additionalBytes) || additionalBytes <= 0) return;
+  const ws = await getWorkspace(workspaceId);
+  if (!ws) return;
+  await updateWorkspaceUsageCounts(workspaceId, {
+    storageBytesUsed: ws.storageBytesUsed + additionalBytes,
+  });
 }
 
 export async function updateWorkspaceMeta(
