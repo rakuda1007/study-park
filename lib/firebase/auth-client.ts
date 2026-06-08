@@ -18,7 +18,10 @@ import { getFirebaseApp } from "./client";
 import { getFirestoreClient } from "./client";
 
 export function getFirebaseAuth() {
-  return getAuth(getFirebaseApp());
+  const auth = getAuth(getFirebaseApp());
+  // Firebase 標準メール・再設定画面の言語（コンソールでテンプレート編集不可でも ja が効く）
+  auth.languageCode = "ja";
+  return auth;
 }
 
 function mapAuthError(e: unknown): Error {
@@ -39,6 +42,11 @@ function mapAuthError(e: unknown): Error {
   if (code === "auth/too-many-requests") {
     return new Error("試行回数が多すぎます。しばらく待ってから再度お試しください。");
   }
+  if (code === "auth/unauthorized-continue-uri") {
+    return new Error(
+      "このサイトのドメインが Firebase の承認済みドメインに登録されていません。管理者に連絡してください。",
+    );
+  }
   if (code === "permission-denied") {
     return new Error(
       "データの保存権限がありません。Firestore のルールが未デプロイの可能性があります。時間をおいてログインし直すか、管理者に連絡してください。",
@@ -46,6 +54,14 @@ function mapAuthError(e: unknown): Error {
   }
   if (e instanceof Error) return e;
   return new Error("認証に失敗しました。");
+}
+
+/** 再設定完了後に戻す URL（アクセス中のオリジンを優先） */
+function passwordResetContinueUrl(): string {
+  if (typeof window !== "undefined") {
+    return new URL("/login", window.location.origin).href;
+  }
+  return absoluteSiteUrl("/login");
 }
 
 /** パスワード再設定メールを送信（登録の有無は応答に含めない） */
@@ -56,7 +72,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   }
   try {
     await sendPasswordResetEmail(getFirebaseAuth(), trimmed, {
-      url: absoluteSiteUrl("/login"),
+      url: passwordResetContinueUrl(),
       handleCodeInApp: false,
     });
   } catch (e) {
