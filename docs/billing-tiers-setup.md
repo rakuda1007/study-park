@@ -2,15 +2,13 @@
 
 ## Stripe について
 
-**スターター（1回払い）と月額は Stripe Dashboard で Price を作成し、環境変数または Firestore に ID を書き込む**運用が可能です。アプリ側の `lib/billing/tiers.ts` はフォールバック用のデフォルト値です。
+手順は [billing-stripe-setup.md](./billing-stripe-setup.md) を参照。アプリ側の `lib/billing/tiers.ts` はフォールバック用のデフォルト値です。
 
-| 環境変数（将来 Checkout 用） | 用途 |
-|------------------------------|------|
+| 設定場所 | 用途 |
+|----------|------|
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | クライアント |
-| `NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID` | スターター（¥980・1回）Price |
-| （各ティア）`billingTiers/{id}.stripePriceId` | 月額 S / M / L |
-
-※ 旧 `NEXT_PUBLIC_STRIPE_CREATOR_PRICE_ID` はスターター用に読み替え予定。
+| `NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID` / `STRIPE_STARTER_PRICE_ID` | スターター（¥980） |
+| `billingTiers/{s,m,l}.stripePriceId` | 月額 S / M / L |
 
 ## Firestore `billingTiers/{tierId}`
 
@@ -47,4 +45,4 @@
 
 ## 後方互換
 
-既存データの `planId: "included"` は読み取り時に `trial` として扱う（マイグレーション予定）。
+既存データの `planId: "included"` は読み取り時に `trial` として扱う。日次 `billingReconcile` で `trial` へ書き換え。

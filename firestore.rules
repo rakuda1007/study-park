@@ -113,6 +113,11 @@ service cloud.firestore {
         allow read: if canAccessWorkspace(wsId);
         allow write: if false;
       }
+
+      match /billingNotifications/{notificationId} {
+        allow read: if isWorkspaceOwner(wsId) || isAdmin();
+        allow write: if false;
+      }
     }
 
     match /workspaceMembers/{memberId} {

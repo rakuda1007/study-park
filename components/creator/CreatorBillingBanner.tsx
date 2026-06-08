@@ -70,12 +70,9 @@ export function CreatorBillingBanner({ ws, purchaseStatus }: Props) {
             ? ` 残り約 ${access.trialDaysRemaining} 日。`
             : null}
           {!stripeReady ? (
-            <>
-              {" "}
-              {stripeNotReadyMessage("starter_purchase")}
-            </>
+            <> {stripeNotReadyMessage("starter_purchase")}</>
           ) : (
-            <> スターター（¥980）は利用状況ページから購入できます（準備中）。</>
+            <> スターター（¥980）は<Link href="/creator/usage">利用状況</Link>から購入できます。</>
           )}
         </p>
       </section>

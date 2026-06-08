@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CreatorBillingActions } from "@/components/creator/CreatorBillingActions";
 import { CreatorBillingBanner } from "@/components/creator/CreatorBillingBanner";
 import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
 import { syncCreatorBillingState } from "@/lib/billing/starter";
@@ -146,6 +147,11 @@ export function CreatorUsageSection() {
           上限超過時は新規問題・画像追加をブロックします。スターター・月額は Stripe の Price ID
           設定後に Checkout を接続します。
         </p>
+      </section>
+
+      <section className="admin-card">
+        <h2 className="admin-card__heading">プランの変更</h2>
+        <CreatorBillingActions ws={ws} purchaseStatus={purchaseStatus} tiers={tiers} />
       </section>
 
       <section className="admin-card">

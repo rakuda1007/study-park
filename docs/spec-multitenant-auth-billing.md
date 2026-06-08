@@ -6,8 +6,8 @@
 | 版     | **0.3**                                                            |
 | 作成日   | 2026-05-25                                                         |
 | 最終更新  | 2026-06-08                                                         |
-| ステータス | **段階実装中**（Phase 1〜4 相当をコード反映済み。Stripe Checkout は未接続）               |
-| 関連    | [課金ティア設定](./billing-tiers-setup.md)、[管理画面セットアップ](./admin-setup.md) |
+| ステータス | **段階実装中**（Stripe Checkout 実装済み。要 env 設定・Functions デプロイ）               |
+| 関連    | [課金ティア設定](./billing-tiers-setup.md)、[Stripe セットアップ](./billing-stripe-setup.md)、[管理画面セットアップ](./admin-setup.md) |
 
 
 ---
@@ -543,9 +543,9 @@ workspaces/{workspaceId}/lesson-images/{contentId}/{filename}
 | 1 認証        | **済**  | `/login`, `/signup/`*, `lib/firebase/auth-client.ts`                                                                       |
 | 2 ワークスペース   | **済**  | `workspaces`, `/creator/`*                                                                                                 |
 | 3 学習者紐づけ    | **済**  | `workspaceMembers`, `/learner`                                                                                             |
-| 4 お試し・スターター | **一部** | `trialEndsAt`, `lib/billing/workspace-access.ts`, `lib/billing/starter.ts`, `CreatorBillingBanner`。**Stripe Checkout 未接続** |
-| 5 上限・月額     | **一部** | `lib/billing/usage.ts`, 作成/編集/画像ゲート, `refresh-usage.ts`, ストレージ加算。**S/M/L Stripe 未接続**                                      |
-| 6 運用        | **未**  | 満了メール、削除バッチ本番（`scripts/purge-expired-trial-workspaces.mjs` は dry-run のみ）、Webhook                                           |
+| 4 お試し・スターター | **済** | Stripe Checkout、`CreatorBillingActions`、`/creator/billing/*`（[セットアップ](./billing-stripe-setup.md)） |
+| 5 上限・月額     | **済** | 月額 Checkout UI、Webhook で `planId` 更新。Price ID 設定・デプロイが必要                                      |
+| 6 運用        | **ほぼ済** | スケジュール Functions（通知・削除・reconcile）、[運用セットアップ](./billing-operations-setup.md) |
 
 
 ### Phase 4〜5 の詳細（2026-06-08 時点）
@@ -558,11 +558,22 @@ workspaces/{workspaceId}/lesson-images/{contentId}/{filename}
 | お試し期限・猶予の書き込みブロック                          | 済（クライアント）                                     |
 | 問題数の再集計                                    | 済（保存時 + ダッシュボード読込時）                           |
 | 画像アップロード時のストレージ加算                          | 済                                             |
-| Stripe スターター Checkout                      | 未                                             |
-| Stripe 月額 Checkout / Webhook               | 未                                             |
+| Stripe スターター Checkout                      | **実装済**（要 env・Functions デプロイ）                    |
+| Stripe 月額 Checkout / Webhook               | **実装済**（要 `billingTiers.stripePriceId`）          |
 
 
 ティア上限: `billingTiers` Firestore + [billing-tiers-setup.md](./billing-tiers-setup.md)
+
+### Phase 6 の詳細（2026-06-08 時点）
+
+| 機能 | 状態 |
+|------|------|
+| 満了 90/30/7 日前メール | 実装済（`billingTrialNotifications`） |
+| 猶予開始・削除 7/1 日前メール | 実装済 |
+| 猶予終了 WS 削除 | 実装済（`billingPurgeExpiredTrials`） |
+| `included`→`trial` マイグレーション | reconcile で日次実行 |
+| 購入状態・Stripe 照合 | `billingReconcile` |
+| Resend メール送信 | 要 `RESEND_API_KEY`（未設定時はログのみ） |
 
 ---
 
