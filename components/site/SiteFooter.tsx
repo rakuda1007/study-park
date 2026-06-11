@@ -6,6 +6,7 @@ const LEGAL_LINKS = [
   { href: "/commerce-disclosure", label: "特定商取引法に基づく表記" },
   { href: "/privacy", label: "プライバシーポリシー" },
   { href: "/terms", label: "利用規約" },
+  { href: "/contact", label: "お問い合わせ" },
 ] as const;
 
 type Props = {

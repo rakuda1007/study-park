@@ -76,7 +76,9 @@ export default function AboutPage() {
 
       <LegalSection title="お問い合わせ">
         <p>
-          ご質問・ご意見・不具合のご連絡は、メール（
+          ご質問・ご意見・不具合のご連絡は、
+          <a href="/contact">お問い合わせページ</a>
+          よりメール（
           <a href={`mailto:${LEGAL_CONTACT_EMAIL}`}>{LEGAL_CONTACT_EMAIL}</a>
           ）にてお受けしています。
         </p>

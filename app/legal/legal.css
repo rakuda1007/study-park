@@ -206,6 +206,83 @@
   text-decoration: underline;
 }
 
+.contact-mail-card {
+  margin: 1rem 0 0.5rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: 10px;
+  border: 1px solid var(--legal-border);
+  background: #f8f9fc;
+  text-align: center;
+}
+
+.contact-mail-card__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--legal-muted);
+}
+
+.contact-mail-card__email {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.contact-mail-card__email a {
+  text-decoration: none;
+}
+
+.contact-mail-card__email a:hover {
+  text-decoration: underline;
+}
+
+.contact-mail-card__button {
+  display: inline-block;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  background: var(--legal-accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.contact-mail-card__button:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
+.contact-mail-card__note {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--legal-muted);
+}
+
+.contact-faq {
+  margin: 0;
+}
+
+.contact-faq__item + .contact-faq__item {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--legal-border);
+}
+
+.contact-faq__question {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.contact-faq__answer {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: var(--legal-ink);
+}
+
 @media (min-width: 768px) {
   .legal-page__main {
     padding-inline: 2rem;
