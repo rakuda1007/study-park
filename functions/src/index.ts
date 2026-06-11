@@ -1,4 +1,4 @@
-import { onCall, HttpsError, onRequest } from "firebase-functions/v2/https";
+import { onRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineSecret } from "firebase-functions/params";
 import {
@@ -11,62 +11,71 @@ import {
   createSubscriptionCheckoutSession,
   resolveSubscriptionPriceId,
 } from "./billing/checkout";
+import { verifyFirebaseIdToken } from "./billing/auth";
+import { billingHttpErrorStatus, parseJsonBody } from "./billing/http";
 import { handleStripeWebhook } from "./billing/webhook";
 
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 
-const callableOptions = {
-  region: "asia-northeast1",
+const billingHttpOptions = {
+  region: "asia-northeast1" as const,
   secrets: [stripeSecretKey],
+  invoker: "public" as const,
+  cors: true,
 };
 
-export const createStarterCheckout = onCall(callableOptions, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "ログインが必要です。");
-  }
-  const workspaceId = String(request.data?.workspaceId ?? "").trim();
-  if (!workspaceId) {
-    throw new HttpsError("invalid-argument", "workspaceId が必要です。");
+export const createStarterCheckout = onRequest(billingHttpOptions, async (req, res) => {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method Not Allowed" });
+    return;
   }
   try {
-    const url = await createStarterCheckoutSession({
-      uid: request.auth.uid,
-      email: request.auth.token.email,
-      workspaceId,
-    });
-    return { url };
+    const { uid, email } = await verifyFirebaseIdToken(req.headers.authorization ?? null);
+    const body = parseJsonBody(req);
+    const workspaceId = String(body.workspaceId ?? "").trim();
+    if (!workspaceId) {
+      res.status(400).json({ error: "workspaceId が必要です。" });
+      return;
+    }
+    const url = await createStarterCheckoutSession({ uid, email, workspaceId });
+    res.json({ url });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Checkout の作成に失敗しました。";
-    throw new HttpsError("failed-precondition", message);
+    res.status(billingHttpErrorStatus(message)).json({ error: message });
   }
 });
 
-export const createSubscriptionCheckout = onCall(callableOptions, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "ログインが必要です。");
-  }
-  const workspaceId = String(request.data?.workspaceId ?? "").trim();
-  const tierId = String(request.data?.tierId ?? "").trim();
-  if (!workspaceId || !tierId) {
-    throw new HttpsError("invalid-argument", "workspaceId と tierId が必要です。");
-  }
-  if (tierId !== "s" && tierId !== "m" && tierId !== "l") {
-    throw new HttpsError("invalid-argument", "tierId は s / m / l のいずれかです。");
+export const createSubscriptionCheckout = onRequest(billingHttpOptions, async (req, res) => {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method Not Allowed" });
+    return;
   }
   try {
+    const { uid, email } = await verifyFirebaseIdToken(req.headers.authorization ?? null);
+    const body = parseJsonBody(req);
+    const workspaceId = String(body.workspaceId ?? "").trim();
+    const tierId = String(body.tierId ?? "").trim();
+    if (!workspaceId || !tierId) {
+      res.status(400).json({ error: "workspaceId と tierId が必要です。" });
+      return;
+    }
+    if (tierId !== "s" && tierId !== "m" && tierId !== "l") {
+      res.status(400).json({ error: "tierId は s / m / l のいずれかです。" });
+      return;
+    }
     const priceId = await resolveSubscriptionPriceId(tierId);
     const url = await createSubscriptionCheckoutSession({
-      uid: request.auth.uid,
-      email: request.auth.token.email,
+      uid,
+      email,
       workspaceId,
       tierId,
       priceId,
     });
-    return { url };
+    res.json({ url });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Checkout の作成に失敗しました。";
-    throw new HttpsError("failed-precondition", message);
+    res.status(billingHttpErrorStatus(message)).json({ error: message });
   }
 });
 
@@ -107,6 +116,7 @@ export const stripeWebhook = onRequest(
   {
     region: "asia-northeast1",
     secrets: [stripeSecretKey, stripeWebhookSecret],
+    invoker: "public",
   },
   async (req, res) => {
     if (req.method !== "POST") {
