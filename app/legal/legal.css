@@ -236,7 +236,7 @@
   text-decoration: underline;
 }
 
-.contact-mail-card__button {
+.legal-doc a.contact-mail-card__button {
   display: inline-block;
   padding: 0.55rem 1.25rem;
   border-radius: 8px;
@@ -245,12 +245,15 @@
   font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease;
 }
 
-.contact-mail-card__button:hover {
-  opacity: 0.9;
+.legal-doc a.contact-mail-card__button:hover,
+.legal-doc a.contact-mail-card__button:focus-visible {
+  opacity: 1;
   color: #fff;
+  background: #3f4699;
+  text-decoration: none;
 }
 
 .contact-mail-card__note {
