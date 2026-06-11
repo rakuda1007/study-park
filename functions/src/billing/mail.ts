@@ -10,7 +10,7 @@ export type MailPayload = {
 export type SendMailResult = { sent: boolean; mode: "resend" | "log" };
 
 function getMailFrom(): string {
-  return process.env.BILLING_MAIL_FROM?.trim() || "Study Park <noreply@study.tennis-community.com>";
+  return process.env.BILLING_MAIL_FROM?.trim() || "Study Park <noreply@study.tennis-park-community.com>";
 }
 
 export async function sendBillingMail(payload: MailPayload): Promise<SendMailResult> {

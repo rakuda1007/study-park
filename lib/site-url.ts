@@ -1,5 +1,5 @@
 /** 本番の公開オリジン（招待・共有リンクの既定） */
-export const PRODUCTION_SITE_ORIGIN = "https://study.tennis-community.com";
+export const PRODUCTION_SITE_ORIGIN = "https://study.tennis-park-community.com";
 
 /** ビルド時・メタデータ用のサイトオリジン */
 export function siteOriginFromEnv(): string {

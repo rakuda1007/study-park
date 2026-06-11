@@ -47,7 +47,7 @@ npm run dev
 
 ブラウザで `http://localhost:3000/admin/login` を開き、管理者アカウントでログインします。
 
-本番の公開 URL: **https://study.tennis-community.com**（学習者登録: `/signup/learner`）
+本番の公開 URL: **https://study.tennis-park-community.com**（学習者登録: `/signup/learner`）
 
 ### 本番サイト（Hosting）でログインする場合
 

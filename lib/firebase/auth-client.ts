@@ -75,8 +75,8 @@ function passwordResetContinueOrigin(): string {
   }
 
   // www 付きで開いていると continueUrl のホストが未登録になりやすい → apex へ
-  if (hostname === "www.study.tennis-community.com") {
-    return "https://study.tennis-community.com";
+  if (hostname === "www.study.tennis-park-community.com") {
+    return "https://study.tennis-park-community.com";
   }
 
   return window.location.origin;
