@@ -21,6 +21,8 @@ export function CreatorBillingActions({ ws, purchaseStatus, tiers }: Props) {
   const atLimit =
     ws.questionCount >= ws.questionCountLimit ||
     ws.storageBytesUsed >= ws.storageBytesLimit;
+  const canChooseSubscription =
+    purchaseStatus === "active" && ws.subscriptionStatus !== "active";
 
   async function onStarter() {
     setErr("");
@@ -72,10 +74,12 @@ export function CreatorBillingActions({ ws, purchaseStatus, tiers }: Props) {
         </div>
       ) : null}
 
-      {purchaseStatus === "active" && ws.subscriptionStatus !== "active" && atLimit ? (
+      {canChooseSubscription ? (
         <div>
           <p style={{ margin: "0 0 0.5rem", fontSize: "0.9rem" }}>
-            上限に達しました。月額プランで容量を広げられます。
+            {atLimit
+              ? "上限に達しています。月額プランで容量を広げられます。"
+              : "スターター購入後は、いつでも月額プラン（S/M/L）に変更できます。"}
           </p>
           <div className="admin-row" style={{ flexWrap: "wrap", gap: "0.5rem" }}>
             {subscriptionTiers.map((t) => (
@@ -95,9 +99,9 @@ export function CreatorBillingActions({ ws, purchaseStatus, tiers }: Props) {
         </div>
       ) : null}
 
-      {purchaseStatus === "active" && !atLimit ? (
+      {purchaseStatus === "active" && ws.subscriptionStatus === "active" ? (
         <p className="admin-msg" style={{ fontSize: "0.85rem" }}>
-          現在のプラン内で利用中です。上限に達すると月額プランへのアップグレードが表示されます。
+          月額プラン契約中です。プラン名と上限は上の利用状況をご確認ください。
         </p>
       ) : null}
     </div>
