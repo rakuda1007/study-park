@@ -45,7 +45,7 @@ jobs:
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID }}
           NEXT_PUBLIC_FIREBASE_FUNCTIONS_REGION: ${{ secrets.NEXT_PUBLIC_FIREBASE_FUNCTIONS_REGION }}
-          NEXT_PUBLIC_SITE_URL: https://study.tennis-community.com
+          NEXT_PUBLIC_SITE_URL: https://study.tennis-park-community.com
         run: npm run build
 
       - name: Deploy to Firebase Hosting
