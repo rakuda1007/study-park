@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PortalHeader } from "@/components/portal/PortalHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 const FEATURES = [
   {
@@ -166,8 +167,8 @@ export default function PortalPage() {
         </div>
       </section>
 
-      <footer className="portal-footer">
-        <p className="portal-footer__text">
+      <SiteFooter variant="portal">
+        <p className="site-footer__extra">
           Parkシリーズ全体を見る:{" "}
           <a
             href="https://trip.tennis-park-community.com/portal"
@@ -176,13 +177,12 @@ export default function PortalPage() {
           >
             Trip Park 公式ポータル
           </a>
-        </p>
-        <p className="portal-footer__copy">
+          {" · "}
           <Link href="/">Study Park トップ</Link>
           {" · "}
           <Link href="/login">ログイン</Link>
         </p>
-      </footer>
+      </SiteFooter>
     </div>
   );
 }

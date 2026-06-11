@@ -2,6 +2,7 @@ import { HomeGuestCta } from "@/components/home/HomeGuestCta";
 import { HomeNav } from "@/components/home/HomeNav";
 import { HomeTopbar } from "@/components/home/HomeTopbar";
 import { HomePwaLanding } from "@/components/home/HomePwaLanding";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import type { ContentManifest } from "@/lib/content/types";
 import contentManifest from "@/public/content-manifest.json";
 
@@ -45,6 +46,7 @@ export default function Home() {
           <HomeNav manifest={manifest} />
         </div>
 
+        <SiteFooter />
       </main>
     </HomePwaLanding>
   );
