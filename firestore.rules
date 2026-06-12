@@ -51,6 +51,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // 管理者ログインのアカウントロック（Cloud Functions / Admin SDK のみ更新）
+    match /adminLoginLocks/{lockId} {
+      allow read, write: if false;
+    }
+
     match /users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isSignedIn() && request.auth.uid == uid

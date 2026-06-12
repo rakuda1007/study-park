@@ -48,10 +48,30 @@ npm run firebase:deploy:storage
 
 ### 5-1. Firebase で TOTP を有効化
 
-1. Firebase Console → **Authentication** → **Sign-in method**
-2. **詳細設定**（または多要素認証）→ **TOTP（認証アプリ）** を有効化
+TOTP は通常の Firebase Auth だけでは使えません。**Identity Platform へのアップグレード**と **Admin SDK での有効化**が必要です。
 
-初回ログイン後、認証アプリ（Google Authenticator 等）の登録を求められます。
+#### 手順 A: Identity Platform にアップグレード
+
+1. [Firebase Console](https://console.firebase.google.com/project/study-park-fb726/authentication/providers) → **Authentication** → **ログイン方法**
+2. 画面下部の **詳細** にある青い案内 **「アップグレードして有効にする」** をクリック
+3. 案内に従い **Firebase Authentication with Identity Platform** を有効化
+
+※ Cloud Functions を使っているプロジェクトは多くの場合 **Blaze プラン**です。Identity Platform も無料枠があり、小規模利用では追加費用はかかりにくいです。
+
+#### 手順 B: TOTP をプロジェクトで有効化（コンソールのチェックは無い）
+
+Identity Platform 有効化後、次を **1回だけ** 実行します。
+
+```bash
+# .env.local の Firebase Admin 設定を読み込んでから
+node scripts/enable-totp-mfa.mjs
+```
+
+成功すると `TOTP 多要素認証を有効化しました。` と表示されます。
+
+参考: [Firebase TOTP MFA ドキュメント](https://firebase.google.com/docs/auth/web/totp-mfa)
+
+初回ログイン後、認証アプリ（Google Authenticator 等）の QR 登録を求められます。
 
 ### 5-2. ベーシック認証の環境変数
 
@@ -71,6 +91,22 @@ firebase deploy --only functions:verifyAdminAccessGate
 ```
 
 ローカル開発では `NEXT_PUBLIC_BILLING_USE_API_ROUTES=true` のとき Next.js API `/api/admin/access-gate` を使用します。
+
+### 5-3. アカウントロック（10回失敗で30分ロック）
+
+管理者ログイン（`/admin/login`）では、同一メールアドレスに対して **10回連続のログイン失敗** で **30分間** ログインを拒否します。
+
+- 状態は Firestore `adminLoginLocks` に保存（クライアントからの直接読み書きは禁止）
+- 本番: Cloud Functions `adminLoginLock`
+- ローカル: `NEXT_PUBLIC_BILLING_USE_API_ROUTES=true` のとき `/api/admin/login-lock`
+
+デプロイ:
+
+```bash
+firebase deploy --only functions:adminLoginLock,firestore:rules
+```
+
+Stripe セキュリティチェックリストの「10回以下のログイン失敗でアカウントロック」は **はい** で回答できます。
 
 ## 6. 開発サーバー
 

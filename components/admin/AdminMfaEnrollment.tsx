@@ -26,6 +26,13 @@ export function AdminMfaEnrollment({ user, onEnrolled }: Props) {
       onEnrolled();
       return;
     }
+    if (!user.emailVerified) {
+      setError(
+        "メールアドレスが未確認です。Firebase Console で確認済みにするか、scripts/verify-admin-email.mjs を実行してください。",
+      );
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     void generateAdminTotpEnrollment(user)
       .then((result) => {

@@ -6,6 +6,12 @@ import {
   verifyAdminAccessGateCredentials,
 } from "./admin/access-gate";
 import {
+  formatAdminLoginLockMessage,
+  getAdminLoginLockState,
+  recordAdminLoginFailure,
+  recordAdminLoginSuccess,
+} from "./admin/login-lock";
+import {
   runBillingPurgeExpiredTrials,
   runBillingReconcile,
   runBillingTrialNotifications,
@@ -117,6 +123,53 @@ export const billingReconcile = onSchedule(
   async () => {
     const result = await runBillingReconcile({ recountQuestions: true });
     console.info("[billingReconcile]", result);
+  },
+);
+
+export const adminLoginLock = onRequest(
+  {
+    region: "asia-northeast1",
+    invoker: "public",
+    cors: true,
+  },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).json({ error: "Method Not Allowed" });
+      return;
+    }
+    try {
+      const body =
+        typeof req.body === "object" && req.body !== null
+          ? (req.body as { email?: string; action?: string })
+          : {};
+      const email = String(body.email ?? "").trim();
+      const action = String(body.action ?? "").trim();
+      if (!email) {
+        res.status(400).json({ error: "email が必要です。" });
+        return;
+      }
+      if (action === "check") {
+        res.json(await getAdminLoginLockState(email));
+        return;
+      }
+      if (action === "failure") {
+        const state = await recordAdminLoginFailure(email);
+        res.json({
+          ...state,
+          message: state.locked ? formatAdminLoginLockMessage(state) : undefined,
+        });
+        return;
+      }
+      if (action === "success") {
+        await recordAdminLoginSuccess(email);
+        res.json({ locked: false, failCount: 0, remainingAttempts: 10, lockedUntil: null });
+        return;
+      }
+      res.status(400).json({ error: "action が不正です。" });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "ログイン制限の処理に失敗しました。";
+      res.status(500).json({ error: message });
+    }
   },
 );
 

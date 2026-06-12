@@ -11,6 +11,12 @@ import {
   isMultiFactorAuthRequiredError,
 } from "@/lib/firebase/admin-mfa";
 import {
+  checkAdminLoginLock,
+  formatAdminLoginLockMessage,
+  recordAdminLoginFailure,
+  recordAdminLoginSuccess,
+} from "@/lib/admin/login-lock";
+import {
   getFirebaseAuth,
   isAdminUser,
   signInWithEmail,
@@ -52,8 +58,9 @@ function AdminLoginInner() {
     return user;
   }
 
-  async function finishLogin(user: User) {
+  async function finishLogin(user: User, emailForLock: string) {
     const admin = await ensureAdminUser(user);
+    await recordAdminLoginSuccess(emailForLock);
     if (!adminMfaEnrolled(admin)) {
       setSignedInUser(admin);
       setStep("mfa-enroll");
@@ -62,20 +69,41 @@ function AdminLoginInner() {
     router.replace("/admin/contents");
   }
 
+  async function handleLoginFailure(emailForLock: string, err: unknown) {
+    if (isMultiFactorAuthRequiredError(err)) {
+      setMfaError(err);
+      setStep("mfa-challenge");
+      return;
+    }
+    if (emailForLock) {
+      try {
+        const lockState = await recordAdminLoginFailure(emailForLock);
+        if (lockState.locked) {
+          setError(formatAdminLoginLockMessage(lockState));
+          return;
+        }
+      } catch {
+        // lock API 失敗時は通常エラーのみ表示
+      }
+    }
+    setError(err instanceof Error ? err.message : "ログインに失敗しました。");
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setBusy(true);
+    const trimmed = email.trim();
     try {
-      const user = await signInWithEmail(email, password);
-      await finishLogin(user);
-    } catch (err) {
-      if (isMultiFactorAuthRequiredError(err)) {
-        setMfaError(err);
-        setStep("mfa-challenge");
+      const lock = await checkAdminLoginLock(trimmed);
+      if (lock.locked) {
+        setError(formatAdminLoginLockMessage(lock));
         return;
       }
-      setError(err instanceof Error ? err.message : "ログインに失敗しました。");
+      const user = await signInWithEmail(trimmed, password);
+      await finishLogin(user, trimmed);
+    } catch (err) {
+      await handleLoginFailure(trimmed, err);
     } finally {
       setBusy(false);
     }
@@ -86,9 +114,9 @@ function AdminLoginInner() {
       <AdminMfaChallenge
         mfaError={mfaError}
         onVerified={(user) => {
-          void finishLogin(user).catch((err) => {
-            setError(err instanceof Error ? err.message : "ログインに失敗しました。");
-            setStep("sign-in");
+          const emailForLock = user.email ?? email.trim();
+          void finishLogin(user, emailForLock).catch((err) => {
+            void handleLoginFailure(emailForLock, err).then(() => setStep("sign-in"));
           });
         }}
       />
