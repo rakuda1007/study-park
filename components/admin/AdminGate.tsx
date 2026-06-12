@@ -1,26 +1,41 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { AdminAccessGateForm } from "@/components/admin/AdminAccessGateForm";
+import { isAccessGateSessionValid } from "@/lib/admin/access-gate";
+import { adminMfaEnrolled } from "@/lib/firebase/admin-mfa";
 import { isAdminUser, subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const isLogin = pathname === "/admin/login";
-  const [ready, setReady] = useState(isLogin);
+  const [gateReady, setGateReady] = useState(false);
+  const [gateUnlocked, setGateUnlocked] = useState(false);
+  const [authReady, setAuthReady] = useState(isLogin);
   const [allowed, setAllowed] = useState(isLogin);
 
+  const refreshGate = useCallback(() => {
+    setGateUnlocked(isAccessGateSessionValid());
+    setGateReady(true);
+  }, []);
+
   useEffect(() => {
+    refreshGate();
+  }, [refreshGate, pathname]);
+
+  useEffect(() => {
+    if (!gateUnlocked) return;
     if (isLogin) {
-      setReady(true);
+      setAuthReady(true);
       setAllowed(true);
       return;
     }
 
     let unsub: (() => void) | undefined;
     let cancelled = false;
-    setReady(false);
+    setAuthReady(false);
 
     void waitForAuthReady().then(() => {
       if (cancelled) return;
@@ -29,11 +44,17 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
         if (!user || !ok) {
           router.replace("/admin/login");
           setAllowed(false);
-          setReady(true);
+          setAuthReady(true);
+          return;
+        }
+        if (!adminMfaEnrolled(user)) {
+          router.replace("/admin/login?step=mfa-enroll");
+          setAllowed(false);
+          setAuthReady(true);
           return;
         }
         setAllowed(true);
-        setReady(true);
+        setAuthReady(true);
       });
     });
 
@@ -41,13 +62,23 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
       cancelled = true;
       unsub?.();
     };
-  }, [isLogin, router]);
+  }, [gateUnlocked, isLogin, router]);
 
-  if (!ready) {
+  if (!gateReady) {
     return <p className="admin-loading">読み込み中…</p>;
   }
+
+  if (!gateUnlocked) {
+    return <AdminAccessGateForm onUnlocked={refreshGate} />;
+  }
+
+  if (!authReady) {
+    return <p className="admin-loading">読み込み中…</p>;
+  }
+
   if (!allowed && !isLogin) {
     return null;
   }
+
   return <>{children}</>;
 }

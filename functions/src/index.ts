@@ -1,6 +1,10 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
+import {
+  issueAdminAccessGateToken,
+  verifyAdminAccessGateCredentials,
+} from "./admin/access-gate";
 import {
   runBillingPurgeExpiredTrials,
   runBillingReconcile,
@@ -17,6 +21,10 @@ import { handleStripeWebhook } from "./billing/webhook";
 
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+const adminGatePassword = defineSecret("ADMIN_GATE_PASSWORD");
+const adminGateUsername = defineString("ADMIN_GATE_USERNAME", {
+  default: "study-park-admin",
+});
 
 const billingHttpOptions = {
   region: "asia-northeast1" as const,
@@ -109,6 +117,43 @@ export const billingReconcile = onSchedule(
   async () => {
     const result = await runBillingReconcile({ recountQuestions: true });
     console.info("[billingReconcile]", result);
+  },
+);
+
+export const verifyAdminAccessGate = onRequest(
+  {
+    region: "asia-northeast1",
+    secrets: [adminGatePassword],
+    invoker: "public",
+    cors: true,
+  },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).json({ error: "Method Not Allowed" });
+      return;
+    }
+    try {
+      process.env.ADMIN_GATE_USERNAME = adminGateUsername.value();
+      process.env.ADMIN_GATE_PASSWORD = adminGatePassword.value();
+      const body =
+        typeof req.body === "object" && req.body !== null
+          ? (req.body as { username?: string; password?: string })
+          : {};
+      const username = String(body.username ?? "");
+      const password = String(body.password ?? "");
+      if (!username || !password) {
+        res.status(400).json({ error: "ユーザー名とパスワードが必要です。" });
+        return;
+      }
+      if (!verifyAdminAccessGateCredentials(username, password)) {
+        res.status(401).json({ error: "ユーザー名またはパスワードが正しくありません。" });
+        return;
+      }
+      res.json(issueAdminAccessGateToken());
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "認証に失敗しました。";
+      res.status(503).json({ error: message });
+    }
   },
 );
 

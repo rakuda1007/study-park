@@ -39,13 +39,52 @@ npm run firebase:deploy:storage
 
 レッスンに画像を入れる機能は **Firebase Storage** を使います。初回は Storage を有効化し、上記 `storage` のデプロイが必要です。
 
-## 5. 開発サーバー
+## 5. 管理画面のセキュリティ（Stripe 審査対応）
+
+`/admin` には次の2段階の保護があります。
+
+1. **ベーシック認証ゲート**（Cloud Functions `verifyAdminAccessGate`）
+2. **Firebase ログイン + TOTP 二段階認証**（管理者アカウント必須）
+
+### 5-1. Firebase で TOTP を有効化
+
+1. Firebase Console → **Authentication** → **Sign-in method**
+2. **詳細設定**（または多要素認証）→ **TOTP（認証アプリ）** を有効化
+
+初回ログイン後、認証アプリ（Google Authenticator 等）の登録を求められます。
+
+### 5-2. ベーシック認証の環境変数
+
+**ローカル（`.env.local`）**
+
+```env
+ADMIN_GATE_USERNAME=study-park-admin
+ADMIN_GATE_PASSWORD=（十分に長いランダム文字列）
+```
+
+**本番 Functions**
+
+```bash
+firebase functions:secrets:set ADMIN_GATE_PASSWORD
+# functions/.env に ADMIN_GATE_USERNAME=study-park-admin（任意・既定値あり）
+firebase deploy --only functions:verifyAdminAccessGate
+```
+
+ローカル開発では `NEXT_PUBLIC_BILLING_USE_API_ROUTES=true` のとき Next.js API `/api/admin/access-gate` を使用します。
+
+## 6. 開発サーバー
 
 ```bash
 npm run dev
 ```
 
-ブラウザで `http://localhost:3000/admin/login` を開き、管理者アカウントでログインします。
+ブラウザで `http://localhost:3000/admin/login` を開き、
+
+1. ベーシック認証（ユーザー名 / パスワード）
+2. 管理者メール / パスワード
+3. 二段階認証（初回は QR 登録）
+
+の順でログインします。
 
 本番の公開 URL: **https://study.tennis-park-community.com**（学習者登録: `/signup/learner`）
 
@@ -60,7 +99,7 @@ npm run dev
 
 Variables だけに登録している場合、`firebase-hosting.yml` は **`secrets.NAME`** で読むため、dash 側は **Secrets** に同じ名前で登録し直してください（またはワークフローを `vars` に合わせて書き換える）。
 
-## 6. コンテンツの公開フロー（Firestore 直公開）
+## 7. コンテンツの公開フロー（Firestore 直公開）
 
 1. 管理画面でクイズ / レッスンを作成・編集して **保存**
 2. 公開状態を **公開（サイトに出す）** にして **保存**（保存時に表示フラグも自動でオンになります）

@@ -11,6 +11,18 @@
   color: var(--admin-text);
 }
 
+.admin-mfa-qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 1rem;
+}
+
+.admin-mfa-qr {
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: #fff;
+}
+
 .admin-shell {
   max-width: 52rem;
   margin: 0 auto;
