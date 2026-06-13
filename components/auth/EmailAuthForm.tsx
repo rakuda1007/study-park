@@ -1,16 +1,25 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import type { MultiFactorError } from "firebase/auth";
+import { isMultiFactorAuthRequiredError } from "@/lib/firebase/admin-mfa";
 
 type Props = {
   submitLabel: string;
   onSubmit: (email: string, password: string) => Promise<void>;
+  onMultiFactorRequired?: (error: MultiFactorError) => void;
   children?: React.ReactNode;
   /** 登録シェル内など、外側にカードがあるときは true */
   embedded?: boolean;
 };
 
-export function EmailAuthForm({ submitLabel, onSubmit, children, embedded = false }: Props) {
+export function EmailAuthForm({
+  submitLabel,
+  onSubmit,
+  onMultiFactorRequired,
+  children,
+  embedded = false,
+}: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,6 +32,10 @@ export function EmailAuthForm({ submitLabel, onSubmit, children, embedded = fals
     try {
       await onSubmit(email.trim(), password);
     } catch (err) {
+      if (isMultiFactorAuthRequiredError(err) && onMultiFactorRequired) {
+        onMultiFactorRequired(err);
+        return;
+      }
       setError(err instanceof Error ? err.message : "エラーが発生しました。");
     } finally {
       setBusy(false);

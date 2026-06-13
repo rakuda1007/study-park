@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { MultiFactorError } from "firebase/auth";
 import { AuthSignupPageShell } from "@/components/auth/AuthSignupPageShell";
 import { EmailAuthForm } from "@/components/auth/EmailAuthForm";
+import { TotpMfaChallenge } from "@/components/auth/TotpMfaChallenge";
 import { joinWorkspaceByInviteCode } from "@/lib/workspaces/members";
 import { resolvePostLoginPath, signInWithEmail, signUpWithEmail } from "@/lib/firebase/auth-client";
 import "../../auth/auth.css";
@@ -16,6 +18,7 @@ export default function SignupLearnerPage() {
   const [givenName, setGivenName] = useState("");
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [joinMsg, setJoinMsg] = useState("");
+  const [mfaError, setMfaError] = useState<MultiFactorError | null>(null);
 
   async function afterAuth(uid: string) {
     if (inviteCode.trim()) {
@@ -26,6 +29,24 @@ export default function SignupLearnerPage() {
     }
     const path = await resolvePostLoginPath(uid);
     router.replace(path);
+  }
+
+  if (mfaError) {
+    return (
+      <AuthSignupPageShell title="二段階認証" lead="認証アプリの6桁コードを入力してください。">
+        <TotpMfaChallenge
+          mfaError={mfaError}
+          onVerified={(user) => {
+            void afterAuth(user.uid);
+          }}
+        />
+        <p className="auth-links auth-links--center">
+          <button type="button" className="auth-mode-toggle__btn" onClick={() => setMfaError(null)}>
+            戻る
+          </button>
+        </p>
+      </AuthSignupPageShell>
+    );
   }
 
   return (
@@ -100,6 +121,7 @@ export default function SignupLearnerPage() {
       <EmailAuthForm
         embedded
         submitLabel={mode === "signup" ? "学習者として登録" : "ログインして参加"}
+        onMultiFactorRequired={mode === "login" ? setMfaError : undefined}
         onSubmit={async (email, password) => {
           if (mode === "signup") {
             if (!familyName.trim() || !givenName.trim()) {
