@@ -6,7 +6,7 @@ import { getUserProfile } from "@/lib/users/firestore";
 import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 import { createWorkspaceForCreator, getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 
-const PUBLIC_PATHS = ["/creator/login"];
+const PUBLIC_PATHS = ["/creator/login", "/creator/start"];
 
 export function CreatorGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

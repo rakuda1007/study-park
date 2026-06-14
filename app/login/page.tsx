@@ -1,17 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import type { MultiFactorError } from "firebase/auth";
 import { EmailAuthForm } from "@/components/auth/EmailAuthForm";
 import { TotpMfaChallenge } from "@/components/auth/TotpMfaChallenge";
 import { resolvePostLoginPath, signInWithEmail } from "@/lib/firebase/auth-client";
 import "../auth/auth.css";
 
-export default function LoginPage() {
+function safeNextPath(raw: string | null): string | null {
+  if (!raw?.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
+
+function LoginInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = safeNextPath(searchParams.get("next"));
   const [mfaError, setMfaError] = useState<MultiFactorError | null>(null);
+
+  async function finishLogin(uid: string) {
+    if (nextPath) {
+      router.replace(nextPath);
+      return;
+    }
+    const path = await resolvePostLoginPath(uid);
+    router.replace(path);
+  }
 
   if (mfaError) {
     return (
@@ -20,7 +36,7 @@ export default function LoginPage() {
           <TotpMfaChallenge
             mfaError={mfaError}
             onVerified={(user) => {
-              void resolvePostLoginPath(user.uid).then((path) => router.replace(path));
+              void finishLogin(user.uid);
             }}
           />
           <p className="auth-links">
@@ -47,8 +63,7 @@ export default function LoginPage() {
           onMultiFactorRequired={setMfaError}
           onSubmit={async (email, password) => {
             const user = await signInWithEmail(email, password);
-            const path = await resolvePostLoginPath(user.uid);
-            router.replace(path);
+            await finishLogin(user.uid);
           }}
         />
         <p className="auth-links">
@@ -61,5 +76,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="auth-root">読み込み中…</div>}>
+      <LoginInner />
+    </Suspense>
   );
 }

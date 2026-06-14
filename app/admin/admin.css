@@ -598,6 +598,36 @@
   margin-bottom: 1rem;
 }
 
+.learner-become-creator-card {
+  margin-bottom: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--admin-accent, #5058b8) 35%, transparent);
+  background: color-mix(in srgb, var(--admin-accent, #5058b8) 6%, var(--admin-card-bg, #fff));
+}
+
+.learner-become-creator-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.learner-become-creator-card__lead {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--admin-muted);
+}
+
+.learner-become-creator-card__note {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--admin-muted);
+}
+
+.learner-become-creator-card__link {
+  display: inline-block;
+  text-decoration: none;
+}
+
 .learner-join-card__title {
   margin: 0 0 0.4rem;
   font-size: 1.05rem;

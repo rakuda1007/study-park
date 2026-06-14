@@ -57,14 +57,21 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // 学習者ホームの「提供：氏名」表示のため、ログイン済みユーザー同士の読み取りを許可
+      allow read: if isSignedIn();
       allow create: if isSignedIn() && request.auth.uid == uid
         && request.resource.data.role in ['creator', 'learner']
         && request.resource.data.appPurchase.status == 'none';
       allow update: if isAdmin()
         || (isSignedIn() && request.auth.uid == uid
           && request.resource.data.role == resource.data.role
-          && request.resource.data.appPurchase == resource.data.appPurchase);
+          && request.resource.data.appPurchase == resource.data.appPurchase)
+        || (isSignedIn()
+          && request.auth.uid == uid
+          && resource.data.role == 'learner'
+          && request.resource.data.role == 'creator'
+          && request.resource.data.appPurchase == resource.data.appPurchase
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'updatedAt']));
     }
 
     match /billingTiers/{tierId} {
@@ -133,8 +140,15 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.role == 'learner'
-        && request.resource.data.status == 'active';
-      allow update: if isWorkspaceOwner(resource.data.workspaceId) || isAdmin();
+        && request.resource.data.status == 'active'
+        && memberId == request.resource.data.workspaceId + '_' + request.auth.uid;
+      allow update: if isWorkspaceOwner(resource.data.workspaceId)
+        || isAdmin()
+        || (isSignedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.role == 'learner'
+          && request.resource.data.status == 'active');
       allow delete: if isAdmin();
     }
 

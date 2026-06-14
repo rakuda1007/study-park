@@ -10,10 +10,11 @@ import type { ContentManifest } from "@/lib/content/types";
 import { loadLearnerHomeRows, type LearnerHomeRow } from "@/lib/learner/home-rows";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 import { JoinWorkspaceInviteForm } from "@/components/learner/JoinWorkspaceInviteForm";
+import { LearnerBecomeCreatorCard } from "@/components/learner/LearnerBecomeCreatorCard";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
-import { backfillLearnerNamesIfEmpty } from "@/lib/users/firestore";
+import { backfillLearnerNamesIfEmpty, getUserProfile } from "@/lib/users/firestore";
 import contentManifest from "@/public/content-manifest.json";
 
 type SubjectGroup = {
@@ -51,6 +52,7 @@ export default function LearnerHomePage() {
   const [subjectNames, setSubjectNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
+  const [showCreatorUpgrade, setShowCreatorUpgrade] = useState(false);
 
   const refreshRows = useCallback(
     async (uid: string) => {
@@ -68,6 +70,8 @@ export default function LearnerHomePage() {
         setUserId(user.uid);
         try {
           await backfillLearnerNamesIfEmpty(user.uid);
+          const profile = await getUserProfile(user.uid);
+          setShowCreatorUpgrade(profile?.role === "learner");
           await refreshRows(user.uid);
         } finally {
           setLoading(false);
@@ -94,12 +98,15 @@ export default function LearnerHomePage() {
       </p>
 
       {!loading && userId ? (
-        <JoinWorkspaceInviteForm
-          userId={userId}
-          onJoined={() => {
-            void refreshRows(userId);
-          }}
-        />
+        <>
+          {showCreatorUpgrade ? <LearnerBecomeCreatorCard /> : null}
+          <JoinWorkspaceInviteForm
+            userId={userId}
+            onJoined={() => {
+              void refreshRows(userId);
+            }}
+          />
+        </>
       ) : null}
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}

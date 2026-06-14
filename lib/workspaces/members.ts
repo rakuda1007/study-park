@@ -71,6 +71,15 @@ export async function isActiveMember(workspaceId: string, userId: string): Promi
   return snap.exists() && snap.data()?.status === "active";
 }
 
+function isPermissionDeniedError(e: unknown): boolean {
+  return (
+    e !== null &&
+    typeof e === "object" &&
+    "code" in e &&
+    (e as { code: string }).code === "permission-denied"
+  );
+}
+
 export async function joinWorkspaceByInviteCode(
   inviteCode: string,
   learnerUserId: string,
@@ -80,11 +89,21 @@ export async function joinWorkspaceByInviteCode(
     throw new Error("招待コードを入力してください。");
   }
 
-  const inviteSnap = await getDoc(
-    doc(getFirestoreClient(), "workspaceInviteCodes", code),
-  );
+  let inviteSnap;
+  try {
+    inviteSnap = await getDoc(doc(getFirestoreClient(), "workspaceInviteCodes", code));
+  } catch (e) {
+    if (isPermissionDeniedError(e)) {
+      throw new Error(
+        "招待コードを確認できません。Firestore ルールのデプロイ（firebase deploy --only firestore:rules）をご確認ください。",
+      );
+    }
+    throw e;
+  }
   if (!inviteSnap.exists()) {
-    throw new Error("招待コードが見つかりません。クリエイターに確認してください。");
+    throw new Error(
+      "招待コードが見つかりません。クリエイターに確認するか、教室側で招待コードの再登録が必要な場合があります。",
+    );
   }
   const workspaceId = String(inviteSnap.data()?.workspaceId ?? "");
   const ownerId = String(inviteSnap.data()?.ownerId ?? "");
@@ -92,17 +111,45 @@ export async function joinWorkspaceByInviteCode(
     throw new Error("招待コードが無効です。");
   }
   const ref = doc(getFirestoreClient(), "workspaceMembers", memberId(workspaceId, learnerUserId));
+  const existing = await getDoc(ref);
 
-  await setDoc(ref, {
+  const memberPayload = {
     workspaceId,
     userId: learnerUserId,
-    role: "learner",
-    status: "active",
+    role: "learner" as const,
+    status: "active" as const,
     invitedBy: ownerId,
     createdAt: serverTimestamp(),
-  });
+  };
 
-  const workspace = await getWorkspace(workspaceId);
+  try {
+    if (existing.exists() && existing.data()?.status === "active") {
+      // 既に参加済み
+    } else if (existing.exists()) {
+      await updateDoc(ref, {
+        status: "active",
+        role: "learner",
+        invitedBy: ownerId,
+      });
+    } else {
+      await setDoc(ref, memberPayload);
+    }
+  } catch (e) {
+    if (isPermissionDeniedError(e)) {
+      throw new Error("教室への参加権限がありません。ログインし直すか、しばらくしてから再度お試しください。");
+    }
+    throw e;
+  }
+
+  let workspace;
+  try {
+    workspace = await getWorkspace(workspaceId);
+  } catch (e) {
+    if (isPermissionDeniedError(e)) {
+      return { workspaceId, workspaceName: "教材" };
+    }
+    throw e;
+  }
   return {
     workspaceId,
     workspaceName: workspace?.name ?? "教材",
