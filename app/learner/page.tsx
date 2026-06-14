@@ -13,7 +13,12 @@ import { JoinWorkspaceInviteForm } from "@/components/learner/JoinWorkspaceInvit
 import { LearnerBecomeCreatorCard } from "@/components/learner/LearnerBecomeCreatorCard";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
+import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import {
+  CONTENT_PERIOD_FILTER_ALL,
+  contentMatchesPeriodFilter,
+} from "@/lib/content/period";
 import { backfillLearnerNamesIfEmpty, getUserProfile } from "@/lib/users/firestore";
 import contentManifest from "@/public/content-manifest.json";
 
@@ -53,6 +58,7 @@ export default function LearnerHomePage() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
   const [showCreatorUpgrade, setShowCreatorUpgrade] = useState(false);
+  const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
 
   const refreshRows = useCallback(
     async (uid: string) => {
@@ -90,6 +96,16 @@ export default function LearnerHomePage() {
     [rows, subjectNames, manifest],
   );
 
+  const allContents = useMemo(() => rows.flatMap((r) => r.contents), [rows]);
+
+  function visibleItemCount(subjectGroups: SubjectGroup[]): number {
+    return subjectGroups.reduce(
+      (total, group) =>
+        total + group.items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)).length,
+      0,
+    );
+  }
+
   return (
     <LearnerShell>
       <p className="admin-msg learner-welcome-msg">
@@ -98,6 +114,17 @@ export default function LearnerHomePage() {
       </p>
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
+
+      {!loading && allContents.length > 0 ? (
+        <div className="learner-period-toolbar">
+          <ContentPeriodFilter
+            contents={allContents}
+            value={periodFilter}
+            onChange={setPeriodFilter}
+            storageKey="study-park-learner-content-period-filter"
+          />
+        </div>
+      ) : null}
 
       {!loading && rows.length === 0 ? (
         <section className="admin-card">
@@ -117,8 +144,10 @@ export default function LearnerHomePage() {
               </>
             )}
           </p>
-          {r.subjectGroups.length === 0 ? (
+          {r.contents.length === 0 ? (
             <p className="admin-msg">公開中の教材はまだありません。</p>
+          ) : visibleItemCount(r.subjectGroups) === 0 ? (
+            <p className="admin-msg">選択した期間の教材はありません。</p>
           ) : (
             <div className="learner-subject-list">
               {r.subjectGroups.map((g) => (
@@ -126,6 +155,7 @@ export default function LearnerHomePage() {
                   key={g.subjectId}
                   group={g}
                   workspaceSlug={r.workspaceSlug}
+                  periodFilter={periodFilter}
                 />
               ))}
             </div>

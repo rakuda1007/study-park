@@ -1,5 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
 import { workspacePlayHref } from "@/lib/content/urls";
+import {
+  contentMatchesPeriodFilter,
+  groupByContentPeriod,
+  resolveContentPeriod,
+} from "@/lib/content/period";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 
 export type LearnerSubjectGroup = {
@@ -39,14 +47,51 @@ function StudyItemList({
   );
 }
 
+function PeriodGroups({
+  groups,
+  workspaceSlug,
+}: {
+  groups: { key: string; label: string; items: WorkspaceContentDoc[] }[];
+  workspaceSlug: string;
+}) {
+  return (
+    <>
+      {groups.map((periodGroup) => (
+        <div key={periodGroup.key} className="admin-period-group learner-period-group">
+          <h4>{periodGroup.label}</h4>
+          <StudyItemList items={periodGroup.items} workspaceSlug={workspaceSlug} />
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function LearnerSubjectSection({
   group,
   workspaceSlug,
+  periodFilter,
 }: {
   group: LearnerSubjectGroup;
   workspaceSlug: string;
+  periodFilter: string;
 }) {
-  const count = group.items.length;
+  const filteredItems = useMemo(
+    () => group.items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
+    [group.items, periodFilter],
+  );
+
+  const periodGroups = useMemo(
+    () =>
+      groupByContentPeriod(filteredItems, (item) => resolveContentPeriod(item)).map(
+        (periodGroup) => ({
+          ...periodGroup,
+          items: periodGroup.items.sort((a, b) => a.order - b.order),
+        }),
+      ),
+    [filteredItems],
+  );
+
+  const count = filteredItems.length;
 
   if (count === 0) return null;
 
@@ -59,7 +104,7 @@ export function LearnerSubjectSection({
         <h3 id={`learner-subject-${group.subjectId}`} className="learner-subject-label">
           {group.subjectName}
         </h3>
-        <StudyItemList items={group.items} workspaceSlug={workspaceSlug} />
+        <PeriodGroups groups={periodGroups} workspaceSlug={workspaceSlug} />
       </section>
     );
   }
@@ -76,7 +121,7 @@ export function LearnerSubjectSection({
         </span>
       </summary>
       <div className="learner-subject-dropdown-panel">
-        <StudyItemList items={group.items} workspaceSlug={workspaceSlug} />
+        <PeriodGroups groups={periodGroups} workspaceSlug={workspaceSlug} />
       </div>
     </details>
   );

@@ -698,6 +698,20 @@
   font-weight: 700;
 }
 
+.learner-period-toolbar {
+  margin: 0 0 1rem;
+}
+
+.learner-period-group {
+  margin-left: 0;
+  padding-left: 0.75rem;
+}
+
+.learner-subject-group .learner-period-group:first-of-type,
+.learner-subject-dropdown-panel .learner-period-group:first-of-type {
+  margin-top: 0.15rem;
+}
+
 .learner-subject-list {
   display: flex;
   flex-direction: column;
