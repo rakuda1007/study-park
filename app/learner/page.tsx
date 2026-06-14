@@ -97,20 +97,11 @@ export default function LearnerHomePage() {
         <Link href="/?park=1">トップページ</Link> からいつでも無料で利用できます。
       </p>
 
-      {!loading && userId ? (
-        <JoinWorkspaceInviteForm
-          userId={userId}
-          onJoined={() => {
-            void refreshRows(userId);
-          }}
-        />
-      ) : null}
-
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
       {!loading && rows.length === 0 ? (
         <section className="admin-card">
-          <p>まだ参加している教材がありません。上のフォームから招待コードを入力して参加してください。</p>
+          <p>まだ参加している教材がありません。下のフォームから招待コードを入力して参加してください。</p>
         </section>
       ) : null}
 
@@ -143,6 +134,15 @@ export default function LearnerHomePage() {
       ))}
 
       {!loading && userId && showCreatorUpgrade ? <LearnerBecomeCreatorCard /> : null}
+
+      {!loading && userId ? (
+        <JoinWorkspaceInviteForm
+          userId={userId}
+          onJoined={() => {
+            void refreshRows(userId);
+          }}
+        />
+      ) : null}
     </LearnerShell>
   );
 }
