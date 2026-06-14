@@ -62,7 +62,7 @@ function PinnedSection({
 
   return (
     <div className="admin-period-group learner-period-group learner-pinned-group">
-      <h4>{CONTENT_PINNED_SECTION_LABEL}</h4>
+      <h4 className="learner-period-heading">{CONTENT_PINNED_SECTION_LABEL}</h4>
       <StudyItemList items={items} workspaceSlug={workspaceSlug} />
     </div>
   );
@@ -79,7 +79,7 @@ function PeriodGroups({
     <>
       {groups.map((periodGroup) => (
         <div key={periodGroup.key} className="admin-period-group learner-period-group">
-          <h4>{periodGroup.label}</h4>
+          <h4 className="learner-period-heading">{periodGroup.label}</h4>
           <StudyItemList items={periodGroup.items} workspaceSlug={workspaceSlug} />
         </div>
       ))}
