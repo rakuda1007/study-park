@@ -8,6 +8,10 @@ import {
   groupByContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
+import {
+  CONTENT_PINNED_SECTION_LABEL,
+  splitPinnedContents,
+} from "@/lib/content/pinned";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
 
 export type LearnerSubjectGroup = {
@@ -47,6 +51,23 @@ function StudyItemList({
   );
 }
 
+function PinnedSection({
+  items,
+  workspaceSlug,
+}: {
+  items: WorkspaceContentDoc[];
+  workspaceSlug: string;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="admin-period-group learner-period-group learner-pinned-group">
+      <h4>{CONTENT_PINNED_SECTION_LABEL}</h4>
+      <StudyItemList items={items} workspaceSlug={workspaceSlug} />
+    </div>
+  );
+}
+
 function PeriodGroups({
   groups,
   workspaceSlug,
@@ -75,23 +96,28 @@ export function LearnerSubjectSection({
   workspaceSlug: string;
   periodFilter: string;
 }) {
-  const filteredItems = useMemo(
-    () => group.items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
-    [group.items, periodFilter],
+  const { pinned, regular } = useMemo(
+    () => splitPinnedContents(group.items),
+    [group.items],
+  );
+
+  const filteredRegular = useMemo(
+    () => regular.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
+    [regular, periodFilter],
   );
 
   const periodGroups = useMemo(
     () =>
-      groupByContentPeriod(filteredItems, (item) => resolveContentPeriod(item)).map(
+      groupByContentPeriod(filteredRegular, (item) => resolveContentPeriod(item)).map(
         (periodGroup) => ({
           ...periodGroup,
           items: periodGroup.items.sort((a, b) => a.order - b.order),
         }),
       ),
-    [filteredItems],
+    [filteredRegular],
   );
 
-  const count = filteredItems.length;
+  const count = pinned.length + filteredRegular.length;
 
   if (count === 0) return null;
 
@@ -104,6 +130,7 @@ export function LearnerSubjectSection({
         <h3 id={`learner-subject-${group.subjectId}`} className="learner-subject-label">
           {group.subjectName}
         </h3>
+        <PinnedSection items={pinned} workspaceSlug={workspaceSlug} />
         <PeriodGroups groups={periodGroups} workspaceSlug={workspaceSlug} />
       </section>
     );
@@ -121,6 +148,7 @@ export function LearnerSubjectSection({
         </span>
       </summary>
       <div className="learner-subject-dropdown-panel">
+        <PinnedSection items={pinned} workspaceSlug={workspaceSlug} />
         <PeriodGroups groups={periodGroups} workspaceSlug={workspaceSlug} />
       </div>
     </details>

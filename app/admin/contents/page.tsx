@@ -28,6 +28,13 @@ import {
   groupByContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
+import {
+  CONTENT_PINNED_SECTION_KEY,
+  CONTENT_PINNED_SECTION_LABEL,
+  countContentsForDisplay,
+  isContentPinned,
+  splitPinnedContents,
+} from "@/lib/content/pinned";
 import type { ContentDoc, ContentType, LegacyContentDoc, SubjectDoc } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
@@ -146,17 +153,18 @@ export default function AdminContentsPage() {
     }
   }
 
-  const filteredContents = useMemo(
-    () => contents.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
-    [contents, periodFilter],
-  );
   const showLegacy = periodFilter === CONTENT_PERIOD_FILTER_ALL;
-  const totalCount = filteredContents.length + (showLegacy ? legacyContents.length : 0);
+  const totalCount =
+    countContentsForDisplay(contents, periodFilter) +
+    (showLegacy ? legacyContents.length : 0);
 
   const groupedRows: AdminSubjectGroup[] = subjects
     .map((subject) => {
-      const contentRows = filteredContents
-        .filter((c) => c.subjectId === subject.id)
+      const subjectContents = contents.filter((c) => c.subjectId === subject.id);
+      const { pinned, regular } = splitPinnedContents(subjectContents);
+      const pinnedRows = pinned.map((doc) => ({ kind: "content" as const, doc }));
+      const regularRows = regular
+        .filter((c) => contentMatchesPeriodFilter(c, periodFilter))
         .map((doc) => ({ kind: "content" as const, doc }))
         .sort((a, b) => a.doc.order - b.doc.order);
       const legacyRows: AdminMenuRow[] = showLegacy
@@ -165,11 +173,11 @@ export default function AdminContentsPage() {
             .map((doc) => ({ kind: "legacy" as const, doc }))
             .sort((a, b) => a.doc.order - b.doc.order)
         : [];
-      const allRows = [...contentRows, ...legacyRows].sort(
+      const allRows = [...pinnedRows, ...regularRows, ...legacyRows].sort(
         (a, b) => a.doc.order - b.doc.order,
       );
       const periodGroups = groupByContentPeriod(
-        contentRows.map((row) => row.doc),
+        regularRows.map((row) => row.doc),
         (doc) => resolveContentPeriod(doc),
       ).map((group) => ({
         key: group.key,
@@ -179,6 +187,15 @@ export default function AdminContentsPage() {
           .map((doc) => ({ kind: "content" as const, doc })),
       }));
       const sections = [
+        ...(pinnedRows.length > 0
+          ? [
+              {
+                key: CONTENT_PINNED_SECTION_KEY,
+                label: CONTENT_PINNED_SECTION_LABEL,
+                rows: pinnedRows,
+              },
+            ]
+          : []),
         ...periodGroups,
         ...(legacyRows.length > 0
           ? [{ key: "legacy", label: "静的アプリ", rows: legacyRows }]
@@ -322,7 +339,9 @@ export default function AdminContentsPage() {
                     row.kind === "content" ? row.doc.title : row.doc.label;
                   const meta =
                     row.kind === "content"
-                      ? `${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}`
+                      ? `${row.doc.type} · /play?slug=${row.doc.slug} · 順序 ${index + 1}${
+                          isContentPinned(row.doc) ? " · 常設" : ""
+                        }`
                       : `${row.doc.href} · 順序 ${index + 1}`;
 
                   const badge =

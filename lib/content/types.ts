@@ -74,6 +74,8 @@ export type ContentDoc = {
   /** 一覧絞り込み用の作成年月 */
   periodYear: number;
   periodMonth: number;
+  /** 期間フィルターに関係なく科目の上位に常時表示 */
+  pinned?: boolean;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

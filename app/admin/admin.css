@@ -712,6 +712,24 @@
   margin-top: 0.15rem;
 }
 
+.learner-pinned-group h4 {
+  color: var(--admin-accent, #5058b8);
+}
+
+.admin-content-pinned-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--admin-text);
+}
+
+.admin-content-pinned-field input {
+  margin-top: 0.2rem;
+}
+
 .learner-subject-list {
   display: flex;
   flex-direction: column;

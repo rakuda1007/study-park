@@ -16,6 +16,12 @@ import {
   groupByContentPeriod,
   resolveContentPeriod,
 } from "@/lib/content/period";
+import {
+  CONTENT_PINNED_SECTION_KEY,
+  CONTENT_PINNED_SECTION_LABEL,
+  countContentsForDisplay,
+  splitPinnedContents,
+} from "@/lib/content/pinned";
 import type { ContentType } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
@@ -119,20 +125,29 @@ export function CreatorContentsSection() {
     }
   }
 
-  const filteredItems = useMemo(
-    () => items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)),
-    [items, periodFilter],
-  );
-  const groupedItems = useMemo(
-    () =>
-      groupByContentPeriod(filteredItems, (item) => resolveContentPeriod(item)).map(
-        (group) => ({
-          ...group,
-          items: group.items.sort((a, b) => a.order - b.order),
-        }),
-      ),
-    [filteredItems],
-  );
+  const visibleCount = countContentsForDisplay(items, periodFilter);
+  const groupedItems = useMemo(() => {
+    const { pinned, regular } = splitPinnedContents(items);
+    const filteredRegular = regular.filter((c) => contentMatchesPeriodFilter(c, periodFilter));
+    const periodGroups = groupByContentPeriod(filteredRegular, (item) =>
+      resolveContentPeriod(item),
+    ).map((group) => ({
+      ...group,
+      items: group.items.sort((a, b) => a.order - b.order),
+    }));
+    return [
+      ...(pinned.length > 0
+        ? [
+            {
+              key: CONTENT_PINNED_SECTION_KEY,
+              label: CONTENT_PINNED_SECTION_LABEL,
+              items: pinned,
+            },
+          ]
+        : []),
+      ...periodGroups,
+    ];
+  }, [items, periodFilter]);
 
   if (loading) {
     return <p className="admin-loading">教材を読み込み中…</p>;
@@ -189,7 +204,7 @@ export function CreatorContentsSection() {
 
       <div className="admin-list-toolbar" style={{ marginTop: "1rem" }}>
         <h2 className="admin-card__heading" style={{ margin: 0 }}>
-          教材一覧（{filteredItems.length}件）
+          教材一覧（{visibleCount}件）
         </h2>
         <ContentPeriodFilter
           contents={items}
@@ -223,7 +238,7 @@ export function CreatorContentsSection() {
           </div>
         ))}
       </div>
-      {filteredItems.length === 0 ? (
+      {visibleCount === 0 ? (
         <p className="admin-msg">
           {items.length === 0
             ? "まだ教材がありません。上のフォームから作成してください。"

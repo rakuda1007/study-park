@@ -38,6 +38,7 @@ function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
     quiz: data.quiz as ContentDoc["quiz"],
     periodYear: period.year,
     periodMonth: period.month,
+    pinned: data.pinned === true,
     createdAt,
     updatedAt: String(data.updatedAt ?? ""),
   };

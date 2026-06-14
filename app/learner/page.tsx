@@ -17,8 +17,8 @@ import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
   CONTENT_PERIOD_FILTER_ALL,
-  contentMatchesPeriodFilter,
 } from "@/lib/content/period";
+import { countContentsForDisplay } from "@/lib/content/pinned";
 import { backfillLearnerNamesIfEmpty, getUserProfile } from "@/lib/users/firestore";
 import contentManifest from "@/public/content-manifest.json";
 
@@ -100,8 +100,7 @@ export default function LearnerHomePage() {
 
   function visibleItemCount(subjectGroups: SubjectGroup[]): number {
     return subjectGroups.reduce(
-      (total, group) =>
-        total + group.items.filter((c) => contentMatchesPeriodFilter(c, periodFilter)).length,
+      (total, group) => total + countContentsForDisplay(group.items, periodFilter),
       0,
     );
   }

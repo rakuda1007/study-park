@@ -76,6 +76,7 @@ function mapContent(id: string, data: Record<string, unknown>): ContentDoc {
     quiz: data.quiz as ContentDoc["quiz"],
     periodYear: period.year,
     periodMonth: period.month,
+    pinned: data.pinned === true,
     createdAt,
     updatedAt: tsToIso(data.updatedAt),
     publishedAt: data.publishedAt ? tsToIso(data.publishedAt) : undefined,
@@ -255,6 +256,7 @@ export async function updateContent(
       | "quiz"
       | "periodYear"
       | "periodMonth"
+      | "pinned"
     >
   > & { updatedBy: string },
 ): Promise<void> {

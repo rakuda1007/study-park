@@ -39,6 +39,7 @@ import { SLUG_PATTERN } from "@/lib/content/types";
 import { contentPlayHref } from "@/lib/content/urls";
 import { listLegacyContents } from "@/lib/content/legacy-contents";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
+import { ContentPinnedField } from "@/components/admin/ContentPinnedField";
 import { RichTextArea } from "@/components/admin/RichTextArea";
 import {
   blankAnswersToInput,
@@ -69,6 +70,7 @@ function EditContentInner() {
   const [ready, setReady] = useState(false);
   const [periodYear, setPeriodYear] = useState(new Date().getFullYear());
   const [periodMonth, setPeriodMonth] = useState(new Date().getMonth() + 1);
+  const [pinned, setPinned] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [sections, setSections] = useState<LessonSection[]>([]);
 
@@ -96,6 +98,7 @@ function EditContentInner() {
     setReady(c.ready);
     setPeriodYear(c.periodYear);
     setPeriodMonth(c.periodMonth);
+    setPinned(c.pinned === true);
     setQuestions((c.quiz?.questions ?? []).map(normalizeQuizQuestion));
     setSections(c.lesson?.sections ?? []);
   }, [id]);
@@ -137,6 +140,7 @@ function EditContentInner() {
         ready: readyForSite,
         periodYear,
         periodMonth,
+        pinned,
         updatedBy: uid,
       });
       if (doc.type === "quiz") {
@@ -298,6 +302,7 @@ function EditContentInner() {
               onYearChange={setPeriodYear}
               onMonthChange={setPeriodMonth}
             />
+            <ContentPinnedField checked={pinned} onChange={setPinned} />
             <RichTextArea
               id="intro"
               label="はじめに / リード文"

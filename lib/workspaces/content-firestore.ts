@@ -73,6 +73,7 @@ function mapContent(workspaceId: string, id: string, data: Record<string, unknow
     quiz: data.quiz as ContentDoc["quiz"],
     periodYear: period.year,
     periodMonth: period.month,
+    pinned: data.pinned === true,
     createdAt,
     updatedAt: tsToIso(data.updatedAt),
     publishedAt: data.publishedAt ? tsToIso(data.publishedAt) : undefined,
@@ -208,6 +209,7 @@ export async function updateWorkspaceContent(
       | "visibility"
       | "periodYear"
       | "periodMonth"
+      | "pinned"
     >
   > & { updatedBy: string },
 ): Promise<void> {

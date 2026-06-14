@@ -7,6 +7,7 @@ import { LessonSectionsEditor } from "@/components/admin/LessonSectionsEditor";
 import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEditor";
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
+import { ContentPinnedField } from "@/components/admin/ContentPinnedField";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
@@ -61,6 +62,7 @@ function EditInner() {
   const [visibility, setVisibility] = useState<ContentVisibility>("members");
   const [periodYear, setPeriodYear] = useState(new Date().getFullYear());
   const [periodMonth, setPeriodMonth] = useState(new Date().getMonth() + 1);
+  const [pinned, setPinned] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [sections, setSections] = useState<LessonSection[]>([]);
   const [showAds, setShowAds] = useState(false);
@@ -104,6 +106,7 @@ function EditInner() {
     setVisibility(c.visibility);
     setPeriodYear(c.periodYear);
     setPeriodMonth(c.periodMonth);
+    setPinned(c.pinned === true);
     setQuestions((c.quiz?.questions ?? []).map(normalizeQuizQuestion));
     setSections(c.lesson?.sections ?? []);
   }, [id, uid]);
@@ -151,6 +154,7 @@ function EditInner() {
         visibility,
         periodYear,
         periodMonth,
+        pinned,
         updatedBy: uid,
       });
       if (doc.type === "quiz") {
@@ -259,6 +263,7 @@ function EditInner() {
               onYearChange={setPeriodYear}
               onMonthChange={setPeriodMonth}
             />
+            <ContentPinnedField checked={pinned} onChange={setPinned} />
             <div className="admin-field">
               <label htmlFor="visibility">公開範囲</label>
               <select
