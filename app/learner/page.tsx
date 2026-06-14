@@ -98,15 +98,12 @@ export default function LearnerHomePage() {
       </p>
 
       {!loading && userId ? (
-        <>
-          {showCreatorUpgrade ? <LearnerBecomeCreatorCard /> : null}
-          <JoinWorkspaceInviteForm
-            userId={userId}
-            onJoined={() => {
-              void refreshRows(userId);
-            }}
-          />
-        </>
+        <JoinWorkspaceInviteForm
+          userId={userId}
+          onJoined={() => {
+            void refreshRows(userId);
+          }}
+        />
       ) : null}
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
@@ -144,6 +141,8 @@ export default function LearnerHomePage() {
           )}
         </section>
       ))}
+
+      {!loading && userId && showCreatorUpgrade ? <LearnerBecomeCreatorCard /> : null}
     </LearnerShell>
   );
 }

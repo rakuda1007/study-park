@@ -599,7 +599,8 @@
 }
 
 .learner-become-creator-card {
-  margin-bottom: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0;
   border: 1px solid color-mix(in srgb, var(--admin-accent, #5058b8) 35%, transparent);
   background: color-mix(in srgb, var(--admin-accent, #5058b8) 6%, var(--admin-card-bg, #fff));
 }
