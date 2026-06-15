@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { MultiFactorError } from "firebase/auth";
 import { AuthSignupPageShell } from "@/components/auth/AuthSignupPageShell";
 import { EmailAuthForm } from "@/components/auth/EmailAuthForm";
 import { TotpMfaChallenge } from "@/components/auth/TotpMfaChallenge";
 import { joinWorkspaceByInviteCode } from "@/lib/workspaces/members";
+import { InviteCodeInput } from "@/components/learner/InviteCodeInput";
 import { resolvePostLoginPath, signInWithEmail, signUpWithEmail } from "@/lib/firebase/auth-client";
 import "../../auth/auth.css";
 
@@ -24,7 +25,7 @@ export default function SignupLearnerPage() {
     if (inviteCode.trim()) {
       const r = await joinWorkspaceByInviteCode(inviteCode, uid);
       setJoinMsg(`${r.workspaceName} に参加しました。`);
-      router.replace("/learner");
+      router.replace(`/learner?joined=${encodeURIComponent(r.workspaceId)}`);
       return;
     }
     const path = await resolvePostLoginPath(uid);
@@ -61,11 +62,11 @@ export default function SignupLearnerPage() {
             必須
           </span>
         </label>
-        <input
+        <InviteCodeInput
           id="invite"
           className="auth-input--code"
           value={inviteCode}
-          onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+          onChange={setInviteCode}
           placeholder="8文字のコード"
           required
         />

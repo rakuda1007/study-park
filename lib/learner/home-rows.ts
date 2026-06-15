@@ -9,7 +9,7 @@ import {
 } from "@/lib/workspaces/content-firestore";
 import { enrichWorkspaceContentsFromAdmin } from "@/lib/workspaces/enrich-from-admin";
 import { getWorkspace, getWorkspaceByOwner } from "@/lib/workspaces/firestore";
-import { listWorkspacesForLearner } from "@/lib/workspaces/members";
+import { listWorkspacesForLearner, isActiveMember } from "@/lib/workspaces/members";
 import { formatProfileDisplayName } from "@/lib/users/display-name";
 import { getUserProfile } from "@/lib/users/firestore";
 
@@ -30,12 +30,30 @@ export type LearnerHomeData = {
 export async function loadLearnerHomeRows(
   userId: string,
   manifest: ContentManifest,
+  options?: { ensureWorkspaceId?: string },
 ): Promise<LearnerHomeData> {
   const [memberships, subjects, ownedWs] = await Promise.all([
     listWorkspacesForLearner(userId),
     listPublicSubjects(),
     getWorkspaceByOwner(userId),
   ]);
+
+  const ensureWorkspaceId = options?.ensureWorkspaceId?.trim();
+  if (
+    ensureWorkspaceId &&
+    !memberships.some((m) => m.workspaceId === ensureWorkspaceId) &&
+    (await isActiveMember(ensureWorkspaceId, userId))
+  ) {
+    memberships.push({
+      id: `${ensureWorkspaceId}_${userId}`,
+      workspaceId: ensureWorkspaceId,
+      userId,
+      role: "learner",
+      status: "active",
+      invitedBy: "",
+      createdAt: new Date().toISOString(),
+    });
+  }
   const subjectNames = buildSubjectNameMap(manifest, subjects);
   const rows: LearnerHomeRow[] = [];
   const seen = new Set<string>();

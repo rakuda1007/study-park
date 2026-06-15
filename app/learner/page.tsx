@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   subjectDisplayName,
@@ -53,6 +54,8 @@ function groupBySubject(
 
 export default function LearnerHomePage() {
   const manifest = contentManifest as ContentManifest;
+  const searchParams = useSearchParams();
+  const joinedWorkspaceId = searchParams.get("joined")?.trim() || undefined;
   const [rows, setRows] = useState<LearnerHomeRow[]>([]);
   const [subjectNames, setSubjectNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -61,8 +64,8 @@ export default function LearnerHomePage() {
   const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
 
   const refreshRows = useCallback(
-    async (uid: string) => {
-      const data = await loadLearnerHomeRows(uid, manifest);
+    async (uid: string, ensureWorkspaceId?: string) => {
+      const data = await loadLearnerHomeRows(uid, manifest, { ensureWorkspaceId });
       setRows(data.rows);
       setSubjectNames(data.subjectNames);
     },
@@ -78,14 +81,14 @@ export default function LearnerHomePage() {
           await backfillLearnerNamesIfEmpty(user.uid);
           const profile = await getUserProfile(user.uid);
           setShowCreatorUpgrade(profile?.role === "learner");
-          await refreshRows(user.uid);
+          await refreshRows(user.uid, joinedWorkspaceId);
         } finally {
           setLoading(false);
         }
       })();
     });
     return unsub;
-  }, [refreshRows]);
+  }, [refreshRows, joinedWorkspaceId]);
 
   const rowsWithGroups = useMemo(
     () =>
@@ -167,8 +170,8 @@ export default function LearnerHomePage() {
       {!loading && userId ? (
         <JoinWorkspaceInviteForm
           userId={userId}
-          onJoined={() => {
-            void refreshRows(userId);
+          onJoined={(result) => {
+            void refreshRows(userId, result.workspaceId);
           }}
         />
       ) : null}

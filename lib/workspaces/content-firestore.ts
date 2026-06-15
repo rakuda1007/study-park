@@ -30,7 +30,11 @@ import type {
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentVisibility } from "./types";
 import { resolveWorkspaceBySlug } from "./members";
-import { ensureWorkspaceSubjects, listWorkspaceSubjects } from "./subjects-firestore";
+import {
+  ensureWorkspaceSubjects,
+  listWorkspaceSubjects,
+  publishWorkspaceSubjectForContent,
+} from "./subjects-firestore";
 
 export { ensureWorkspaceSubjects };
 import { updateWorkspaceUsageCounts } from "./firestore";
@@ -223,6 +227,14 @@ export async function updateWorkspaceContent(
     updatedAt: serverTimestamp(),
     ...(rest.status === "published" ? { publishedAt: serverTimestamp() } : {}),
   });
+  if (rest.status === "published") {
+    const subjectId =
+      rest.subjectId ??
+      (await getWorkspaceContent(workspaceId, id))?.subjectId;
+    if (subjectId) {
+      await publishWorkspaceSubjectForContent(workspaceId, subjectId);
+    }
+  }
   if (rest.quiz !== undefined) {
     await syncQuestionCount(workspaceId);
   }
@@ -294,14 +306,22 @@ export async function listPublishedContentsForMember(
   const publishedSubjectIds = new Set(
     subjects.filter((s) => s.status === "published").map((s) => s.id),
   );
-  return snap.docs
-    .map((d) => mapContent(workspaceId, d.id, d.data()))
-    .filter(
-      (c) =>
-        publishedSubjectIds.has(c.subjectId) &&
-        (c.visibility === "members" ||
-          c.visibility === "unlisted" ||
-          c.visibility === "public"),
-    );
+  const memberVisible = (visibility: ContentVisibility) =>
+    visibility === "members" || visibility === "unlisted" || visibility === "public";
+
+  const items = snap.docs.map((d) => mapContent(workspaceId, d.id, d.data()));
+  for (const c of items) {
+    const subject = subjects.find((s) => s.id === c.subjectId);
+    if (subject?.status === "draft" && memberVisible(c.visibility)) {
+      void publishWorkspaceSubjectForContent(workspaceId, c.subjectId);
+    }
+  }
+
+  return items.filter((c) => {
+      if (!memberVisible(c.visibility)) return false;
+      if (publishedSubjectIds.has(c.subjectId)) return true;
+      // 公開教材があるのに教科が draft のまま（既存データの救済）
+      return subjects.some((s) => s.id === c.subjectId && s.status === "draft");
+    });
 }
 

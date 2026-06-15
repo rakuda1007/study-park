@@ -2,10 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { joinWorkspaceByInviteCode } from "@/lib/workspaces/members";
+import { InviteCodeInput } from "@/components/learner/InviteCodeInput";
 
 type Props = {
   userId: string;
-  onJoined: (workspaceName: string) => void;
+  onJoined: (result: { workspaceId: string; workspaceName: string }) => void;
 };
 
 export function JoinWorkspaceInviteForm({ userId, onJoined }: Props) {
@@ -23,7 +24,7 @@ export function JoinWorkspaceInviteForm({ userId, onJoined }: Props) {
       const result = await joinWorkspaceByInviteCode(inviteCode, userId);
       setInviteCode("");
       setMessage(`「${result.workspaceName}」に参加しました。`);
-      onJoined(result.workspaceName);
+      onJoined(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "参加に失敗しました。");
     } finally {
@@ -44,15 +45,13 @@ export function JoinWorkspaceInviteForm({ userId, onJoined }: Props) {
           招待コード
         </label>
         <div className="learner-join-form__row">
-          <input
+          <InviteCodeInput
             id="learner-invite-code"
             className="learner-join-form__input"
             value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+            onChange={setInviteCode}
             placeholder="8文字のコード"
             required
-            autoComplete="off"
-            spellCheck={false}
           />
           <button type="submit" className="admin-btn admin-btn--primary learner-join-form__btn" disabled={busy}>
             {busy ? "参加中…" : "参加する"}

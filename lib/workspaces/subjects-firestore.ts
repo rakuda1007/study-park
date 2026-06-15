@@ -126,13 +126,26 @@ export async function ensureWorkspaceSubjects(workspaceId: string): Promise<void
       await setDoc(ref, {
         name: s.name,
         order: s.order,
-        status: "draft",
+        status: "published",
         enabledInForm: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
     }
   }
+}
+
+/** 教材を公開したとき、学習者ホームに出るよう教科も公開する */
+export async function publishWorkspaceSubjectForContent(
+  workspaceId: string,
+  subjectId: string,
+): Promise<void> {
+  if (!subjectId) return;
+  const ref = doc(getFirestoreClient(), "workspaces", workspaceId, "subjects", subjectId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  if (snap.data()?.status === "published") return;
+  await updateDoc(ref, { status: "published", updatedAt: serverTimestamp() });
 }
 
 export async function setWorkspaceSubjectStatus(
@@ -183,11 +196,15 @@ export async function syncWorkspaceSubjectsFromContents(
       continue;
     }
 
-    await updateDoc(ref, {
+    const patch: Record<string, unknown> = {
       name,
       order,
       updatedAt: serverTimestamp(),
-    });
+    };
+    if (snap.data()?.status !== "published" && hasPublishedContent) {
+      patch.status = "published";
+    }
+    await updateDoc(ref, patch);
   }
 }
 
