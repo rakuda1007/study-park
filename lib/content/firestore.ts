@@ -16,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { syncAdminContentMirrors } from "@/lib/workspaces/admin-content-mirror";
 import { DEFAULT_SUBJECTS } from "./subject-defaults";
 import { currentContentPeriod, mapStoredContentPeriod } from "./period";
 import { DEFAULT_QUIZ_BLANK_ANSWERS } from "./quiz-answers";
@@ -267,6 +268,16 @@ export async function updateContent(
     updatedAt: serverTimestamp(),
     ...(rest.status === "published" ? { publishedAt: serverTimestamp() } : {}),
   });
+
+  const mirrorPatch: Partial<
+    Pick<ContentDoc, "pinned" | "periodYear" | "periodMonth">
+  > = {};
+  if (rest.pinned !== undefined) mirrorPatch.pinned = rest.pinned;
+  if (rest.periodYear !== undefined) mirrorPatch.periodYear = rest.periodYear;
+  if (rest.periodMonth !== undefined) mirrorPatch.periodMonth = rest.periodMonth;
+  if (Object.keys(mirrorPatch).length > 0) {
+    await syncAdminContentMirrors(id, mirrorPatch, updatedBy);
+  }
 }
 
 export async function deleteContent(id: string): Promise<void> {

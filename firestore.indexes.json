@@ -94,6 +94,13 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "order", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "contents",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "migratedFrom", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

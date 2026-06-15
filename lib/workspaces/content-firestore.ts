@@ -50,6 +50,8 @@ function tsToIso(v: unknown): string {
 export type WorkspaceContentDoc = ContentDoc & {
   visibility: ContentVisibility;
   workspaceId: string;
+  /** 管理用 contents から移行した場合の参照（contents/{id}） */
+  migratedFrom?: string;
 };
 
 function mapContent(workspaceId: string, id: string, data: Record<string, unknown>): WorkspaceContentDoc {
@@ -74,6 +76,7 @@ function mapContent(workspaceId: string, id: string, data: Record<string, unknow
     periodYear: period.year,
     periodMonth: period.month,
     pinned: data.pinned === true,
+    migratedFrom: data.migratedFrom ? String(data.migratedFrom) : undefined,
     createdAt,
     updatedAt: tsToIso(data.updatedAt),
     publishedAt: data.publishedAt ? tsToIso(data.publishedAt) : undefined,

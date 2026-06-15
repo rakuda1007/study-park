@@ -7,6 +7,7 @@ import {
   listPublishedContentsForMember,
   type WorkspaceContentDoc,
 } from "@/lib/workspaces/content-firestore";
+import { enrichWorkspaceContentsFromAdmin } from "@/lib/workspaces/enrich-from-admin";
 import { getWorkspace, getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import { listWorkspacesForLearner } from "@/lib/workspaces/members";
 import { formatProfileDisplayName } from "@/lib/users/display-name";
@@ -53,7 +54,9 @@ export async function loadLearnerHomeRows(
     const ws = await getWorkspace(m.workspaceId);
     if (!ws) continue;
     seen.add(m.workspaceId);
-    const contents = await listPublishedContentsForMember(m.workspaceId);
+    const contents = await enrichWorkspaceContentsFromAdmin(
+      await listPublishedContentsForMember(m.workspaceId),
+    );
     rows.push({
       workspaceId: m.workspaceId,
       workspaceName: ws.name,
@@ -65,7 +68,9 @@ export async function loadLearnerHomeRows(
   }
 
   if (ownedWs && !seen.has(ownedWs.id)) {
-    const contents = await listPublishedContentsForMember(ownedWs.id);
+    const contents = await enrichWorkspaceContentsFromAdmin(
+      await listPublishedContentsForMember(ownedWs.id),
+    );
     rows.push({
       workspaceId: ownedWs.id,
       workspaceName: ownedWs.name,
