@@ -717,22 +717,32 @@
   margin-top: 0.4rem;
 }
 
-.learner-period-heading {
-  margin: 0 0 0.4rem;
-  padding: 0.25rem 0.55rem;
-  font-size: 0.72rem;
+.learner-period-group .learner-period-heading {
+  display: block;
+  box-sizing: border-box;
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   line-height: 1.35;
-  color: var(--admin-muted);
-  background: color-mix(in srgb, var(--admin-muted) 12%, transparent);
-  border-radius: 4px;
-  display: inline-block;
+  color: var(--admin-accent);
+  background: color-mix(in srgb, var(--admin-accent) 14%, var(--admin-panel));
+  border-radius: 0;
+  border-top: 1px solid color-mix(in srgb, var(--admin-accent) 22%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--admin-accent) 22%, transparent);
+}
+
+.learner-subject-dropdown-panel .learner-period-group .learner-period-heading {
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
 }
 
 .learner-pinned-group .learner-period-heading {
-  color: var(--admin-accent, #5058b8);
-  background: color-mix(in srgb, var(--admin-accent, #5058b8) 14%, transparent);
+  color: #fff;
+  background: var(--admin-accent);
+  border-top-color: transparent;
+  border-bottom-color: color-mix(in srgb, var(--admin-accent) 70%, #000);
 }
 
 .learner-period-group .learner-study-list {
