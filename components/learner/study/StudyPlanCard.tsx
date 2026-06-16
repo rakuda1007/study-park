@@ -15,6 +15,7 @@ import {
 } from "@/lib/study/week";
 import { StudyReadableText } from "./StudyReadableText";
 import { StudyProgressBar } from "./StudyProgressBar";
+import { StudyProgressGauge } from "./StudyProgressGauge";
 
 type Props = {
   plan: StudyPlanWithItems;
@@ -71,7 +72,7 @@ export function StudyPlanCard({
         </Link>
       </header>
 
-      <StudyProgressBar
+      <StudyProgressGauge
         percent={progress}
         status={status}
         size={listView || compact ? "sm" : "md"}

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { StudyItemProgressEditor } from "@/components/learner/study/StudyItemProgressEditor";
 import { StudyPlanForm } from "@/components/learner/study/StudyPlanForm";
-import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
+import { StudyProgressGauge } from "@/components/learner/study/StudyProgressGauge";
 import { StudySaveTemplateForm } from "@/components/learner/study/StudySaveTemplateForm";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import {
@@ -238,7 +238,7 @@ function LearnerStudyPlanInner() {
         <>
           <section className="admin-card study-detail-progress">
             <h3 className="study-detail-progress__title">計画全体の進捗</h3>
-            <StudyProgressBar percent={progress} status={status} />
+            <StudyProgressGauge percent={progress} status={status} size="md" />
           </section>
 
           <section className="admin-card">

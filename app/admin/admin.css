@@ -1891,6 +1891,140 @@
   min-width: 2.25rem;
 }
 
+.study-progress-gauge {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+}
+
+.study-progress-gauge__badge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.25rem;
+  z-index: 1;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.08rem 0.35rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.study-progress-gauge__badge--warning {
+  background: #fff4d6;
+  color: #9a6700;
+}
+
+.study-progress-gauge__badge--danger,
+.study-progress-gauge__badge--urgent {
+  background: #fde8e8;
+  color: #b42318;
+}
+
+.study-progress-gauge__svg {
+  display: block;
+  overflow: visible;
+}
+
+.study-progress-gauge__track {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+.study-progress-gauge--ok .study-progress-gauge__value {
+  stroke: #4f8cff;
+}
+
+.study-progress-gauge--ok .study-progress-gauge__needle {
+  stroke: #3d6fd4;
+}
+
+.study-progress-gauge--ok .study-progress-gauge__hub {
+  fill: #3d6fd4;
+}
+
+.study-progress-gauge--warning .study-progress-gauge__value {
+  stroke: #f0b429;
+}
+
+.study-progress-gauge--warning .study-progress-gauge__needle {
+  stroke: #d48806;
+}
+
+.study-progress-gauge--warning .study-progress-gauge__hub {
+  fill: #d48806;
+}
+
+.study-progress-gauge--danger .study-progress-gauge__value,
+.study-progress-gauge--urgent .study-progress-gauge__value {
+  stroke: #f97066;
+}
+
+.study-progress-gauge--danger .study-progress-gauge__needle,
+.study-progress-gauge--urgent .study-progress-gauge__needle {
+  stroke: #d92d20;
+}
+
+.study-progress-gauge--danger .study-progress-gauge__hub,
+.study-progress-gauge--urgent .study-progress-gauge__hub {
+  fill: #d92d20;
+}
+
+.study-progress-gauge--complete .study-progress-gauge__value {
+  stroke: #3cb371;
+}
+
+.study-progress-gauge--complete .study-progress-gauge__needle {
+  stroke: #1a7f4b;
+}
+
+.study-progress-gauge--complete .study-progress-gauge__hub {
+  fill: #1a7f4b;
+}
+
+.study-progress-gauge__label {
+  margin-top: -0.35rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.study-progress-gauge--sm .study-progress-gauge__label {
+  margin-top: -0.3rem;
+}
+
+.study-progress-gauge__percent {
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.study-progress-gauge--sm .study-progress-gauge__percent {
+  font-size: 0.75rem;
+}
+
+.study-progress-gauge__complete {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #1a7f4b;
+}
+
+.study-progress-gauge--sm .study-progress-gauge__complete {
+  font-size: 0.72rem;
+}
+
+.study-plan-card--list .study-progress-gauge {
+  margin-left: auto;
+}
+
+.study-plan-card:not(.study-plan-card--list) .study-progress-gauge {
+  margin: 0.15rem 0 0.5rem;
+}
+
+.study-detail-progress .study-progress-gauge {
+  margin: 0 auto;
+  display: flex;
+}
+
 .study-page-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2204,7 +2338,7 @@
     padding: 0.5rem 0.65rem;
     margin-bottom: 0.35rem;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(9rem, 42%);
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
     column-gap: 0.75rem;
     row-gap: 0.3rem;
@@ -2217,9 +2351,11 @@
     margin-bottom: 0;
   }
 
-  .study-plan-card--list > .study-progress {
+  .study-plan-card--list > .study-progress-gauge {
     grid-column: 2;
     grid-row: 1;
+    margin-left: 0;
+    justify-self: end;
   }
 
   .study-plan-card__items--list {
