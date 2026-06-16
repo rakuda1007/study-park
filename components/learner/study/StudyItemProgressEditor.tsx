@@ -14,6 +14,8 @@ type Props = {
   onUpdated: (itemId: string, progressPercent: number) => void;
 };
 
+const PROGRESS_STEP = 5;
+
 export function StudyItemProgressEditor({ userId, planId, item, onUpdated }: Props) {
   const [value, setValue] = useState(item.progressPercent);
   const [saving, setSaving] = useState(false);
@@ -64,25 +66,48 @@ export function StudyItemProgressEditor({ userId, planId, item, onUpdated }: Pro
           type="range"
           min={0}
           max={100}
-          step={5}
+          step={PROGRESS_STEP}
           value={value}
           className="study-item-editor__slider"
           onChange={(e) => setValue(Number(e.target.value))}
           onMouseUp={(e) => void save(Number((e.target as HTMLInputElement).value))}
           onTouchEnd={(e) => void save(Number((e.target as HTMLInputElement).value))}
         />
-        <label className="study-item-editor__number">
-          <span className="admin-label">進捗%</span>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            className="admin-input study-item-editor__percent-input"
-            value={value}
-            onChange={(e) => setValue(Number(e.target.value))}
-            onBlur={() => void save(value)}
-          />
-        </label>
+        <div className="study-item-editor__adjust-row">
+          <div className="study-item-editor__stepper">
+            <button
+              type="button"
+              className="study-item-editor__step-btn"
+              aria-label={`${PROGRESS_STEP}%減らす`}
+              disabled={saving || value <= 0}
+              onClick={() => void save(value - PROGRESS_STEP)}
+            >
+              −
+            </button>
+            <span className="study-item-editor__step-value">{value}%</span>
+            <button
+              type="button"
+              className="study-item-editor__step-btn"
+              aria-label={`${PROGRESS_STEP}%増やす`}
+              disabled={saving || value >= 100}
+              onClick={() => void save(value + PROGRESS_STEP)}
+            >
+              ＋
+            </button>
+          </div>
+          <label className="study-item-editor__number">
+            <span className="admin-label">進捗%</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              className="admin-input study-item-editor__percent-input"
+              value={value}
+              onChange={(e) => setValue(Number(e.target.value))}
+              onBlur={() => void save(value)}
+            />
+          </label>
+        </div>
         <div className="study-item-editor__quick">
           {[0, 25, 50, 75, 100].map((n) => (
             <button

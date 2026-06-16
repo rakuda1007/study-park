@@ -15,12 +15,10 @@ export function todayStudyDate(): string {
   return formatStudyDate(new Date());
 }
 
-/** 月曜始まりの週の開始日 */
+/** 日曜始まり・土曜終わりの週の開始日（日曜） */
 export function getWeekStart(date: Date): Date {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
+  d.setDate(d.getDate() - d.getDay());
   d.setHours(0, 0, 0, 0);
   return d;
 }
@@ -46,13 +44,12 @@ export function formatWeekLabel(weekStart: Date): string {
   const endDay = weekEnd.getDate();
   const endMonth = weekEnd.getMonth() + 1;
 
-  const weekOfMonth = Math.ceil(startDay / 7);
   const dateRange =
     m === endMonth
       ? `${m}/${startDay}〜${endDay}`
       : `${m}/${startDay}〜${endMonth}/${endDay}`;
 
-  return `${y}年${m}月 第${weekOfMonth}週（${dateRange}）`;
+  return `${y}年（${dateRange}・日〜土）`;
 }
 
 export function planOverlapsWeek(

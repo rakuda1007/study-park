@@ -1934,6 +1934,48 @@
   width: 100%;
 }
 
+.study-item-editor__adjust-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.study-item-editor__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.study-item-editor__step-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.study-item-editor__step-btn:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+
+.study-item-editor__step-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.study-item-editor__step-value {
+  min-width: 3rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .study-item-editor__number {
   display: flex;
   align-items: center;
