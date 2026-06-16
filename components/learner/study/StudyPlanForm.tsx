@@ -6,22 +6,25 @@ import {
   isCustomSubjectId,
   type StudySubjectData,
 } from "@/lib/study/subject-options";
-import type { StudyItemDraft, StudyPlanInput } from "@/lib/study/types";
+import type { StudyItemDraft, StudyItemMasterDoc, StudyPlanInput } from "@/lib/study/types";
 import { todayStudyDate } from "@/lib/study/week";
 import { StudyItemAddPanel } from "./StudyItemAddPanel";
 
 type Props = {
   subjectData: StudySubjectData;
+  masters?: StudyItemMasterDoc[];
   initial?: StudyPlanInput;
   submitLabel: string;
   onSubmit: (input: StudyPlanInput) => Promise<void>;
 };
 
-function emptyItem(): StudyItemDraft {
-  return { source: "external", label: "", scopeNote: "" };
-}
-
-export function StudyPlanForm({ subjectData, initial, submitLabel, onSubmit }: Props) {
+export function StudyPlanForm({
+  subjectData,
+  masters = [],
+  initial,
+  submitLabel,
+  onSubmit,
+}: Props) {
   const defaultSubject = subjectData.subjects[0] ?? customSubjectOption();
   const [subjectId, setSubjectId] = useState(initial?.subjectId ?? defaultSubject.id);
   const [customSubjectName, setCustomSubjectName] = useState(
@@ -33,10 +36,13 @@ export function StudyPlanForm({ subjectData, initial, submitLabel, onSubmit }: P
   const [items, setItems] = useState<StudyItemDraft[]>(
     initial?.items.length ? initial.items : [],
   );
-  const [manualItem, setManualItem] = useState<StudyItemDraft>(emptyItem());
-  const [showManualItem, setShowManualItem] = useState(false);
   const [err, setErr] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const resolvedSubjectId = useMemo(() => {
+    if (isCustomSubjectId(subjectId)) return `custom:${customSubjectName.trim() || "その他"}`;
+    return subjectId;
+  }, [subjectId, customSubjectName]);
 
   const subjectName = useMemo(() => {
     if (isCustomSubjectId(subjectId)) return customSubjectName.trim();
@@ -49,21 +55,6 @@ export function StudyPlanForm({ subjectData, initial, submitLabel, onSubmit }: P
 
   function removeItem(index: number) {
     setItems((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function addManualItem() {
-    if (!manualItem.label.trim()) {
-      setErr("学習内容の名称を入力してください。");
-      return;
-    }
-    addItem({
-      source: "external",
-      label: manualItem.label.trim(),
-      scopeNote: manualItem.scopeNote.trim(),
-    });
-    setManualItem(emptyItem());
-    setShowManualItem(false);
-    setErr("");
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -224,36 +215,12 @@ export function StudyPlanForm({ subjectData, initial, submitLabel, onSubmit }: P
           </ul>
         )}
 
-        <StudyItemAddPanel workspaces={subjectData.workspaces} onAdd={addItem} />
-
-        {showManualItem ? (
-          <div className="study-source-form">
-            <label className="admin-field">
-              <span className="admin-label">名称</span>
-              <input
-                className="admin-input"
-                value={manualItem.label}
-                onChange={(e) => setManualItem({ ...manualItem, label: e.target.value })}
-              />
-            </label>
-            <label className="admin-field">
-              <span className="admin-label">対象範囲</span>
-              <input
-                className="admin-input"
-                value={manualItem.scopeNote}
-                onChange={(e) => setManualItem({ ...manualItem, scopeNote: e.target.value })}
-              />
-            </label>
-            <div className="study-source-form__actions">
-              <button type="button" className="admin-btn" onClick={() => setShowManualItem(false)}>
-                キャンセル
-              </button>
-              <button type="button" className="admin-btn admin-btn--primary" onClick={addManualItem}>
-                追加
-              </button>
-            </div>
-          </div>
-        ) : null}
+        <StudyItemAddPanel
+          workspaces={subjectData.workspaces}
+          masters={masters}
+          subjectId={resolvedSubjectId}
+          onAdd={addItem}
+        />
       </section>
 
       {err ? <p className="admin-err">{err}</p> : null}
