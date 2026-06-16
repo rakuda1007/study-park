@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  collectionGroup,
-  getDocs,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentDoc } from "@/lib/content/types";
+import { listWorkspaceContents } from "./content-firestore";
+import { getWorkspaceByOwner } from "./firestore";
 
 type MirrorPatch = Partial<Pick<ContentDoc, "pinned" | "periodYear" | "periodMonth">>;
 
@@ -19,21 +14,22 @@ export async function syncAdminContentMirrors(
   patch: MirrorPatch,
   updatedBy: string,
 ): Promise<number> {
-  const snap = await getDocs(
-    query(
-      collectionGroup(getFirestoreClient(), "contents"),
-      where("migratedFrom", "==", `contents/${contentId}`),
-    ),
-  );
-  if (snap.empty) return 0;
+  const migratedFrom = `contents/${contentId}`;
+  const ws = await getWorkspaceByOwner(updatedBy);
+  if (!ws) return 0;
+
+  const items = await listWorkspaceContents(ws.id);
+  const mirrors = items.filter((c) => c.migratedFrom === migratedFrom);
+  if (mirrors.length === 0) return 0;
+
   await Promise.all(
-    snap.docs.map((d) =>
-      updateDoc(d.ref, {
+    mirrors.map((c) =>
+      updateDoc(doc(getFirestoreClient(), "workspaces", ws.id, "contents", c.id), {
         ...patch,
         updatedBy,
         updatedAt: serverTimestamp(),
       }),
     ),
   );
-  return snap.size;
+  return mirrors.length;
 }

@@ -276,7 +276,11 @@ export async function updateContent(
   if (rest.periodYear !== undefined) mirrorPatch.periodYear = rest.periodYear;
   if (rest.periodMonth !== undefined) mirrorPatch.periodMonth = rest.periodMonth;
   if (Object.keys(mirrorPatch).length > 0) {
-    await syncAdminContentMirrors(id, mirrorPatch, updatedBy);
+    try {
+      await syncAdminContentMirrors(id, mirrorPatch, updatedBy);
+    } catch {
+      /* ミラー同期失敗でも管理用コンテンツの保存は成功させる */
+    }
   }
 }
 

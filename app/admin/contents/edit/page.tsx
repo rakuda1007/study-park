@@ -47,6 +47,7 @@ import {
   parseBlankAnswersInput,
 } from "@/lib/content/quiz-answers";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { formatAdminFirestoreError } from "@/lib/firebase/firestore-errors";
 import contentManifestBase from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
 
@@ -160,7 +161,7 @@ function EditContentInner() {
       );
       await load();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "保存に失敗しました。");
+      setErr(formatAdminFirestoreError(e));
     } finally {
       setSaving(false);
     }
