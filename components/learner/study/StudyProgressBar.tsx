@@ -7,11 +7,20 @@ type Props = {
   status?: StudyDelayStatus;
   label?: string;
   size?: "sm" | "md";
+  hideBadge?: boolean;
+  hidePercent?: boolean;
 };
 
-export function StudyProgressBar({ percent, status = "ok", label, size = "md" }: Props) {
+export function StudyProgressBar({
+  percent,
+  status = "ok",
+  label,
+  size = "md",
+  hideBadge = false,
+  hidePercent = false,
+}: Props) {
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
-  const statusLabel = delayStatusLabel(status);
+  const statusLabel = hideBadge ? null : delayStatusLabel(status);
 
   return (
     <div className={`study-progress study-progress--${size}`}>
@@ -35,7 +44,9 @@ export function StudyProgressBar({ percent, status = "ok", label, size = "md" }:
       >
         <div className="study-progress__fill" style={{ width: `${clamped}%` }} />
       </div>
-      <span className="study-progress__percent">{clamped}%</span>
+      {hidePercent ? null : (
+        <span className="study-progress__percent">{clamped}%</span>
+      )}
     </div>
   );
 }

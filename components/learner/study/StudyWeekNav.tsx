@@ -2,9 +2,8 @@
 
 import {
   addWeeks,
-  formatWeekLabel,
+  formatWeekLabelCompact,
   getWeekStart,
-  todayStudyDate,
 } from "@/lib/study/week";
 
 type Props = {
@@ -17,7 +16,7 @@ export function StudyWeekNav({ weekStart, onChange }: Props) {
   const isCurrentWeek = weekStart.getTime() === currentWeekStart.getTime();
 
   return (
-    <div className="study-week-nav">
+    <div className="study-week-nav study-week-nav--compact">
       <button
         type="button"
         className="study-week-nav__btn"
@@ -27,11 +26,17 @@ export function StudyWeekNav({ weekStart, onChange }: Props) {
         ◀
       </button>
       <div className="study-week-nav__label">
-        <strong>{formatWeekLabel(weekStart)}</strong>
-        {!isCurrentWeek ? (
-          <span className="study-week-nav__hint">表示中の週</span>
+        <strong>{formatWeekLabelCompact(weekStart)}</strong>
+        {isCurrentWeek ? (
+          <span className="study-week-nav__tag">今週</span>
         ) : (
-          <span className="study-week-nav__hint">今週</span>
+          <button
+            type="button"
+            className="study-week-nav__jump"
+            onClick={() => onChange(currentWeekStart)}
+          >
+            今週へ
+          </button>
         )}
       </div>
       <button
@@ -42,18 +47,6 @@ export function StudyWeekNav({ weekStart, onChange }: Props) {
       >
         ▶
       </button>
-      {!isCurrentWeek ? (
-        <button
-          type="button"
-          className="admin-btn study-week-nav__today"
-          onClick={() => onChange(currentWeekStart)}
-        >
-          今週
-        </button>
-      ) : null}
-      <time className="study-week-nav__date" dateTime={todayStudyDate()}>
-        今日: {todayStudyDate().replace(/-/g, "/")}
-      </time>
     </div>
   );
 }

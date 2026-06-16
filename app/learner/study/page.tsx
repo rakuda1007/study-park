@@ -77,17 +77,22 @@ export default function LearnerStudyPage() {
   const alertCounts = useMemo(() => {
     let nearDue = 0;
     let behind = 0;
+    let completed = 0;
     for (const plan of weekPlans) {
       const progress = averageProgress(plan.items);
       const status = delayStatus(progress, plan.startDate, plan.dueDate);
-      if (daysRemaining(plan.dueDate) <= 3 && progress < 100) {
+      if (progress >= 100) {
+        completed += 1;
+        continue;
+      }
+      if (daysRemaining(plan.dueDate) <= 3) {
         nearDue += 1;
       }
       if (status === "warning" || status === "danger" || status === "urgent") {
         behind += 1;
       }
     }
-    return { nearDue, behind };
+    return { nearDue, behind, completed };
   }, [weekPlans]);
 
   const grouped = useMemo(() => groupPlansBySubject(weekPlans), [weekPlans]);
@@ -103,22 +108,40 @@ export default function LearnerStudyPage() {
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
       {!loading && weekPlans.length > 0 ? (
-        <section className="admin-card study-summary-card">
-          <h2 className="study-summary-card__title">今週の全体進捗</h2>
-          <StudyProgressBar percent={overallProgress} />
-          <p className="study-summary-card__meta">
-            表示中の計画: {weekPlans.length}件
-            {alertCounts.behind > 0 ? (
-              <span className="study-summary-card__alert">
-                ／ 遅れ気味: {alertCounts.behind}件
-              </span>
-            ) : null}
-            {alertCounts.nearDue > 0 ? (
-              <span className="study-summary-card__urgent">
-                ／ 期限が近い: {alertCounts.nearDue}件
-              </span>
-            ) : null}
-          </p>
+        <section className="admin-card study-summary-card study-summary-card--compact">
+          <div className="study-summary-card__row">
+            <span className="study-summary-card__title">
+              今週の進捗（{weekPlans.length}件）
+            </span>
+            <span className="study-summary-card__percent">{overallProgress}%</span>
+          </div>
+          <StudyProgressBar percent={overallProgress} size="sm" hideBadge />
+          {(alertCounts.completed > 0 ||
+            alertCounts.behind > 0 ||
+            alertCounts.nearDue > 0) && (
+            <p className="study-summary-card__meta">
+              {alertCounts.completed > 0 ? (
+                <span className="study-summary-card__done">
+                  完了 {alertCounts.completed}件
+                </span>
+              ) : null}
+              {alertCounts.completed > 0 &&
+              (alertCounts.behind > 0 || alertCounts.nearDue > 0)
+                ? " · "
+                : null}
+              {alertCounts.behind > 0 ? (
+                <span className="study-summary-card__alert">
+                  遅れ {alertCounts.behind}件
+                </span>
+              ) : null}
+              {alertCounts.behind > 0 && alertCounts.nearDue > 0 ? " · " : null}
+              {alertCounts.nearDue > 0 ? (
+                <span className="study-summary-card__urgent">
+                  期限近 {alertCounts.nearDue}件
+                </span>
+              ) : null}
+            </p>
+          )}
         </section>
       ) : null}
 
@@ -134,26 +157,41 @@ export default function LearnerStudyPage() {
 
       {!loading && weekPlans.length > 0 ? (
         <div className="study-plan-list">
-          {[...grouped.entries()].map(([subjectName, subjectPlans]) => (
-            <section key={subjectName} className="study-subject-section">
-              <h2 className="study-subject-section__title">{subjectName}</h2>
-              {subjectPlans.map((plan) => {
-                const progress = averageProgress(plan.items);
-                const status = delayStatus(progress, plan.startDate, plan.dueDate);
-                const badge = delayStatusLabel(status);
-                return (
-                  <div key={plan.id} className="study-subject-section__plan-wrap">
-                    {badge ? (
-                      <span className={`study-subject-section__status study-subject-section__status--${status}`}>
-                        {badge}
-                      </span>
-                    ) : null}
-                    <StudyPlanCard plan={plan} />
-                  </div>
-                );
-              })}
-            </section>
-          ))}
+          {[...grouped.entries()].map(([subjectName, subjectPlans]) => {
+            const singlePlan = subjectPlans.length === 1 ? subjectPlans[0] : null;
+            const singleStatus = singlePlan
+              ? delayStatus(
+                  averageProgress(singlePlan.items),
+                  singlePlan.startDate,
+                  singlePlan.dueDate,
+                )
+              : null;
+            const singleBadge =
+              singleStatus && singlePlan ? delayStatusLabel(singleStatus) : null;
+
+            return (
+              <section key={subjectName} className="study-subject-section">
+                <div className="study-subject-section__head">
+                  <h2 className="study-subject-section__title">{subjectName}</h2>
+                  {singleBadge ? (
+                    <span
+                      className={`study-status-badge study-status-badge--${singleStatus}`}
+                    >
+                      {singleBadge}
+                    </span>
+                  ) : null}
+                </div>
+                {subjectPlans.map((plan) => (
+                  <StudyPlanCard
+                    key={plan.id}
+                    plan={plan}
+                    listView
+                    hideStatusBadge={subjectPlans.length === 1}
+                  />
+                ))}
+              </section>
+            );
+          })}
         </div>
       ) : null}
 

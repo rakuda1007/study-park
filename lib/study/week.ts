@@ -37,19 +37,30 @@ export function addWeeks(weekStart: Date, weeks: number): Date {
 }
 
 export function formatWeekLabel(weekStart: Date): string {
+  return formatWeekLabelCompact(weekStart);
+}
+
+/** 週表示用の短いラベル（例: 6/14〜20） */
+export function formatWeekLabelCompact(weekStart: Date, today = new Date()): string {
   const weekEnd = getWeekEnd(weekStart);
+  const range = formatDateRangeCompact(weekStart, weekEnd);
   const y = weekStart.getFullYear();
-  const m = weekStart.getMonth() + 1;
-  const startDay = weekStart.getDate();
-  const endDay = weekEnd.getDate();
-  const endMonth = weekEnd.getMonth() + 1;
+  if (y !== today.getFullYear()) return `${y}/${range}`;
+  return range;
+}
 
-  const dateRange =
-    m === endMonth
-      ? `${m}/${startDay}〜${endDay}`
-      : `${m}/${startDay}〜${endMonth}/${endDay}`;
+/** 計画期間の短い表記（例: 6/12〜18） */
+export function formatPlanPeriodCompact(startDate: string, dueDate: string): string {
+  return formatDateRangeCompact(parseStudyDate(startDate), parseStudyDate(dueDate));
+}
 
-  return `${y}年（${dateRange}・日〜土）`;
+function formatDateRangeCompact(start: Date, end: Date): string {
+  const sm = start.getMonth() + 1;
+  const sd = start.getDate();
+  const em = end.getMonth() + 1;
+  const ed = end.getDate();
+  if (sm === em) return `${sm}/${sd}〜${ed}`;
+  return `${sm}/${sd}〜${em}/${ed}`;
 }
 
 export function planOverlapsWeek(
@@ -74,7 +85,7 @@ export function daysRemaining(dueDate: string, today = new Date()): number {
 
 export function formatDaysRemaining(dueDate: string, today = new Date()): string {
   const days = daysRemaining(dueDate, today);
-  if (days < 0) return `期限超過 ${Math.abs(days)}日`;
+  if (days < 0) return `超過${Math.abs(days)}日`;
   if (days === 0) return "今日まで";
-  return `あと ${days}日`;
+  return `残${days}日`;
 }
