@@ -11,6 +11,7 @@ import type { ContentDoc } from "@/lib/content/types";
 import { resolveAuthSession, subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
 import {
+  getPublishedWorkspaceContentById,
   getPublishedWorkspaceContentBySlug,
   getPublishedWorkspaceContentInWorkspace,
 } from "@/lib/workspaces/content-firestore";
@@ -24,6 +25,7 @@ function PlayInner() {
   const params = useSearchParams();
   const wsSlug = (params.get("ws") ?? "").trim().toLowerCase();
   const workspaceId = (params.get("wid") ?? "").trim();
+  const contentId = (params.get("cid") ?? "").trim();
   const slug = (params.get("slug") ?? "").trim().toLowerCase();
   const [content, setContent] = useState<ContentDoc | null>(null);
   const [showAds, setShowAds] = useState(false);
@@ -33,34 +35,43 @@ function PlayInner() {
   const [homeHref, setHomeHref] = useState("/");
 
   useEffect(() => {
-    if (!slug) {
+    if (!slug && !contentId) {
       setLoading(false);
       setNotFound(true);
       return;
     }
+
     let cancelled = false;
-    void (async () => {
+    let unsub: (() => void) | undefined;
+
+    async function load(authUser: User | null) {
+      if (cancelled) return;
       setLoading(true);
       setNotFound(false);
       setDenied(false);
+      setContent(null);
+
       try {
-        await waitForAuthReady();
-        const authUser = await new Promise<User | null>((resolve) => {
-          const unsub = subscribeAuth((user) => {
-            unsub();
-            resolve(user);
-          });
-        });
         const uid = authUser?.uid ?? null;
         const session = await resolveAuthSession(authUser);
         const isWorkspacePlay = !!(wsSlug || workspaceId);
         setHomeHref(session === "learner" && isWorkspacePlay ? "/learner" : "/");
+
         if (isWorkspacePlay) {
-          const doc = workspaceId
-            ? await getPublishedWorkspaceContentInWorkspace(workspaceId, slug)
-            : await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid);
+          let doc =
+            workspaceId && contentId
+              ? await getPublishedWorkspaceContentById(workspaceId, contentId)
+              : workspaceId && slug
+                ? await getPublishedWorkspaceContentInWorkspace(workspaceId, slug)
+                : slug
+                  ? await getPublishedWorkspaceContentBySlug(wsSlug, slug, uid)
+                  : null;
           if (cancelled) return;
           if (!doc) {
+            if (!uid) {
+              setDenied(true);
+              return;
+            }
             setNotFound(true);
             return;
           }
@@ -75,11 +86,15 @@ function PlayInner() {
           setShowAds(await getWorkspaceShowAds(doc.workspaceId));
           if (!uid) {
             const ref = workspaceId
-              ? `play:wid=${workspaceId}&slug=${slug}`
-              : `play:ws=${wsSlug}&slug=${slug}`;
+              ? `play:wid=${workspaceId}&slug=${slug || doc.slug}`
+              : `play:ws=${wsSlug}&slug=${slug || doc.slug}`;
             void recordGuestContentUse(ref);
           }
         } else {
+          if (!slug) {
+            setNotFound(true);
+            return;
+          }
           const doc = await getPublishedContentBySlug(slug);
           if (cancelled) return;
           if (!doc) {
@@ -98,18 +113,27 @@ function PlayInner() {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
+    }
+
+    void waitForAuthReady().then(() => {
+      if (cancelled) return;
+      unsub = subscribeAuth((user) => {
+        void load(user);
+      });
+    });
+
     return () => {
       cancelled = true;
+      unsub?.();
     };
-  }, [slug, wsSlug, workspaceId]);
+  }, [slug, wsSlug, workspaceId, contentId]);
 
-  if (!slug || notFound) {
+  if ((!slug && !contentId) || notFound) {
     return (
       <div className="play-status">
         <p>コンテンツが見つからないか、まだ公開されていません。</p>
         <p>
-          <Link href="/">トップへ戻る</Link>
+          <Link href={homeHref}>トップへ戻る</Link>
         </p>
       </div>
     );

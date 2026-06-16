@@ -220,6 +220,9 @@ export async function resolvePostLoginPath(uid: string): Promise<string> {
 /** 永続化されたセッション復元が終わるまで待つ（ゲートの誤リダイレクト防止） */
 export function waitForAuthReady(): Promise<void> {
   const auth = getFirebaseAuth();
+  if (typeof auth.authStateReady === "function") {
+    return auth.authStateReady();
+  }
   return new Promise((resolve) => {
     const unsub = onAuthStateChanged(auth, () => {
       unsub();

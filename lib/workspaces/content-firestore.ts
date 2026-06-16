@@ -283,6 +283,17 @@ export async function saveWorkspaceQuizQuestions(
   await syncQuestionCount(workspaceId);
 }
 
+/** workspaceId + contentId で公開教材を取得（学習者プレイ用の確実な解決） */
+export async function getPublishedWorkspaceContentById(
+  workspaceId: string,
+  contentId: string,
+): Promise<WorkspaceContentDoc | null> {
+  const item = await getWorkspaceContent(workspaceId, contentId.trim());
+  if (!item || item.status !== "published") return null;
+  if (!isMemberVisibleContent(item.visibility)) return null;
+  return item;
+}
+
 /** workspaceId + slug で公開教材を取得（学習者ホームと同じ経路） */
 export async function getPublishedWorkspaceContentInWorkspace(
   workspaceId: string,

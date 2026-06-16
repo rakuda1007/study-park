@@ -3,17 +3,19 @@ export function contentPlayHref(slug: string): string {
   return `/play?slug=${encodeURIComponent(slug)}`;
 }
 
-/** ワークスペース配信コンテンツのプレイ URL（wid は学習者プレイ用の確実な解決） */
+/** ワークスペース配信コンテンツのプレイ URL（wid / cid は学習者プレイ用の確実な解決） */
 export function workspacePlayHref(
   workspaceSlug: string,
   contentSlug: string,
   workspaceId?: string,
+  contentId?: string,
 ): string {
   const q = new URLSearchParams({
     ws: workspaceSlug,
     slug: contentSlug,
   });
   if (workspaceId) q.set("wid", workspaceId);
+  if (contentId) q.set("cid", contentId);
   return `/play?${q.toString()}`;
 }
 

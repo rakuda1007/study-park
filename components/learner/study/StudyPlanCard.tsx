@@ -65,6 +65,7 @@ export function StudyPlanCard({ plan, compact = false }: Props) {
                       item.contentRef.workspaceSlug,
                       item.contentRef.contentSlug,
                       item.contentRef.workspaceId,
+                      item.contentRef.contentId,
                     )}
                     className="study-plan-card__play-link"
                   >

@@ -32,7 +32,7 @@ function StudyItemList({
       {items.map((c) => (
         <li key={c.id}>
           <Link
-            href={workspacePlayHref(workspaceSlug, c.slug, c.workspaceId)}
+            href={workspacePlayHref(workspaceSlug, c.slug, c.workspaceId, c.id)}
             className="learner-study-link"
           >
             <span className="learner-study-link__text">

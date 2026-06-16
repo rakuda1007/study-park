@@ -48,6 +48,7 @@ export function StudyItemProgressEditor({ userId, planId, item, onUpdated }: Pro
               item.contentRef.workspaceSlug,
               item.contentRef.contentSlug,
               item.contentRef.workspaceId,
+              item.contentRef.contentId,
             )}
             className="study-item-editor__play"
           >
