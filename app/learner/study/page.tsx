@@ -109,13 +109,14 @@ export default function LearnerStudyPage() {
 
       {!loading && weekPlans.length > 0 ? (
         <section className="admin-card study-summary-card study-summary-card--compact">
-          <div className="study-summary-card__row">
+          <div className="study-summary-card__row study-summary-card__row--bar">
             <span className="study-summary-card__title">
               今週の進捗（{weekPlans.length}件）
             </span>
-            <span className="study-summary-card__percent">{overallProgress}%</span>
+            <div className="study-summary-card__bar-wrap">
+              <StudyProgressBar percent={overallProgress} size="sm" hideBadge />
+            </div>
           </div>
-          <StudyProgressBar percent={overallProgress} size="sm" hideBadge />
           {(alertCounts.completed > 0 ||
             alertCounts.behind > 0 ||
             alertCounts.nearDue > 0) && (
@@ -156,7 +157,7 @@ export default function LearnerStudyPage() {
       ) : null}
 
       {!loading && weekPlans.length > 0 ? (
-        <div className="study-plan-list">
+        <div className="study-plan-list study-week-page__plans">
           {[...grouped.entries()].map(([subjectName, subjectPlans]) => {
             const singlePlan = subjectPlans.length === 1 ? subjectPlans[0] : null;
             const singleStatus = singlePlan

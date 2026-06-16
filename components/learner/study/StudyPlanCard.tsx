@@ -100,9 +100,6 @@ export function StudyPlanCard({
                   ) : null}
                 </span>
                 <span className="study-plan-card__item-actions">
-                  {listView ? (
-                    <span className="study-plan-card__item-pct">{item.progressPercent}%</span>
-                  ) : null}
                   {item.source === "app" && item.contentRef ? (
                     <Link
                       href={workspacePlayHref(
@@ -122,7 +119,6 @@ export function StudyPlanCard({
                 percent={item.progressPercent}
                 size="sm"
                 hideBadge
-                hidePercent={listView}
               />
             </li>
           ))}
