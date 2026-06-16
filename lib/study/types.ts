@@ -55,3 +55,48 @@ export type StudyPlanInput = {
   memo?: string;
   items: StudyItemDraft[];
 };
+
+/** よく使う学習内容マスタ（外部教材の定型登録用） */
+export type StudyItemMasterDoc = {
+  id: string;
+  /** 空文字は全科目で使える */
+  subjectId: string;
+  subjectName?: string;
+  name: string;
+  /** 対象範囲入力のヒント（例: ページ、問、第○単元） */
+  defaultUnit?: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type StudyItemMasterInput = {
+  subjectId: string;
+  subjectName?: string;
+  name: string;
+  defaultUnit?: string;
+  order?: number;
+};
+
+/** 学習計画テンプレート（再利用用） */
+export type StudyTemplateDoc = {
+  id: string;
+  name: string;
+  subjectId: string;
+  subjectName: string;
+  memo?: string;
+  /** テンプレート適用時の期間（日数） */
+  durationDays: number;
+  items: StudyItemDraft[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type StudyTemplateInput = {
+  name: string;
+  subjectId: string;
+  subjectName: string;
+  memo?: string;
+  durationDays: number;
+  items: StudyItemDraft[];
+};

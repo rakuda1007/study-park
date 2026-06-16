@@ -166,6 +166,12 @@ export default function LearnerStudyPage() {
             すべての計画を見る
           </Link>
         ) : null}
+        <Link href="/learner/study/templates" className="admin-btn">
+          テンプレート
+        </Link>
+        <Link href="/learner/study/masters" className="admin-btn">
+          よく使う項目
+        </Link>
       </div>
     </LearnerShell>
   );

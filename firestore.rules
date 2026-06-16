@@ -80,6 +80,14 @@ service cloud.firestore {
           allow read, write: if isSignedIn() && request.auth.uid == uid;
         }
       }
+
+      match /studyItemMasters/{masterId} {
+        allow read, write: if isSignedIn() && request.auth.uid == uid;
+      }
+
+      match /studyTemplates/{templateId} {
+        allow read, write: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     match /billingTiers/{tierId} {

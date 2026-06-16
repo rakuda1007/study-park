@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { StudyItemProgressEditor } from "@/components/learner/study/StudyItemProgressEditor";
 import { StudyPlanForm } from "@/components/learner/study/StudyPlanForm";
 import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
+import { StudySaveTemplateForm } from "@/components/learner/study/StudySaveTemplateForm";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import {
   customSubjectOption,
@@ -19,11 +20,12 @@ import {
   replaceStudyItems,
   updateStudyPlanMeta,
 } from "@/lib/study/firestore";
+import { listStudyItemMasters } from "@/lib/study/masters-firestore";
 import {
   averageProgress,
   delayStatus,
 } from "@/lib/study/progress";
-import type { StudyPlanInput, StudyPlanWithItems } from "@/lib/study/types";
+import type { StudyPlanInput, StudyPlanWithItems, StudyItemMasterDoc } from "@/lib/study/types";
 import { formatDaysRemaining } from "@/lib/study/week";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifest from "@/public/content-manifest.json";
@@ -38,6 +40,7 @@ function LearnerStudyPlanInner() {
   const [userId, setUserId] = useState("");
   const [plan, setPlan] = useState<StudyPlanWithItems | null>(null);
   const [subjectData, setSubjectData] = useState<StudySubjectData | null>(null);
+  const [masters, setMasters] = useState<StudyItemMasterDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -48,12 +51,14 @@ function LearnerStudyPlanInner() {
         setPlan(null);
         return;
       }
-      const [data, subjects] = await Promise.all([
+      const [data, subjects, masterList] = await Promise.all([
         getStudyPlanWithItems(uid, planId),
         loadStudySubjectData(uid, manifest),
+        listStudyItemMasters(uid),
       ]);
       setPlan(data);
       setSubjectData(subjects);
+      setMasters(masterList);
     },
     [planId, manifest],
   );
@@ -202,9 +207,16 @@ function LearnerStudyPlanInner() {
         </div>
       </header>
 
+      {!editing ? (
+        <div className="study-detail-template-save">
+          <StudySaveTemplateForm userId={userId} plan={plan} />
+        </div>
+      ) : null}
+
       {editing && subjectData && userId ? (
         <StudyPlanForm
           subjectData={subjectData}
+          masters={masters}
           initial={initialInput}
           submitLabel="変更を保存"
           onSubmit={async (input) => {
