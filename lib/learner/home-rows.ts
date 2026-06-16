@@ -68,13 +68,21 @@ export async function loadLearnerHomeRows(
     return label;
   }
 
+  async function loadMemberContents(workspaceId: string): Promise<WorkspaceContentDoc[]> {
+    try {
+      return await enrichWorkspaceContentsFromAdmin(
+        await listPublishedContentsForMember(workspaceId),
+      );
+    } catch {
+      return [];
+    }
+  }
+
   for (const m of memberships) {
     const ws = await getWorkspace(m.workspaceId);
     if (!ws) continue;
     seen.add(m.workspaceId);
-    const contents = await enrichWorkspaceContentsFromAdmin(
-      await listPublishedContentsForMember(m.workspaceId),
-    );
+    const contents = await loadMemberContents(m.workspaceId);
     rows.push({
       workspaceId: m.workspaceId,
       workspaceName: ws.name,
@@ -86,9 +94,7 @@ export async function loadLearnerHomeRows(
   }
 
   if (ownedWs && !seen.has(ownedWs.id)) {
-    const contents = await enrichWorkspaceContentsFromAdmin(
-      await listPublishedContentsForMember(ownedWs.id),
-    );
+    const contents = await loadMemberContents(ownedWs.id);
     rows.push({
       workspaceId: ownedWs.id,
       workspaceName: ownedWs.name,

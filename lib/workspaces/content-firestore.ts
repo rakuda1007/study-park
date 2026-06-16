@@ -32,7 +32,6 @@ import type { ContentVisibility } from "./types";
 import { resolveWorkspaceBySlug } from "./members";
 import {
   ensureWorkspaceSubjects,
-  listWorkspaceSubjects,
   publishWorkspaceSubjectForContent,
 } from "./subjects-firestore";
 
@@ -58,8 +57,21 @@ export type WorkspaceContentDoc = ContentDoc & {
   migratedFrom?: string;
 };
 
+function resolveWorkspaceContentVisibility(
+  data: Record<string, unknown>,
+  status: ContentStatus,
+): ContentVisibility {
+  const vis = data.visibility;
+  if (vis === "members" || vis === "unlisted" || vis === "public" || vis === "private") {
+    return vis;
+  }
+  // 旧データ互換: visibility 未設定の公開教材は学習者向けに表示する
+  if (status === "published") return "members";
+  return "private";
+}
+
 function mapContent(workspaceId: string, id: string, data: Record<string, unknown>): WorkspaceContentDoc {
-  const vis = data.visibility as ContentVisibility;
+  const status = (data.status as ContentStatus) ?? "draft";
   const createdAt = tsToIso(data.createdAt);
   const period = mapStoredContentPeriod(data, createdAt);
   return {
@@ -69,11 +81,10 @@ function mapContent(workspaceId: string, id: string, data: Record<string, unknow
     type: data.type as ContentDoc["type"],
     slug: String(data.slug ?? ""),
     title: String(data.title ?? ""),
-    status: (data.status as ContentStatus) ?? "draft",
+    status,
     order: Number(data.order ?? 0),
     ready: Boolean(data.ready),
-    visibility:
-      vis === "members" || vis === "unlisted" || vis === "public" ? vis : "private",
+    visibility: resolveWorkspaceContentVisibility(data, status),
     intro: data.intro ? String(data.intro) : undefined,
     lesson: data.lesson as ContentDoc["lesson"],
     quiz: data.quiz as ContentDoc["quiz"],
@@ -293,35 +304,34 @@ export async function getPublishedWorkspaceContentBySlug(
   return getPublishedWorkspaceContentInWorkspace(ws.id, contentSlug);
 }
 
-/** 学習者向け: 公開科目に属する教材一覧 */
+function isMemberVisibleContent(visibility: ContentVisibility): boolean {
+  return visibility === "members" || visibility === "unlisted" || visibility === "public";
+}
+
+async function queryPublishedWorkspaceContents(workspaceId: string) {
+  const col = contentsCol(workspaceId);
+  try {
+    return await getDocs(
+      query(col, where("status", "==", "published"), orderBy("order", "asc")),
+    );
+  } catch {
+    const snap = await getDocs(query(col, where("status", "==", "published")));
+    return {
+      docs: [...snap.docs].sort(
+        (a, b) => Number(a.data().order ?? 0) - Number(b.data().order ?? 0),
+      ),
+    };
+  }
+}
+
+/** 学習者向け: 公開教材一覧（教科マスタ未整備の旧データも表示） */
 export async function listPublishedContentsForMember(
   workspaceId: string,
 ): Promise<WorkspaceContentDoc[]> {
-  const [subjects, snap] = await Promise.all([
-    listWorkspaceSubjects(workspaceId),
-    getDocs(
-      query(contentsCol(workspaceId), where("status", "==", "published"), orderBy("order", "asc")),
-    ),
-  ]);
-  const publishedSubjectIds = new Set(
-    subjects.filter((s) => s.status === "published").map((s) => s.id),
-  );
-  const memberVisible = (visibility: ContentVisibility) =>
-    visibility === "members" || visibility === "unlisted" || visibility === "public";
-
+  const snap = await queryPublishedWorkspaceContents(workspaceId);
   const items = snap.docs.map((d) => mapContent(workspaceId, d.id, d.data()));
-  for (const c of items) {
-    const subject = subjects.find((s) => s.id === c.subjectId);
-    if (subject?.status === "draft" && memberVisible(c.visibility)) {
-      void publishWorkspaceSubjectForContent(workspaceId, c.subjectId);
-    }
-  }
-
-  return items.filter((c) => {
-      if (!memberVisible(c.visibility)) return false;
-      if (publishedSubjectIds.has(c.subjectId)) return true;
-      // 公開教材があるのに教科が draft のまま（既存データの救済）
-      return subjects.some((s) => s.id === c.subjectId && s.status === "draft");
-    });
+  return items
+    .filter((c) => isMemberVisibleContent(c.visibility))
+    .sort((a, b) => a.order - b.order);
 }
 

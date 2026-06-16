@@ -24,6 +24,7 @@ import {
   isGlobalWorkspaceSlugTaken,
   registerWorkspaceSlugIndex,
 } from "./slug-index";
+import { ensureWorkspaceSubjects } from "./subjects-firestore";
 import { generateInviteCode, isValidWorkspaceSlug, normalizeWorkspaceSlug } from "./slug";
 import type { WorkspaceDoc } from "./types";
 
@@ -195,6 +196,7 @@ export async function createWorkspaceForCreator(
   } catch {
     /* 広告フラグ未デプロイ時も WS 作成は完了させる */
   }
+  await ensureWorkspaceSubjects(ref.id);
   const snap = await getDoc(ref);
   return mapWorkspace(ref.id, snap.data() ?? payload);
 }
