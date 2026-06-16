@@ -2263,13 +2263,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .study-week-page__plans {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.6rem 0.85rem;
-  }
-}
-
 .study-settings-links {
   display: flex;
   flex-wrap: wrap;
