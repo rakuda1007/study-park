@@ -58,7 +58,7 @@ function PlayInner() {
         setHomeHref(session === "learner" && isWorkspacePlay ? "/learner" : "/");
 
         if (isWorkspacePlay) {
-          let doc =
+          const doc =
             workspaceId && contentId
               ? await getPublishedWorkspaceContentById(workspaceId, contentId)
               : workspaceId && slug
