@@ -58,6 +58,7 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
     bottomItems.push({ label: "プロフィール", href: "/creator/profile" });
   } else if (session === "learner") {
     items.push({ label: meta.dashboardLinkLabel, href: homePathForSession(session) });
+    items.push({ label: "学習管理", href: "/learner/study" });
     bottomItems.push({ label: "プロフィール", href: "/learner/profile" });
   }
 

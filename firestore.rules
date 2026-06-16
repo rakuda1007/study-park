@@ -72,6 +72,14 @@ service cloud.firestore {
           && request.resource.data.role == 'creator'
           && request.resource.data.appPurchase == resource.data.appPurchase
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'updatedAt']));
+
+      match /studyPlans/{planId} {
+        allow read, write: if isSignedIn() && request.auth.uid == uid;
+
+        match /items/{itemId} {
+          allow read, write: if isSignedIn() && request.auth.uid == uid;
+        }
+      }
     }
 
     match /billingTiers/{tierId} {

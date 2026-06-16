@@ -15,6 +15,7 @@ import {
 const LEARNER_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
   { label: "学習者ホーム", href: "/learner" },
+  { label: "学習管理", href: "/learner/study" },
   PORTAL_MENU_ITEM,
 ];
 
