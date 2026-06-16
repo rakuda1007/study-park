@@ -1634,6 +1634,13 @@
   color: var(--admin-muted);
 }
 
+/** ページ番号（P108-111 など）の数字詰まり対策 */
+.study-alnum-text {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  font-feature-settings: "tnum" 1;
+}
+
 .study-plan-card__app-badge {
   margin-right: 0.25rem;
 }

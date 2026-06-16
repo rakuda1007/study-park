@@ -25,6 +25,11 @@ export type StudySubjectData = {
 
 const CUSTOM_SUBJECT_ID = "__custom__";
 
+/** 学習計画で常に選べる科目（参加教材に国語がなくても選択可能） */
+const STUDY_BUILTIN_SUBJECTS: StudySubjectOption[] = [
+  { id: "kokugo", name: "国語" },
+];
+
 export function customSubjectOption(): StudySubjectOption {
   return { id: CUSTOM_SUBJECT_ID, name: "その他（自由入力）" };
 }
@@ -55,6 +60,10 @@ export async function loadStudySubjectData(
         seen.set(content.subjectId, subjectNames.get(content.subjectId) ?? content.subjectId);
       }
     }
+  }
+
+  for (const s of STUDY_BUILTIN_SUBJECTS) {
+    seen.set(s.id, s.name);
   }
 
   const subjects = [...seen.entries()]

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { workspacePlayHref } from "@/lib/content/urls";
 import { updateStudyItemProgress } from "@/lib/study/firestore";
 import type { StudyItemDoc } from "@/lib/study/types";
+import { StudyReadableText } from "./StudyReadableText";
 import { StudyProgressBar } from "./StudyProgressBar";
 
 type Props = {
@@ -39,9 +40,13 @@ export function StudyItemProgressEditor({ userId, planId, item, onUpdated }: Pro
           <span className="study-item-editor__badge">
             {item.source === "app" ? "📱 Study Park" : "📚 その他"}
           </span>
-          <h3 className="study-item-editor__title">{item.label}</h3>
+          <h3 className="study-item-editor__title">
+            <StudyReadableText text={item.label} />
+          </h3>
           {item.scopeNote ? (
-            <p className="study-item-editor__scope">{item.scopeNote}</p>
+            <p className="study-item-editor__scope">
+              <StudyReadableText text={item.scopeNote} />
+            </p>
           ) : null}
         </div>
         {item.source === "app" && item.contentRef ? (

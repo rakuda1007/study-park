@@ -7,6 +7,7 @@ import {
   listStudyTemplates,
 } from "@/lib/study/templates-firestore";
 import type { StudyTemplateDoc } from "@/lib/study/types";
+import { StudyReadableText } from "./StudyReadableText";
 
 type Props = {
   userId: string;
@@ -68,8 +69,12 @@ export function StudyTemplateList({ userId, onApply, showApply = false }: Props)
               {template.items.map((item, index) => (
                 <li key={`${template.id}-${index}`}>
                   {item.source === "app" ? "📱 " : "📚 "}
-                  {item.label}
-                  {item.scopeNote ? `（${item.scopeNote}）` : ""}
+                  <StudyReadableText text={item.label} />
+                  {item.scopeNote ? (
+                    <>
+                      （<StudyReadableText text={item.scopeNote} />）
+                    </>
+                  ) : null}
                 </li>
               ))}
             </ul>

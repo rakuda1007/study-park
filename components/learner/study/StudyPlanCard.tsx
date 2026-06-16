@@ -13,6 +13,7 @@ import {
   formatStudyDate,
   parseStudyDate,
 } from "@/lib/study/week";
+import { StudyReadableText } from "./StudyReadableText";
 import { StudyProgressBar } from "./StudyProgressBar";
 
 type Props = {
@@ -54,9 +55,11 @@ export function StudyPlanCard({ plan, compact = false }: Props) {
                       📱
                     </span>
                   ) : null}
-                  {item.label}
+                  <StudyReadableText text={item.label} />
                   {item.scopeNote ? (
-                    <span className="study-plan-card__scope">（{item.scopeNote}）</span>
+                    <span className="study-plan-card__scope">
+                      （<StudyReadableText text={item.scopeNote} />）
+                    </span>
                   ) : null}
                 </span>
                 {item.source === "app" && item.contentRef ? (

@@ -9,6 +9,7 @@ import {
 import type { StudyItemDraft, StudyItemMasterDoc, StudyPlanInput } from "@/lib/study/types";
 import { todayStudyDate } from "@/lib/study/week";
 import { StudyItemAddPanel } from "./StudyItemAddPanel";
+import { StudyReadableText } from "./StudyReadableText";
 
 type Props = {
   subjectData: StudySubjectData;
@@ -198,9 +199,13 @@ export function StudyPlanForm({
                   <span className="study-plan-form__item-badge">
                     {item.source === "app" ? "📱 アプリ教材" : "📚 その他"}
                   </span>
-                  <strong>{item.label}</strong>
+                  <strong>
+                    <StudyReadableText text={item.label} />
+                  </strong>
                   {item.scopeNote ? (
-                    <span className="study-plan-form__item-scope">（{item.scopeNote}）</span>
+                    <span className="study-plan-form__item-scope">
+                      （<StudyReadableText text={item.scopeNote} />）
+                    </span>
                   ) : null}
                 </div>
                 <button
