@@ -16,7 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
-import { syncAdminContentMirrors } from "@/lib/workspaces/admin-content-mirror";
+import { syncAdminContentToInvitationWorkspace } from "@/lib/workspaces/admin-content-sync";
 import { DEFAULT_SUBJECTS } from "./subject-defaults";
 import { currentContentPeriod, mapStoredContentPeriod } from "./period";
 import { DEFAULT_QUIZ_BLANK_ANSWERS } from "./quiz-answers";
@@ -269,18 +269,11 @@ export async function updateContent(
     ...(rest.status === "published" ? { publishedAt: serverTimestamp() } : {}),
   });
 
-  const mirrorPatch: Partial<
-    Pick<ContentDoc, "pinned" | "periodYear" | "periodMonth">
-  > = {};
-  if (rest.pinned !== undefined) mirrorPatch.pinned = rest.pinned;
-  if (rest.periodYear !== undefined) mirrorPatch.periodYear = rest.periodYear;
-  if (rest.periodMonth !== undefined) mirrorPatch.periodMonth = rest.periodMonth;
-  if (Object.keys(mirrorPatch).length > 0) {
-    try {
-      await syncAdminContentMirrors(id, mirrorPatch, updatedBy);
-    } catch {
-      /* ミラー同期失敗でも管理用コンテンツの保存は成功させる */
-    }
+  try {
+    const c = await getContent(id);
+    if (c) await syncAdminContentToInvitationWorkspace(c, updatedBy);
+  } catch {
+    /* ワークスペース同期失敗でも管理用コンテンツの保存は成功させる */
   }
 }
 
@@ -345,6 +338,12 @@ export async function saveLessonSections(
     updatedBy,
     updatedAt: serverTimestamp(),
   });
+  try {
+    const c = await getContent(id);
+    if (c) await syncAdminContentToInvitationWorkspace(c, updatedBy);
+  } catch {
+    /* ワークスペース同期失敗でも保存は成功 */
+  }
 }
 
 export async function saveQuizQuestions(
@@ -357,6 +356,12 @@ export async function saveQuizQuestions(
     updatedBy,
     updatedAt: serverTimestamp(),
   });
+  try {
+    const c = await getContent(id);
+    if (c) await syncAdminContentToInvitationWorkspace(c, updatedBy);
+  } catch {
+    /* ワークスペース同期失敗でも保存は成功 */
+  }
 }
 
 /** 初期教科データ（存在しなければ作成） */

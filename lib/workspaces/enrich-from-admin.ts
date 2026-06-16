@@ -25,8 +25,12 @@ export async function enrichWorkspaceContentsFromAdmin(
   const adminById = new Map<string, Awaited<ReturnType<typeof getContent>>>();
   await Promise.all(
     adminIds.map(async (id) => {
-      const admin = await getContent(id);
-      if (admin) adminById.set(id, admin);
+      try {
+        const admin = await getContent(id);
+        if (admin) adminById.set(id, admin);
+      } catch {
+        /* 学習者は下書きの管理用 contents を読めない。WS 側の値をそのまま使う */
+      }
     }),
   );
   if (adminById.size === 0) return contents;

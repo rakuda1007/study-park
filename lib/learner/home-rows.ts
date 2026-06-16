@@ -69,12 +69,16 @@ export async function loadLearnerHomeRows(
   }
 
   async function loadMemberContents(workspaceId: string): Promise<WorkspaceContentDoc[]> {
+    let items: WorkspaceContentDoc[];
     try {
-      return await enrichWorkspaceContentsFromAdmin(
-        await listPublishedContentsForMember(workspaceId),
-      );
+      items = await listPublishedContentsForMember(workspaceId);
     } catch {
       return [];
+    }
+    try {
+      return await enrichWorkspaceContentsFromAdmin(items);
+    } catch {
+      return items;
     }
   }
 
