@@ -200,7 +200,13 @@ function LearnerStudyPlanInner() {
           <h2 className="study-detail-header__title">{plan.subjectName}</h2>
           <p className="study-detail-header__meta">
             {plan.startDate.replace(/-/g, "/")} 〜 {plan.dueDate.replace(/-/g, "/")}
-            <span className="study-detail-header__days">{formatDaysRemaining(plan.dueDate)}</span>
+            <span className="study-detail-header__days">
+              {formatDaysRemaining(
+                plan.dueDate,
+                new Date(),
+                progress >= 100 || plan.status === "completed",
+              )}
+            </span>
           </p>
           {plan.memo ? <p className="study-detail-header__memo">{plan.memo}</p> : null}
         </div>

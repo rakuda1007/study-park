@@ -83,7 +83,12 @@ export function daysRemaining(dueDate: string, today = new Date()): number {
   return Math.round((due.getTime() - t.getTime()) / (24 * 60 * 60 * 1000));
 }
 
-export function formatDaysRemaining(dueDate: string, today = new Date()): string {
+export function formatDaysRemaining(
+  dueDate: string,
+  today = new Date(),
+  completed = false,
+): string {
+  if (completed) return "完了";
   const days = daysRemaining(dueDate, today);
   if (days < 0) return `超過${Math.abs(days)}日`;
   if (days === 0) return "今日まで";

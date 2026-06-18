@@ -33,9 +33,10 @@ export function StudyPlanCard({
   hideStatusBadge = false,
 }: Props) {
   const progress = averageProgress(plan.items);
+  const completed = progress >= 100 || plan.status === "completed";
   const status = delayStatus(progress, plan.startDate, plan.dueDate);
-  const statusLabel = delayStatusLabel(status);
-  const daysLabel = formatDaysRemaining(plan.dueDate);
+  const statusLabel = completed ? null : delayStatusLabel(status);
+  const daysLabel = formatDaysRemaining(plan.dueDate, new Date(), completed);
   const periodLabel = formatPlanPeriodCompact(plan.startDate, plan.dueDate);
 
   return (

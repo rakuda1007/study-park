@@ -14,7 +14,6 @@ import {
 } from "@/lib/study/progress";
 import type { StudyPlanWithItems } from "@/lib/study/types";
 import {
-  daysRemaining,
   getWeekEnd,
   getWeekStart,
 } from "@/lib/study/week";
@@ -77,10 +76,9 @@ export default function LearnerStudyPage() {
         completed += 1;
         continue;
       }
-      if (daysRemaining(plan.dueDate) <= 3) {
+      if (status === "urgent") {
         nearDue += 1;
-      }
-      if (status === "warning" || status === "danger" || status === "urgent") {
+      } else if (status === "warning" || status === "danger") {
         behind += 1;
       }
     }
@@ -150,13 +148,18 @@ export default function LearnerStudyPage() {
         <div className="study-plan-list study-week-page__plans">
           {[...grouped.entries()].map(([subjectName, subjectPlans]) => {
             const singlePlan = subjectPlans.length === 1 ? subjectPlans[0] : null;
-            const singleStatus = singlePlan
-              ? delayStatus(
-                  averageProgress(singlePlan.items),
-                  singlePlan.startDate,
-                  singlePlan.dueDate,
-                )
-              : null;
+            const singleProgress = singlePlan ? averageProgress(singlePlan.items) : 0;
+            const singleCompleted =
+              singlePlan &&
+              (singleProgress >= 100 || singlePlan.status === "completed");
+            const singleStatus =
+              singlePlan && !singleCompleted
+                ? delayStatus(
+                    singleProgress,
+                    singlePlan.startDate,
+                    singlePlan.dueDate,
+                  )
+                : null;
             const singleBadge =
               singleStatus && singlePlan ? delayStatusLabel(singleStatus) : null;
 
