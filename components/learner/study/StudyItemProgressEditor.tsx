@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { workspacePlayHref } from "@/lib/content/urls";
 import { updateStudyItemProgress } from "@/lib/study/firestore";
+import { invalidateStudyPlansCache } from "@/lib/study/plans-loader";
 import type { StudyItemDoc } from "@/lib/study/types";
 import { StudyReadableText } from "./StudyReadableText";
 import { StudyProgressBar } from "./StudyProgressBar";
@@ -27,6 +28,7 @@ export function StudyItemProgressEditor({ userId, planId, item, onUpdated }: Pro
     setSaving(true);
     try {
       await updateStudyItemProgress(userId, planId, item.id, clamped);
+      invalidateStudyPlansCache(userId);
       onUpdated(item.id, clamped);
     } finally {
       setSaving(false);

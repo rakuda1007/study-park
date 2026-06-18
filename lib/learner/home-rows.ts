@@ -82,19 +82,29 @@ export async function loadLearnerHomeRows(
     }
   }
 
-  for (const m of memberships) {
-    const ws = await getWorkspace(m.workspaceId);
-    if (!ws) continue;
-    seen.add(m.workspaceId);
-    const contents = await loadMemberContents(m.workspaceId);
-    rows.push({
-      workspaceId: m.workspaceId,
-      workspaceName: ws.name,
-      workspaceSlug: ws.slug,
-      ownerLabel: await ownerLabel(ws.ownerId),
-      isOwnWorkspace: ws.ownerId === userId,
-      contents,
-    });
+  const membershipRows = await Promise.all(
+    memberships.map(async (m) => {
+      const ws = await getWorkspace(m.workspaceId);
+      if (!ws) return null;
+      const [contents, label] = await Promise.all([
+        loadMemberContents(m.workspaceId),
+        ownerLabel(ws.ownerId),
+      ]);
+      return {
+        workspaceId: m.workspaceId,
+        workspaceName: ws.name,
+        workspaceSlug: ws.slug,
+        ownerLabel: label,
+        isOwnWorkspace: ws.ownerId === userId,
+        contents,
+      } satisfies LearnerHomeRow;
+    }),
+  );
+
+  for (const row of membershipRows) {
+    if (!row) continue;
+    seen.add(row.workspaceId);
+    rows.push(row);
   }
 
   if (ownedWs && !seen.has(ownedWs.id)) {

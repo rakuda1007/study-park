@@ -6,7 +6,7 @@ import { StudyPlanCard } from "@/components/learner/study/StudyPlanCard";
 import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
 import { StudyWeekNav } from "@/components/learner/study/StudyWeekNav";
 import { LearnerShell } from "@/components/learner/LearnerShell";
-import { listStudyPlansWithItems } from "@/lib/study/firestore";
+import { fetchWeekStudyPlansCached } from "@/lib/study/plans-loader";
 import {
   averageProgress,
   delayStatus,
@@ -17,7 +17,6 @@ import {
   daysRemaining,
   getWeekEnd,
   getWeekStart,
-  planOverlapsWeek,
 } from "@/lib/study/week";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 
@@ -37,11 +36,12 @@ export default function LearnerStudyPage() {
   const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
 
   const refresh = useCallback(async (uid: string) => {
-    const data = await listStudyPlansWithItems(uid);
-    setPlans(data.filter((p) => p.status !== "archived"));
-  }, []);
+    const data = await fetchWeekStudyPlansCached(uid, weekStart, weekEnd);
+    setPlans(data);
+  }, [weekStart, weekEnd]);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -58,15 +58,7 @@ export default function LearnerStudyPage() {
     return unsub;
   }, [refresh]);
 
-  const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
-
-  const weekPlans = useMemo(
-    () =>
-      plans.filter((plan) =>
-        planOverlapsWeek(plan, weekStart, weekEnd),
-      ),
-    [plans, weekStart, weekEnd],
-  );
+  const weekPlans = useMemo(() => plans, [plans]);
 
   const overallProgress = useMemo(() => {
     if (weekPlans.length === 0) return 0;
@@ -149,9 +141,7 @@ export default function LearnerStudyPage() {
       {!loading && weekPlans.length === 0 ? (
         <section className="admin-card">
           <p>
-            {plans.length === 0
-              ? "まだ学習計画がありません。下のボタンから追加してください。"
-              : "この週に該当する学習計画はありません。別の週を選ぶか、新しい計画を追加してください。"}
+            この週に表示できる学習計画がありません。別の週を選ぶか、下のボタンから追加してください。
           </p>
         </section>
       ) : null}
@@ -200,7 +190,7 @@ export default function LearnerStudyPage() {
         <Link href="/learner/study/new" className="admin-btn admin-btn--primary">
           ＋ 学習計画を追加
         </Link>
-        {userId && plans.length > 0 ? (
+        {userId ? (
           <Link href="/learner/study/all" className="admin-btn">
             すべての計画を見る
           </Link>

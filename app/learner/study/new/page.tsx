@@ -8,6 +8,7 @@ import { StudyTemplatePicker } from "@/components/learner/study/StudyTemplatePic
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { customSubjectOption, isCustomSubjectId } from "@/lib/study/subject-options";
 import { createStudyPlan } from "@/lib/study/firestore";
+import { invalidateStudyPlansCache } from "@/lib/study/plans-loader";
 import { listStudyItemMasters } from "@/lib/study/masters-firestore";
 import { loadStudySubjectData } from "@/lib/study/subject-options";
 import type { StudySubjectData } from "@/lib/study/subject-options";
@@ -101,6 +102,7 @@ function LearnerStudyNewInner() {
                   ? `custom:${input.subjectName}`
                   : input.subjectId,
               });
+              invalidateStudyPlansCache(userId);
               router.push(studyPlanHref(planId));
             }}
           />

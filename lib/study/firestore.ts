@@ -10,10 +10,12 @@ import {
   query,
   serverTimestamp,
   updateDoc,
+  where,
   writeBatch,
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { planOverlapsWeek, formatStudyDate } from "./week";
 import type {
   StudyItemDoc,
   StudyItemDraft,
@@ -88,6 +90,37 @@ export async function listStudyPlans(userId: string): Promise<StudyPlanDoc[]> {
   return snap.docs.map((d) => mapPlan(d.id, d.data()));
 }
 
+/** 期限が指定日以降の計画のみ取得（週ビュー向け・古い完了計画を省略） */
+export async function listStudyPlansDueOnOrAfter(
+  userId: string,
+  dueDateMin: string,
+): Promise<StudyPlanDoc[]> {
+  try {
+    const snap = await getDocs(
+      query(
+        plansCol(userId),
+        where("dueDate", ">=", dueDateMin),
+        orderBy("dueDate", "asc"),
+      ),
+    );
+    return snap.docs.map((d) => mapPlan(d.id, d.data()));
+  } catch {
+    return listStudyPlans(userId);
+  }
+}
+
+async function attachItemsToPlans(
+  userId: string,
+  plans: StudyPlanDoc[],
+): Promise<StudyPlanWithItems[]> {
+  return Promise.all(
+    plans.map(async (plan) => {
+      const items = await listStudyItems(userId, plan.id);
+      return { ...plan, items };
+    }),
+  );
+}
+
 export async function listStudyItems(
   userId: string,
   planId: string,
@@ -109,13 +142,21 @@ export async function getStudyPlanWithItems(
 
 export async function listStudyPlansWithItems(userId: string): Promise<StudyPlanWithItems[]> {
   const plans = await listStudyPlans(userId);
-  const withItems = await Promise.all(
-    plans.map(async (plan) => {
-      const items = await listStudyItems(userId, plan.id);
-      return { ...plan, items };
-    }),
+  return attachItemsToPlans(userId, plans);
+}
+
+/** 週ビュー向け：期限で絞ってから items を取得 */
+export async function listStudyPlansWithItemsForWeek(
+  userId: string,
+  weekStart: Date,
+  weekEnd: Date,
+): Promise<StudyPlanWithItems[]> {
+  const weekStartIso = formatStudyDate(weekStart);
+  const plans = (await listStudyPlansDueOnOrAfter(userId, weekStartIso)).filter(
+    (plan) =>
+      plan.status !== "archived" && planOverlapsWeek(plan, weekStart, weekEnd),
   );
-  return withItems;
+  return attachItemsToPlans(userId, plans);
 }
 
 export async function createStudyPlan(
@@ -216,16 +257,16 @@ export async function updateStudyItemProgress(
   progressPercent: number,
 ): Promise<void> {
   const value = Math.max(0, Math.min(100, Math.round(progressPercent)));
-  await updateDoc(
-    doc(getFirestoreClient(), "users", userId, "studyPlans", planId, "items", itemId),
-    {
-      progressPercent: value,
-      updatedAt: serverTimestamp(),
-    },
-  );
-  await updateDoc(doc(getFirestoreClient(), "users", userId, "studyPlans", planId), {
+  const batch = writeBatch(getFirestoreClient());
+  const db = getFirestoreClient();
+  batch.update(doc(db, "users", userId, "studyPlans", planId, "items", itemId), {
+    progressPercent: value,
     updatedAt: serverTimestamp(),
   });
+  batch.update(doc(db, "users", userId, "studyPlans", planId), {
+    updatedAt: serverTimestamp(),
+  });
+  await batch.commit();
 }
 
 export async function deleteStudyPlan(userId: string, planId: string): Promise<void> {

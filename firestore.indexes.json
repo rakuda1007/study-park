@@ -1,6 +1,13 @@
 {
   "indexes": [
     {
+      "collectionGroup": "studyPlans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "dueDate", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "contents",
       "queryScope": "COLLECTION",
       "fields": [

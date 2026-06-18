@@ -21,6 +21,7 @@ import {
   updateStudyPlanMeta,
 } from "@/lib/study/firestore";
 import { listStudyItemMasters } from "@/lib/study/masters-firestore";
+import { invalidateStudyPlansCache } from "@/lib/study/plans-loader";
 import {
   averageProgress,
   delayStatus,
@@ -43,24 +44,36 @@ function LearnerStudyPlanInner() {
   const [masters, setMasters] = useState<StudyItemMasterDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [editingDataLoading, setEditingDataLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const refresh = useCallback(
+  const refreshPlan = useCallback(
     async (uid: string) => {
       if (!planId) {
         setPlan(null);
         return;
       }
-      const [data, subjects, masterList] = await Promise.all([
-        getStudyPlanWithItems(uid, planId),
-        loadStudySubjectData(uid, manifest),
-        listStudyItemMasters(uid),
-      ]);
+      const data = await getStudyPlanWithItems(uid, planId);
       setPlan(data);
-      setSubjectData(subjects);
-      setMasters(masterList);
     },
-    [planId, manifest],
+    [planId],
+  );
+
+  const loadEditingData = useCallback(
+    async (uid: string) => {
+      setEditingDataLoading(true);
+      try {
+        const [subjects, masterList] = await Promise.all([
+          loadStudySubjectData(uid, manifest),
+          listStudyItemMasters(uid),
+        ]);
+        setSubjectData(subjects);
+        setMasters(masterList);
+      } finally {
+        setEditingDataLoading(false);
+      }
+    },
+    [manifest],
   );
 
   useEffect(() => {
@@ -69,14 +82,19 @@ function LearnerStudyPlanInner() {
         if (!user) return;
         setUserId(user.uid);
         try {
-          await refresh(user.uid);
+          await refreshPlan(user.uid);
         } finally {
           setLoading(false);
         }
       })();
     });
     return unsub;
-  }, [refresh]);
+  }, [refreshPlan]);
+
+  useEffect(() => {
+    if (!editing || !userId || subjectData) return;
+    void loadEditingData(userId);
+  }, [editing, userId, subjectData, loadEditingData]);
 
   const progress = useMemo(
     () => (plan ? averageProgress(plan.items) : 0),
@@ -114,6 +132,7 @@ function LearnerStudyPlanInner() {
     setDeleting(true);
     try {
       await deleteStudyPlan(userId, plan.id);
+      invalidateStudyPlansCache(userId);
       router.push("/learner/study");
     } finally {
       setDeleting(false);
@@ -123,13 +142,15 @@ function LearnerStudyPlanInner() {
   async function markCompleted() {
     if (!userId || !plan) return;
     await updateStudyPlanMeta(userId, plan.id, { status: "completed" });
-    await refresh(userId);
+    setPlan((prev) => (prev ? { ...prev, status: "completed" } : prev));
+    invalidateStudyPlansCache(userId);
   }
 
   async function markActive() {
     if (!userId || !plan) return;
     await updateStudyPlanMeta(userId, plan.id, { status: "active" });
-    await refresh(userId);
+    setPlan((prev) => (prev ? { ...prev, status: "active" } : prev));
+    invalidateStudyPlansCache(userId);
   }
 
   if (!planId) {
@@ -213,6 +234,10 @@ function LearnerStudyPlanInner() {
         </div>
       ) : null}
 
+      {editing && editingDataLoading ? (
+        <p className="admin-loading">編集データを読み込み中…</p>
+      ) : null}
+
       {editing && subjectData && userId ? (
         <StudyPlanForm
           subjectData={subjectData}
@@ -230,7 +255,8 @@ function LearnerStudyPlanInner() {
               memo: input.memo,
             });
             await replaceStudyItems(userId, plan.id, input.items, plan.items);
-            await refresh(userId);
+            await refreshPlan(userId);
+            invalidateStudyPlansCache(userId);
             setEditing(false);
           }}
         />

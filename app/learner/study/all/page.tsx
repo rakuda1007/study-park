@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { StudyPlanCard } from "@/components/learner/study/StudyPlanCard";
 import { LearnerShell } from "@/components/learner/LearnerShell";
-import { listStudyPlansWithItems } from "@/lib/study/firestore";
+import { fetchAllStudyPlansCached } from "@/lib/study/plans-loader";
 import type { StudyPlanWithItems } from "@/lib/study/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 
@@ -13,8 +13,8 @@ export default function LearnerStudyAllPage() {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async (uid: string) => {
-    const data = await listStudyPlansWithItems(uid);
-    setPlans(data.filter((p) => p.status !== "archived"));
+    const data = await fetchAllStudyPlansCached(uid);
+    setPlans(data);
   }, []);
 
   useEffect(() => {

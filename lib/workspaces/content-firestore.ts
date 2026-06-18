@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   orderBy,
   query,
   serverTimestamp,
@@ -299,8 +300,27 @@ export async function getPublishedWorkspaceContentInWorkspace(
   contentSlug: string,
 ): Promise<WorkspaceContentDoc | null> {
   const normalized = contentSlug.trim().toLowerCase();
-  const items = await listPublishedContentsForMember(workspaceId);
-  return items.find((c) => c.slug.trim().toLowerCase() === normalized) ?? null;
+  if (!normalized) return null;
+
+  const col = contentsCol(workspaceId);
+  try {
+    const snap = await getDocs(
+      query(
+        col,
+        where("slug", "==", normalized),
+        where("status", "==", "published"),
+        limit(1),
+      ),
+    );
+    const hit = snap.docs[0];
+    if (!hit) return null;
+    const item = mapContent(workspaceId, hit.id, hit.data());
+    if (!isMemberVisibleContent(item.visibility)) return null;
+    return item;
+  } catch {
+    const items = await listPublishedContentsForMember(workspaceId);
+    return items.find((c) => c.slug.trim().toLowerCase() === normalized) ?? null;
+  }
 }
 
 /** 公開コンテンツを ws slug + content slug で取得 */
