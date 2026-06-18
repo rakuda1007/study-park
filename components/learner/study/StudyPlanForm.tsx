@@ -58,6 +58,12 @@ export function StudyPlanForm({
     setItems((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function updateItem(index: number, patch: Partial<StudyItemDraft>) {
+    setItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    );
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErr("");
@@ -72,6 +78,10 @@ export function StudyPlanForm({
     }
     if (items.length === 0) {
       setErr("学習内容を1つ以上追加してください。");
+      return;
+    }
+    if (items.some((item) => !item.label.trim())) {
+      setErr("学習内容の名称を入力してください。");
       return;
     }
 
@@ -141,41 +151,6 @@ export function StudyPlanForm({
             />
           </label>
         </div>
-        <div className="study-plan-form__presets">
-          <span className="admin-label">期間の目安</span>
-          <div className="study-plan-form__preset-btns">
-            <button
-              type="button"
-              className="admin-btn"
-              onClick={() => {
-                const start = todayStudyDate();
-                const d = new Date();
-                d.setDate(d.getDate() + 6);
-                setStartDate(start);
-                setDueDate(
-                  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
-                );
-              }}
-            >
-              1週間
-            </button>
-            <button
-              type="button"
-              className="admin-btn"
-              onClick={() => {
-                const start = todayStudyDate();
-                const d = new Date();
-                d.setDate(d.getDate() + 13);
-                setStartDate(start);
-                setDueDate(
-                  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
-                );
-              }}
-            >
-              2週間
-            </button>
-          </div>
-        </div>
         <label className="admin-field">
           <span className="admin-label">メモ（任意）</span>
           <input
@@ -194,19 +169,42 @@ export function StudyPlanForm({
         ) : (
           <ul className="study-plan-form__item-list">
             {items.map((item, index) => (
-              <li key={`${item.label}-${index}`} className="study-plan-form__item-row">
-                <div>
+              <li
+                key={item.id ?? `draft-${index}`}
+                className="study-plan-form__item-row study-plan-form__item-row--edit"
+              >
+                <div className="study-plan-form__item-fields">
                   <span className="study-plan-form__item-badge">
                     {item.source === "app" ? "📱 アプリ教材" : "📚 その他"}
                   </span>
-                  <strong>
-                    <StudyReadableText text={item.label} />
-                  </strong>
-                  {item.scopeNote ? (
-                    <span className="study-plan-form__item-scope">
-                      （<StudyReadableText text={item.scopeNote} />）
-                    </span>
-                  ) : null}
+                  {item.source === "external" ? (
+                    <label className="admin-field study-plan-form__item-field">
+                      <span className="admin-label">名称</span>
+                      <input
+                        className="admin-input"
+                        value={item.label}
+                        onChange={(e) => updateItem(index, { label: e.target.value })}
+                        placeholder="例: テキスト、問題集"
+                      />
+                    </label>
+                  ) : (
+                    <p className="study-plan-form__item-title">
+                      <StudyReadableText text={item.label} />
+                    </p>
+                  )}
+                  <label className="admin-field study-plan-form__item-field">
+                    <span className="admin-label">対象範囲</span>
+                    <input
+                      className="admin-input"
+                      value={item.scopeNote}
+                      onChange={(e) => updateItem(index, { scopeNote: e.target.value })}
+                      placeholder={
+                        item.source === "app"
+                          ? "例: 全問、第1章"
+                          : "例: p.12-20、第3単元"
+                      }
+                    />
+                  </label>
                 </div>
                 <button
                   type="button"

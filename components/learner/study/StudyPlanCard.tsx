@@ -8,7 +8,7 @@ import {
   delayStatusLabel,
 } from "@/lib/study/progress";
 import type { StudyPlanWithItems } from "@/lib/study/types";
-import { studyPlanHref } from "@/lib/study/urls";
+import { studyPlanEditHref, studyPlanHref } from "@/lib/study/urls";
 import {
   formatDaysRemaining,
   formatPlanPeriodCompact,
@@ -65,13 +65,30 @@ export function StudyPlanCard({
             </p>
           </div>
         )}
-        <Link
-          href={studyPlanHref(plan.id)}
-          className={`study-plan-card__link${listView ? " study-plan-card__link--action" : ""}`}
-        >
-          {listView ? "記録する" : "詳細"}
-        </Link>
       </header>
+
+      {listView ? (
+        <div className="study-plan-card__toolbar">
+          <Link href={studyPlanEditHref(plan.id)} className="study-plan-card__link">
+            編集する
+          </Link>
+          <Link
+            href={studyPlanHref(plan.id)}
+            className="study-plan-card__link study-plan-card__link--action"
+          >
+            記録する
+          </Link>
+        </div>
+      ) : (
+        <div className="study-plan-card__toolbar study-plan-card__toolbar--detail">
+          <Link href={studyPlanEditHref(plan.id)} className="study-plan-card__link">
+            編集する
+          </Link>
+          <Link href={studyPlanHref(plan.id)} className="study-plan-card__link">
+            詳細
+          </Link>
+        </div>
+      )}
 
       <StudyProgressGauge
         percent={progress}

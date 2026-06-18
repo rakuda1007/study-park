@@ -41,6 +41,8 @@ export type StudyPlanWithItems = StudyPlanDoc & {
 };
 
 export type StudyItemDraft = {
+  /** 編集時に既存項目と対応づける */
+  id?: string;
   source: StudyItemSource;
   label: string;
   scopeNote: string;

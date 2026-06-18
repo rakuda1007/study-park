@@ -222,24 +222,42 @@ export async function replaceStudyItems(
 ): Promise<void> {
   const batch = writeBatch(getFirestoreClient());
   const db = getFirestoreClient();
+  const existingById = new Map(existingItems.map((item) => [item.id, item]));
+  const keptIds = new Set(
+    items.map((item) => item.id).filter((id): id is string => Boolean(id)),
+  );
 
   for (const existing of existingItems) {
-    batch.delete(doc(db, "users", userId, "studyPlans", planId, "items", existing.id));
+    if (!keptIds.has(existing.id)) {
+      batch.delete(doc(db, "users", userId, "studyPlans", planId, "items", existing.id));
+    }
   }
 
   items.forEach((item, index) => {
-    const prev = existingItems[index];
-    const progress = prev ? prev.progressPercent : 0;
-    const itemRef = doc(itemsCol(userId, planId));
-    batch.set(itemRef, {
+    const matched = item.id ? existingById.get(item.id) : undefined;
+    const progress = matched?.progressPercent ?? 0;
+    const payload = {
       order: index,
       source: item.source,
       label: item.label.trim(),
       scopeNote: item.scopeNote.trim() || null,
       progressPercent: progress,
       contentRef: item.source === "app" && item.contentRef ? item.contentRef : null,
-      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+    };
+
+    if (item.id && existingById.has(item.id)) {
+      batch.update(
+        doc(db, "users", userId, "studyPlans", planId, "items", item.id),
+        payload,
+      );
+      return;
+    }
+
+    const itemRef = doc(itemsCol(userId, planId));
+    batch.set(itemRef, {
+      ...payload,
+      createdAt: serverTimestamp(),
     });
   });
 

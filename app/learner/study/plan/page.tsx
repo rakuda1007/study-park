@@ -28,6 +28,7 @@ import {
 } from "@/lib/study/progress";
 import type { StudyPlanInput, StudyPlanWithItems, StudyItemMasterDoc } from "@/lib/study/types";
 import { formatDaysRemaining } from "@/lib/study/week";
+import { studyPlanHref } from "@/lib/study/urls";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import contentManifest from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
@@ -35,6 +36,7 @@ import type { ContentManifest } from "@/lib/content/types";
 function LearnerStudyPlanInner() {
   const searchParams = useSearchParams();
   const planId = searchParams.get("planId") ?? "";
+  const wantsEdit = searchParams.get("edit") === "1";
   const router = useRouter();
   const manifest = contentManifest as ContentManifest;
 
@@ -96,6 +98,12 @@ function LearnerStudyPlanInner() {
     void loadEditingData(userId);
   }, [editing, userId, subjectData, loadEditingData]);
 
+  useEffect(() => {
+    if (wantsEdit && plan && userId && !loading) {
+      setEditing(true);
+    }
+  }, [wantsEdit, plan, userId, loading]);
+
   const progress = useMemo(
     () => (plan ? averageProgress(plan.items) : 0),
     [plan],
@@ -118,6 +126,7 @@ function LearnerStudyPlanInner() {
       dueDate: plan.dueDate,
       memo: plan.memo,
       items: plan.items.map((item) => ({
+        id: item.id,
         source: item.source,
         label: item.label,
         scopeNote: item.scopeNote ?? "",
@@ -264,6 +273,9 @@ function LearnerStudyPlanInner() {
             await refreshPlan(userId);
             invalidateStudyPlansCache(userId);
             setEditing(false);
+            if (wantsEdit) {
+              router.replace(studyPlanHref(plan.id));
+            }
           }}
         />
       ) : (
