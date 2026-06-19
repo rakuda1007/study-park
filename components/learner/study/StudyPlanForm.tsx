@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import {
-  customSubjectOption,
+  defaultStudySubjectOption,
   isCustomSubjectId,
   type StudySubjectData,
 } from "@/lib/study/subject-options";
@@ -26,7 +26,7 @@ export function StudyPlanForm({
   submitLabel,
   onSubmit,
 }: Props) {
-  const defaultSubject = subjectData.subjects[0] ?? customSubjectOption();
+  const defaultSubject = defaultStudySubjectOption(subjectData.subjects);
   const [subjectId, setSubjectId] = useState(initial?.subjectId ?? defaultSubject.id);
   const [customSubjectName, setCustomSubjectName] = useState(
     initial && isCustomSubjectId(initial.subjectId) ? initial.subjectName : "",
@@ -164,9 +164,7 @@ export function StudyPlanForm({
 
       <section className="admin-card study-plan-form__section">
         <h2 className="study-plan-form__heading">学習内容</h2>
-        {items.length === 0 ? (
-          <p className="admin-msg">まだ学習内容がありません。下から追加してください。</p>
-        ) : (
+        {items.length > 0 ? (
           <ul className="study-plan-form__item-list">
             {items.map((item, index) => (
               <li
@@ -216,7 +214,7 @@ export function StudyPlanForm({
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
 
         <StudyItemAddPanel
           workspaces={subjectData.workspaces}

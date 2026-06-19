@@ -25,10 +25,26 @@ export type StudySubjectData = {
 
 const CUSTOM_SUBJECT_ID = "__custom__";
 
+/** 学習計画の科目選択から除外する教科 ID */
+const EXCLUDED_STUDY_SUBJECT_IDS = new Set(["general"]);
+
+/** 学習計画フォームの初期選択 */
+export const DEFAULT_STUDY_SUBJECT_ID = "kokugo";
+
 /** 学習計画で常に選べる科目（参加教材に国語がなくても選択可能） */
 const STUDY_BUILTIN_SUBJECTS: StudySubjectOption[] = [
-  { id: "kokugo", name: "国語" },
+  { id: DEFAULT_STUDY_SUBJECT_ID, name: "国語" },
 ];
+
+export function defaultStudySubjectOption(
+  subjects: StudySubjectOption[],
+): StudySubjectOption {
+  return (
+    subjects.find((s) => s.id === DEFAULT_STUDY_SUBJECT_ID) ??
+    subjects.find((s) => !isCustomSubjectId(s.id)) ??
+    customSubjectOption()
+  );
+}
 
 export function customSubjectOption(): StudySubjectOption {
   return { id: CUSTOM_SUBJECT_ID, name: "その他（自由入力）" };
@@ -67,6 +83,7 @@ export async function loadStudySubjectData(
   }
 
   const subjects = [...seen.entries()]
+    .filter(([id]) => !EXCLUDED_STUDY_SUBJECT_IDS.has(id))
     .map(([id, name]) => ({ id, name }))
     .sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
