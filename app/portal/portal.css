@@ -473,22 +473,14 @@
   background: var(--portal-bg);
 }
 
-.portal-detail__hero {
-  padding: 2rem 1.25rem 2.5rem;
+.portal-detail__header {
+  padding: 1.5rem 1.25rem 0;
   background: #fff;
 }
 
-.portal-detail__hero-inner {
+.portal-detail__header-inner {
   max-width: 68rem;
   margin: 0 auto;
-  display: grid;
-  gap: 2rem;
-  align-items: center;
-}
-
-.portal-detail__intro {
-  min-width: 0;
-  text-align: left;
 }
 
 .portal-detail__back-wrap {
@@ -508,7 +500,7 @@
 
 .portal-detail__title {
   margin: 0 0 1rem;
-  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  font-size: clamp(1.35rem, 3.5vw, 2rem);
   font-weight: 800;
   line-height: 1.35;
   letter-spacing: -0.02em;
@@ -516,7 +508,7 @@
 
 .portal-detail__lead {
   margin: 0 0 1.25rem;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   line-height: 1.85;
   color: var(--portal-muted);
 }
@@ -524,12 +516,62 @@
 .portal-detail__intro-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
   gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.portal-detail__body {
+  background: var(--portal-bg);
+}
+
+.portal-detail-block {
+  padding: 2.5rem 1.25rem;
+}
+
+.portal-detail-block--alt {
+  background: #fff;
+}
+
+.portal-detail-block__inner {
+  max-width: 68rem;
+  margin: 0 auto;
+}
+
+.portal-detail-block__heading {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.portal-detail-features {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.portal-detail-features li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--portal-ink);
+}
+
+.portal-detail-features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  font-weight: 800;
+  color: var(--portal-green);
 }
 
 .portal-detail__visual {
-  min-width: 0;
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 1.25rem 2rem;
 }
 
 .portal-detail__photo {
@@ -542,157 +584,52 @@
   box-shadow: 0 8px 28px rgba(26, 31, 46, 0.1);
 }
 
-.portal-detail-section {
-  padding: 3rem 1.25rem;
-}
-
-.portal-detail-section--alt {
-  background: #fff;
-}
-
-.portal-detail-section__inner {
-  max-width: 68rem;
-  margin: 0 auto;
-}
-
-.portal-detail-section__title {
-  margin: 0 0 0.85rem;
-  font-size: clamp(1.1rem, 2.8vw, 1.35rem);
-  font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: -0.02em;
-}
-
-.portal-detail-section__body {
-  margin: 0 0 1rem;
-  font-size: 0.95rem;
-  line-height: 1.85;
-  color: var(--portal-muted);
-}
-
-.portal-detail-section__list {
+.portal-detail-steps {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.25rem;
 }
 
-.portal-detail-section__list li {
-  position: relative;
-  padding-left: 1.35rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--portal-ink);
+.portal-detail-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
 }
 
-.portal-detail-section__list li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  font-weight: 800;
-  color: var(--portal-green);
-}
-
-.portal-detail-flow {
-  padding: 3rem 1.25rem 1rem;
-  background: var(--portal-green-soft);
-}
-
-.portal-detail-flow__inner {
-  max-width: 68rem;
-  margin: 0 auto;
-}
-
-.portal-detail-flow__title {
-  margin: 0 0 1.25rem;
-  font-size: 1.2rem;
-  font-weight: 800;
-  text-align: center;
-}
-
-.portal-detail-flow__steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  counter-reset: portal-step;
-}
-
-.portal-detail-flow__steps li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.85rem 1rem 0.85rem 3rem;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid var(--portal-border);
-  position: relative;
-  counter-increment: portal-step;
-}
-
-.portal-detail-flow__steps li::before {
-  content: counter(portal-step);
-  position: absolute;
-  left: 1rem;
-  top: 0.85rem;
-  width: 1.5rem;
-  height: 1.5rem;
+.portal-detail-step__num {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 2rem;
+  height: 2rem;
   border-radius: 999px;
   background: var(--portal-green);
   color: #fff;
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.portal-detail-flow__steps strong {
   font-size: 0.95rem;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
-.portal-detail-flow__steps span {
-  font-size: 0.88rem;
-  line-height: 1.6;
+.portal-detail-step__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.portal-detail-step__body {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.75;
   color: var(--portal-muted);
 }
 
 .portal-detail-closing {
   padding-top: 2.5rem;
-}
-
-.portal-detail-modes {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.portal-detail-mode {
-  padding: 0.85rem 1rem;
-  border-radius: 12px;
-  border: 1px solid var(--portal-border);
-  background: #fff;
-}
-
-.portal-detail-mode__name {
-  margin: 0 0 0.35rem;
-  font-size: 0.98rem;
-  font-weight: 800;
-  color: var(--portal-green);
-}
-
-.portal-detail-mode__desc {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.65;
-  color: var(--portal-muted);
 }
 
 .portal-closing {
@@ -794,33 +731,21 @@
     padding-inline: 2rem;
   }
 
-  .portal-detail__hero {
-    padding: 2.5rem 2rem 3rem;
+  .portal-detail__header {
+    padding-inline: 2rem;
   }
 
-  .portal-detail__hero-inner {
+  .portal-detail-block {
+    padding: 3rem 2rem;
+  }
+
+  .portal-detail__visual {
+    padding-inline: 2rem;
+  }
+
+  .portal-detail-features {
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-  }
-
-  .portal-detail-section {
-    padding: 3.5rem 2rem;
-  }
-
-  .portal-detail-flow {
-    padding: 3.5rem 2rem 1.5rem;
-  }
-
-  .portal-detail-flow__steps {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.85rem;
-  }
-
-  .portal-detail-modes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    column-gap: 1.5rem;
   }
 }
 
