@@ -102,7 +102,9 @@ export default function PortalStudyManagementPage() {
       <PortalHeader />
 
       <article className="portal-detail">
-        <div className="portal-detail__intro">
+        <section className="portal-detail__hero">
+          <div className="portal-detail__hero-inner">
+            <div className="portal-detail__intro">
           <p className="portal-detail__back-wrap">
             <Link href="/portal" className="portal-detail__back">
               ← ポータルに戻る
@@ -126,19 +128,21 @@ export default function PortalStudyManagementPage() {
               ログイン
             </Link>
           </div>
-        </div>
+            </div>
 
-        <div className="portal-detail__visual">
-          <img
-            src="/portal10.jpg"
-            alt="GOAL・PLAN・ACTION の学習カード"
-            width={640}
-            height={427}
-            className="portal-detail__photo"
-            loading="eager"
-            decoding="async"
-          />
-        </div>
+            <div className="portal-detail__visual">
+              <img
+                src="/portal10.jpg"
+                alt="GOAL・PLAN・ACTION の学習カード"
+                width={640}
+                height={427}
+                className="portal-detail__photo"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </section>
 
         {SECTIONS.map((section, index) => (
           <section

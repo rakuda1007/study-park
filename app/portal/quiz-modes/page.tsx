@@ -97,7 +97,9 @@ export default function PortalQuizModesPage() {
       <PortalHeader />
 
       <article className="portal-detail">
-        <div className="portal-detail__intro">
+        <section className="portal-detail__hero">
+          <div className="portal-detail__hero-inner">
+            <div className="portal-detail__intro">
           <p className="portal-detail__back-wrap">
             <Link href="/portal" className="portal-detail__back">
               ← ポータルに戻る
@@ -122,19 +124,21 @@ export default function PortalQuizModesPage() {
               教材を作る
             </Link>
           </div>
-        </div>
+            </div>
 
-        <div className="portal-detail__visual">
-          <img
-            src="/portal8.jpg"
-            alt="ノートに電球のアイデアを描く様子"
-            width={640}
-            height={480}
-            className="portal-detail__photo"
-            loading="eager"
-            decoding="async"
-          />
-        </div>
+            <div className="portal-detail__visual">
+              <img
+                src="/portal8.jpg"
+                alt="ノートに電球のアイデアを描く様子"
+                width={640}
+                height={480}
+                className="portal-detail__photo"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </section>
 
         <section className="portal-detail-section portal-detail-section--alt">
           <div className="portal-detail-section__inner">
