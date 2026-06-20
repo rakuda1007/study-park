@@ -474,17 +474,23 @@
 }
 
 .portal-detail__header {
-  padding: 1.5rem 1.25rem 0;
-  background: #fff;
+  padding: 1.5rem 1.25rem 2.5rem;
+  background: var(--portal-bg);
+  text-align: center;
 }
 
 .portal-detail__header-inner {
-  max-width: 68rem;
+  max-width: 48rem;
   margin: 0 auto;
+}
+
+.portal-detail__eyebrow {
+  text-align: center;
 }
 
 .portal-detail__back-wrap {
   margin: 0 0 1rem;
+  text-align: left;
 }
 
 .portal-detail__back {
@@ -516,6 +522,7 @@
 .portal-detail__intro-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.65rem;
   margin-bottom: 0.5rem;
 }
@@ -524,24 +531,32 @@
   background: var(--portal-bg);
 }
 
-.portal-detail-block {
-  padding: 2.5rem 1.25rem;
+/* 主な特徴 + 画像（横並び） */
+.portal-detail-split {
+  padding: 0 1.25rem 3rem;
 }
 
-.portal-detail-block--alt {
-  background: #fff;
-}
-
-.portal-detail-block__inner {
+.portal-detail-split__inner {
   max-width: 68rem;
   margin: 0 auto;
+  display: grid;
+  gap: 2rem;
+  align-items: center;
 }
 
-.portal-detail-block__heading {
+.portal-detail-split__heading {
   margin: 0 0 1.25rem;
   font-size: clamp(1.2rem, 3vw, 1.5rem);
   font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+.portal-detail-split__copy {
+  min-width: 0;
+}
+
+.portal-detail-split__visual {
+  min-width: 0;
 }
 
 .portal-detail-features {
@@ -568,12 +583,6 @@
   color: var(--portal-green);
 }
 
-.portal-detail__visual {
-  max-width: 68rem;
-  margin: 0 auto;
-  padding: 0 1.25rem 2rem;
-}
-
 .portal-detail__photo {
   display: block;
   width: 100%;
@@ -584,46 +593,75 @@
   box-shadow: 0 8px 28px rgba(26, 31, 46, 0.1);
 }
 
-.portal-detail-steps {
+/* 使い方（横並びステップカード） */
+.portal-detail-steps-section {
+  padding: 2.5rem 1.25rem 3.5rem;
+  background: #fff;
+}
+
+.portal-detail-steps-section__inner {
+  max-width: 68rem;
+  margin: 0 auto;
+}
+
+.portal-detail-steps-section__heading {
+  margin: 0 0 1.75rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.portal-detail-steps-grid {
   margin: 0;
   padding: 0;
   list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+
+.portal-detail-step-card {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1.35rem 1.5rem;
+  background: #fff;
+  border: 1px solid var(--portal-border);
+  border-left: 4px solid var(--portal-green);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(26, 31, 46, 0.06);
 }
 
-.portal-detail-step {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  align-items: start;
+.portal-detail-step-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
 }
 
-.portal-detail-step__num {
+.portal-detail-step-card__num {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.85rem;
+  height: 1.85rem;
   border-radius: 999px;
   background: var(--portal-green);
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 800;
   flex-shrink: 0;
 }
 
-.portal-detail-step__title {
-  margin: 0 0 0.35rem;
-  font-size: 1.05rem;
+.portal-detail-step-card__title {
+  margin: 0;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1.4;
 }
 
-.portal-detail-step__body {
+.portal-detail-step-card__body {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   line-height: 1.75;
   color: var(--portal-muted);
 }
@@ -735,21 +773,30 @@
     padding-inline: 2rem;
   }
 
-  .portal-detail-block {
-    padding: 3rem 2rem;
-  }
-
-  .portal-detail__visual {
+  .portal-detail-split {
     padding-inline: 2rem;
   }
 
-  .portal-detail-features {
+  .portal-detail-split__inner {
     grid-template-columns: 1fr 1fr;
-    column-gap: 1.5rem;
+    gap: 3rem;
+  }
+
+  .portal-detail-steps-section {
+    padding-inline: 2rem;
+  }
+
+  .portal-detail-steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
   }
 }
 
 @media (min-width: 1024px) {
+  .portal-detail-steps-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .portal-hero__banner {
     max-width: 68rem;
     min-height: 22rem;

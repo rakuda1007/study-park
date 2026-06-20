@@ -52,7 +52,7 @@ export function PortalFeatureDetailLayout({
                 ← ポータルに戻る
               </Link>
             </p>
-            <p className="portal-eyebrow">{eyebrow}</p>
+            <p className="portal-eyebrow portal-detail__eyebrow">{eyebrow}</p>
             <h1 className="portal-detail__title">{title}</h1>
             <p className="portal-detail__lead">{lead}</p>
             <div className="portal-detail__intro-actions">
@@ -70,42 +70,47 @@ export function PortalFeatureDetailLayout({
         </header>
 
         <div className="portal-detail__body">
-          <section className="portal-detail-block">
-            <div className="portal-detail-block__inner">
-              <h2 className="portal-detail-block__heading">主な特徴</h2>
-              <ul className="portal-detail-features">
-                {features.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+          <section className="portal-detail-split" aria-labelledby="portal-detail-features-heading">
+            <div className="portal-detail-split__inner">
+              <div className="portal-detail-split__copy">
+                <h2 id="portal-detail-features-heading" className="portal-detail-split__heading">
+                  主な特徴
+                </h2>
+                <ul className="portal-detail-features">
+                  {features.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="portal-detail-split__visual">
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  width={image.width}
+                  height={image.height}
+                  className="portal-detail__photo"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
             </div>
           </section>
 
-          <div className="portal-detail__visual">
-            <img
-              src={image.src}
-              alt={image.alt}
-              width={image.width}
-              height={image.height}
-              className="portal-detail__photo"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-
-          <section className="portal-detail-block portal-detail-block--alt">
-            <div className="portal-detail-block__inner">
-              <h2 className="portal-detail-block__heading">使い方</h2>
-              <ol className="portal-detail-steps">
+          <section className="portal-detail-steps-section" aria-labelledby="portal-detail-steps-heading">
+            <div className="portal-detail-steps-section__inner">
+              <h2 id="portal-detail-steps-heading" className="portal-detail-steps-section__heading">
+                使い方
+              </h2>
+              <ol className="portal-detail-steps-grid">
                 {steps.map((step, index) => (
-                  <li key={step.title} className="portal-detail-step">
-                    <span className="portal-detail-step__num" aria-hidden>
-                      {index + 1}
-                    </span>
-                    <div className="portal-detail-step__content">
-                      <h3 className="portal-detail-step__title">{step.title}</h3>
-                      <p className="portal-detail-step__body">{step.body}</p>
+                  <li key={step.title} className="portal-detail-step-card">
+                    <div className="portal-detail-step-card__head">
+                      <span className="portal-detail-step-card__num" aria-hidden>
+                        {index + 1}
+                      </span>
+                      <h3 className="portal-detail-step-card__title">{step.title}</h3>
                     </div>
+                    <p className="portal-detail-step-card__body">{step.body}</p>
                   </li>
                 ))}
               </ol>
