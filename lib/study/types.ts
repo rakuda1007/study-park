@@ -21,6 +21,10 @@ export type StudyPlanDoc = {
   dueDate: string;
   memo?: string;
   status: StudyPlanStatus;
+  /** 完了にした日時（自動アーカイブ判定に使用） */
+  completedAt?: string;
+  /** アーカイブした日時 */
+  archivedAt?: string;
   createdAt: string;
   updatedAt: string;
 };

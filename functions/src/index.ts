@@ -16,6 +16,7 @@ import {
   runBillingReconcile,
   runBillingTrialNotifications,
 } from "./billing/scheduled";
+import { runStudyPlanMaintenance } from "./study/scheduled";
 import { createStarterCheckoutSession } from "./billing/checkout";
 import {
   createSubscriptionCheckoutSession,
@@ -123,6 +124,15 @@ export const billingReconcile = onSchedule(
   async () => {
     const result = await runBillingReconcile({ recountQuestions: true });
     console.info("[billingReconcile]", result);
+  },
+);
+
+/** 毎日 5:00 JST — 学習計画の自動アーカイブと Firestore 利用メトリクス出力 */
+export const studyPlanMaintenance = onSchedule(
+  { schedule: "0 5 * * *", ...scheduleRegion },
+  async () => {
+    const result = await runStudyPlanMaintenance();
+    console.info("[studyPlanMaintenance]", result);
   },
 );
 

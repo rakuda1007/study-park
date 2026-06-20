@@ -5,16 +5,24 @@ import { useCallback, useEffect, useState } from "react";
 import { StudyPlanCard } from "@/components/learner/study/StudyPlanCard";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { fetchAllStudyPlansCached } from "@/lib/study/plans-loader";
+import { countActiveStudyPlans } from "@/lib/study/firestore";
+import { isStudyActivePlanAtLimit, studyActivePlanUsageLabel } from "@/lib/study/limits";
 import type { StudyPlanWithItems } from "@/lib/study/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
 export default function LearnerStudyAllPage() {
   const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
+  const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async (uid: string) => {
-    const data = await fetchAllStudyPlansCached(uid);
+    const [data, active] = await Promise.all([
+      fetchAllStudyPlansCached(uid),
+      countActiveStudyPlans(uid),
+    ]);
     setPlans(data);
+    setActiveCount(active);
   }, []);
 
   useEffect(() => {
@@ -42,6 +50,9 @@ export default function LearnerStudyAllPage() {
         </Link>
       </p>
 
+      <p className="admin-msg">{studyActivePlanUsageLabel(activeCount)}</p>
+      <StudyActivePlanUsageBanner activeCount={activeCount} />
+
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
       {!loading && active.length > 0 ? (
@@ -56,6 +67,9 @@ export default function LearnerStudyAllPage() {
       {!loading && completed.length > 0 ? (
         <section className="study-plan-list">
           <h2 className="shell-page-heading">完了した計画</h2>
+          <p className="admin-msg admin-msg--subtle">
+            完了から1年経過した計画は、自動的にアーカイブされます。
+          </p>
           {completed.map((plan) => (
             <StudyPlanCard key={plan.id} plan={plan} compact />
           ))}
@@ -69,9 +83,15 @@ export default function LearnerStudyAllPage() {
       ) : null}
 
       <div className="study-page-actions">
-        <Link href="/learner/study/new" className="admin-btn admin-btn--primary">
-          ＋ 学習計画を追加
-        </Link>
+        {isStudyActivePlanAtLimit(activeCount) ? (
+          <span className="admin-btn admin-btn--primary admin-btn--disabled" aria-disabled="true">
+            ＋ 学習計画を追加（上限）
+          </span>
+        ) : (
+          <Link href="/learner/study/new" className="admin-btn admin-btn--primary">
+            ＋ 学習計画を追加
+          </Link>
+        )}
       </div>
     </LearnerShell>
   );

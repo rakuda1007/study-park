@@ -7,7 +7,8 @@ import { StudyPlanForm } from "@/components/learner/study/StudyPlanForm";
 import { StudyTemplatePicker } from "@/components/learner/study/StudyTemplatePicker";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { customSubjectOption, isCustomSubjectId } from "@/lib/study/subject-options";
-import { createStudyPlan } from "@/lib/study/firestore";
+import { createStudyPlan, countActiveStudyPlans } from "@/lib/study/firestore";
+import { isStudyActivePlanAtLimit, studyActivePlanUsageLabel } from "@/lib/study/limits";
 import { invalidateStudyPlansCache } from "@/lib/study/plans-loader";
 import { listStudyItemMasters } from "@/lib/study/masters-firestore";
 import { loadStudySubjectData } from "@/lib/study/subject-options";
@@ -19,6 +20,7 @@ import {
 import type { StudyPlanInput, StudyTemplateDoc } from "@/lib/study/types";
 import { studyPlanHref } from "@/lib/study/urls";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 import contentManifest from "@/public/content-manifest.json";
 import type { ContentManifest } from "@/lib/content/types";
 
@@ -34,6 +36,7 @@ function LearnerStudyNewInner() {
     () => searchParams.get("templateId") ?? "",
   );
   const [loading, setLoading] = useState(true);
+  const [activeCount, setActiveCount] = useState(0);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -41,14 +44,16 @@ function LearnerStudyNewInner() {
         if (!user) return;
         setUserId(user.uid);
         try {
-          const [data, templateList, masterList] = await Promise.all([
+          const [data, templateList, masterList, active] = await Promise.all([
             loadStudySubjectData(user.uid, manifest),
             listStudyTemplates(user.uid),
             listStudyItemMasters(user.uid),
+            countActiveStudyPlans(user.uid),
           ]);
           setSubjectData(data);
           setTemplates(templateList);
           setMasters(masterList);
+          setActiveCount(active);
         } finally {
           setLoading(false);
         }
@@ -80,9 +85,16 @@ function LearnerStudyNewInner() {
 
       <h2 className="shell-page-heading">学習計画を追加</h2>
 
+      {!loading ? (
+        <>
+          <p className="admin-msg">{studyActivePlanUsageLabel(activeCount)}</p>
+          <StudyActivePlanUsageBanner activeCount={activeCount} />
+        </>
+      ) : null}
+
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
-      {!loading && subjectData && userId ? (
+      {!loading && subjectData && userId && !isStudyActivePlanAtLimit(activeCount) ? (
         <>
           <StudyTemplatePicker
             templates={templates}

@@ -48,6 +48,7 @@ function LearnerStudyPlanInner() {
   const [editing, setEditing] = useState(false);
   const [editingDataLoading, setEditingDataLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [actionErr, setActionErr] = useState("");
 
   const refreshPlan = useCallback(
     async (uid: string) => {
@@ -157,9 +158,14 @@ function LearnerStudyPlanInner() {
 
   async function markActive() {
     if (!userId || !plan) return;
-    await updateStudyPlanMeta(userId, plan.id, { status: "active" });
-    setPlan((prev) => (prev ? { ...prev, status: "active" } : prev));
-    invalidateStudyPlansCache(userId);
+    setActionErr("");
+    try {
+      await updateStudyPlanMeta(userId, plan.id, { status: "active" });
+      setPlan((prev) => (prev ? { ...prev, status: "active", completedAt: undefined } : prev));
+      invalidateStudyPlansCache(userId);
+    } catch (e) {
+      setActionErr(e instanceof Error ? e.message : "再開に失敗しました。");
+    }
   }
 
   if (!planId) {
@@ -242,6 +248,8 @@ function LearnerStudyPlanInner() {
           </button>
         </div>
       </header>
+
+      {actionErr ? <p className="admin-err">{actionErr}</p> : null}
 
       {!editing ? (
         <div className="study-detail-template-save">

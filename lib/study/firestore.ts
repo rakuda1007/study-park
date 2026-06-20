@@ -4,6 +4,7 @@ import {
   addDoc,
   collection,
   doc,
+  getCountFromServer,
   getDoc,
   getDocs,
   orderBy,
@@ -15,6 +16,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
+import { STUDY_ACTIVE_PLAN_LIMIT, StudyPlanLimitError } from "./limits";
 import { planOverlapsWeek, formatStudyDate } from "./week";
 import type {
   StudyItemDoc,
@@ -52,9 +54,25 @@ function mapPlan(id: string, data: Record<string, unknown>): StudyPlanDoc {
     memo: data.memo ? String(data.memo) : undefined,
     status:
       status === "completed" || status === "archived" ? status : "active",
+    completedAt: data.completedAt ? tsToIso(data.completedAt) : undefined,
+    archivedAt: data.archivedAt ? tsToIso(data.archivedAt) : undefined,
     createdAt: tsToIso(data.createdAt),
     updatedAt: tsToIso(data.updatedAt),
   };
+}
+
+export async function countActiveStudyPlans(userId: string): Promise<number> {
+  const snap = await getCountFromServer(
+    query(plansCol(userId), where("status", "==", "active")),
+  );
+  return snap.data().count;
+}
+
+async function assertCanAddActivePlan(userId: string): Promise<void> {
+  const activeCount = await countActiveStudyPlans(userId);
+  if (activeCount >= STUDY_ACTIVE_PLAN_LIMIT) {
+    throw new StudyPlanLimitError(activeCount);
+  }
 }
 
 function mapContentRef(data: unknown): StudyItemDoc["contentRef"] | undefined {
@@ -163,6 +181,8 @@ export async function createStudyPlan(
   userId: string,
   input: StudyPlanInput,
 ): Promise<string> {
+  await assertCanAddActivePlan(userId);
+
   const planRef = await addDoc(plansCol(userId), {
     subjectId: input.subjectId.trim(),
     subjectName: input.subjectName.trim(),
@@ -204,13 +224,33 @@ export async function updateStudyPlanMeta(
     status?: StudyPlanStatus;
   },
 ): Promise<void> {
+  if (patch.status === "active") {
+    const current = await getDoc(doc(getFirestoreClient(), "users", userId, "studyPlans", planId));
+    const currentStatus = current.exists()
+      ? (current.data().status as StudyPlanStatus | undefined)
+      : undefined;
+    if (currentStatus && currentStatus !== "active") {
+      await assertCanAddActivePlan(userId);
+    }
+  }
+
   const data: Record<string, unknown> = { updatedAt: serverTimestamp() };
   if (patch.subjectId !== undefined) data.subjectId = patch.subjectId.trim();
   if (patch.subjectName !== undefined) data.subjectName = patch.subjectName.trim();
   if (patch.startDate !== undefined) data.startDate = patch.startDate;
   if (patch.dueDate !== undefined) data.dueDate = patch.dueDate;
   if (patch.memo !== undefined) data.memo = patch.memo.trim() || null;
-  if (patch.status !== undefined) data.status = patch.status;
+  if (patch.status !== undefined) {
+    data.status = patch.status;
+    if (patch.status === "completed") {
+      data.completedAt = serverTimestamp();
+    } else if (patch.status === "active") {
+      data.completedAt = null;
+      data.archivedAt = null;
+    } else if (patch.status === "archived") {
+      data.archivedAt = serverTimestamp();
+    }
+  }
   await updateDoc(doc(getFirestoreClient(), "users", userId, "studyPlans", planId), data);
 }
 

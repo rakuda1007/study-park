@@ -2048,6 +2048,49 @@
   margin: 1rem 0 2rem;
 }
 
+.admin-btn--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.admin-msg--subtle {
+  font-size: 0.875rem;
+  opacity: 0.85;
+  margin-top: -0.25rem;
+}
+
+.study-active-count-label {
+  white-space: nowrap;
+}
+
+.study-limit-banner {
+  border-left: 4px solid var(--admin-accent);
+}
+
+.study-limit-banner--warn {
+  border-left-color: #c9a227;
+}
+
+.study-limit-banner--danger {
+  border-left-color: var(--admin-danger);
+}
+
+.study-limit-banner__title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.study-limit-banner__body {
+  margin: 0;
+  font-size: 0.925rem;
+  line-height: 1.55;
+}
+
+.study-limit-banner__actions {
+  margin: 0.75rem 0 0;
+}
+
 .study-plan-form__section {
   margin-bottom: 1rem;
 }

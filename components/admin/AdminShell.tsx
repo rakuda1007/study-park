@@ -15,6 +15,7 @@ const ADMIN_MENU_MAIN = [
   { label: "教科マスタ", href: "/admin/subjects" },
   { label: "学習者招待", href: "/admin/invitations" },
   { label: "利用者一覧", href: "/admin/users" },
+  { label: "学習管理の運用", href: "/admin/study-ops" },
   { label: "学習者ホーム", href: "/learner" },
   PORTAL_MENU_ITEM,
 ];

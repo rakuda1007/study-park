@@ -7,6 +7,11 @@ import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
 import { StudyWeekNav } from "@/components/learner/study/StudyWeekNav";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import { fetchWeekStudyPlansCached } from "@/lib/study/plans-loader";
+import { countActiveStudyPlans } from "@/lib/study/firestore";
+import {
+  isStudyActivePlanAtLimit,
+  studyActivePlanUsageLabel,
+} from "@/lib/study/limits";
 import {
   averageProgress,
   delayStatus,
@@ -18,6 +23,7 @@ import {
   getWeekStart,
 } from "@/lib/study/week";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
 function groupPlansBySubject(plans: StudyPlanWithItems[]): Map<string, StudyPlanWithItems[]> {
   const map = new Map<string, StudyPlanWithItems[]>();
@@ -33,13 +39,18 @@ function groupPlansBySubject(plans: StudyPlanWithItems[]): Map<string, StudyPlan
 export default function LearnerStudyPage() {
   const [userId, setUserId] = useState("");
   const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
+  const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
 
   const refresh = useCallback(async (uid: string) => {
-    const data = await fetchWeekStudyPlansCached(uid, weekStart, weekEnd);
+    const [data, active] = await Promise.all([
+      fetchWeekStudyPlansCached(uid, weekStart, weekEnd),
+      countActiveStudyPlans(uid),
+    ]);
     setPlans(data);
+    setActiveCount(active);
   }, [weekStart, weekEnd]);
 
   useEffect(() => {
@@ -91,7 +102,15 @@ export default function LearnerStudyPage() {
     <LearnerShell title="学習管理">
       <p className="admin-msg learner-welcome-msg">
         いつまでに何をやるか、どこまで進んだかを週単位で確認できます。
+        {userId ? (
+          <span className="study-active-count-label">
+            {" "}
+            （{studyActivePlanUsageLabel(activeCount)}）
+          </span>
+        ) : null}
       </p>
+
+      <StudyActivePlanUsageBanner activeCount={activeCount} />
 
       <StudyWeekNav weekStart={weekStart} onChange={setWeekStart} />
 
@@ -190,9 +209,15 @@ export default function LearnerStudyPage() {
       ) : null}
 
       <div className="study-page-actions">
-        <Link href="/learner/study/new" className="admin-btn admin-btn--primary">
-          ＋ 学習計画を追加
-        </Link>
+        {isStudyActivePlanAtLimit(activeCount) ? (
+          <span className="admin-btn admin-btn--primary admin-btn--disabled" aria-disabled="true">
+            ＋ 学習計画を追加（上限）
+          </span>
+        ) : (
+          <Link href="/learner/study/new" className="admin-btn admin-btn--primary">
+            ＋ 学習計画を追加
+          </Link>
+        )}
         {userId ? (
           <Link href="/learner/study/all" className="admin-btn">
             すべての計画を見る
