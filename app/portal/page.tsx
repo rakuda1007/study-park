@@ -25,6 +25,7 @@ const FEATURES = [
       height: 427,
     },
     reverse: false,
+    detailHref: "/portal/study-management",
   },
   {
     num: "02",
@@ -48,6 +49,7 @@ const FEATURES = [
       height: 480,
     },
     reverse: true,
+    detailHref: "/portal/quiz-modes",
   },
   {
     num: "03",
@@ -71,6 +73,7 @@ const FEATURES = [
       height: 427,
     },
     reverse: false,
+    detailHref: "/portal/create-and-share",
   },
 ];
 
@@ -145,6 +148,13 @@ export default function PortalPage() {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
+              {feature.detailHref ? (
+                <p className="portal-feature__more">
+                  <Link href={feature.detailHref} className="portal-feature__more-link">
+                    もっと詳しく →
+                  </Link>
+                </p>
+              ) : null}
             </div>
           </div>
         </section>
