@@ -541,7 +541,7 @@
   margin: 0 auto;
   display: grid;
   gap: 2rem;
-  align-items: center;
+  align-items: start;
 }
 
 .portal-detail-split__heading {
@@ -583,10 +583,10 @@
   color: var(--portal-green);
 }
 
-.portal-detail__photo {
+.portal-detail-split__visual .portal-detail__photo {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   object-position: center;
   border-radius: 14px;
@@ -780,6 +780,10 @@
   .portal-detail-split__inner {
     grid-template-columns: 1fr 1fr;
     gap: 3rem;
+  }
+
+  .portal-detail-split__visual .portal-detail__photo {
+    aspect-ratio: 2 / 1;
   }
 
   .portal-detail-steps-section {
