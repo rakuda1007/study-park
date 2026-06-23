@@ -101,7 +101,9 @@ export function PortalFeatureDetailLayout({
               <h2 id="portal-detail-steps-heading" className="portal-detail-steps-section__heading">
                 使い方
               </h2>
-              <ol className="portal-detail-steps-grid">
+              <ol
+                className={`portal-detail-steps-grid${steps.length === 3 ? " portal-detail-steps-grid--3" : ""}`}
+              >
                 {steps.map((step, index) => (
                   <li key={step.title} className="portal-detail-step-card">
                     <div className="portal-detail-step-card__head">

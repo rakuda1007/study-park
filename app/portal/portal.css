@@ -801,6 +801,10 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .portal-detail-steps-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .portal-hero__banner {
     max-width: 68rem;
     min-height: 22rem;
