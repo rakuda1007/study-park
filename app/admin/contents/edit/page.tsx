@@ -402,7 +402,7 @@ function EditContentInner() {
                       <div className="admin-blank-answer">
                         <RichTextArea
                           id={`blank-${q.id}-${bi}-answers`}
-                          label="正答（別解はカンマ・読点区切り）"
+                          label="正答（別解は半角カンマ区切り。読点「、」は本文に使えます）"
                           value={blankAnswersToInput(b.answers)}
                           onChange={(v) =>
                             updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })

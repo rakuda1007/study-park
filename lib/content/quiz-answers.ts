@@ -24,9 +24,12 @@ export function normalizeBlankAnswerList(answers: string[], marker: string): str
   return answers;
 }
 
+/** 別解の区切り文字（半角カンマのみ。読点「、」は正答本文に使える） */
+export const BLANK_ANSWER_ALT_SEPARATOR = ",";
+
 /** 空欄の別解リストを編集用の1文字列に */
 export function blankAnswersToInput(answers: string[]): string {
-  return answers.join("、");
+  return answers.join(BLANK_ANSWER_ALT_SEPARATOR);
 }
 
 /** 別解1件の前後のスペース・タブのみ除去（改行は保持） */
@@ -34,10 +37,10 @@ function trimBlankAnswerSegment(segment: string): string {
   return segment.replace(/^[ \t]+|[ \t]+$/g, "");
 }
 
-/** 編集欄の文字列を別解リストに（カンマ・読点区切り） */
+/** 編集欄の文字列を別解リストに（半角カンマ区切り。読点「、」は分割しない） */
 export function parseBlankAnswersInput(value: string): string[] {
   return value
-    .split(/[,、]/)
+    .split(BLANK_ANSWER_ALT_SEPARATOR)
     .map(trimBlankAnswerSegment)
     .filter((a) => a.length > 0);
 }
