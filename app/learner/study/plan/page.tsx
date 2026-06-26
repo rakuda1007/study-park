@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { StudyItemProgressEditor } from "@/components/learner/StudyItemProgressEditor";
-import { StudyPlanForm } from "@/components/learner/StudyPlanForm";
-import { StudyProgressGauge } from "@/components/learner/StudyProgressGauge";
-import { StudySaveTemplateForm } from "@/components/learner/StudySaveTemplateForm";
+import { StudyItemProgressEditor } from "@/components/learner/study/StudyItemProgressEditor";
+import { StudyPlanForm } from "@/components/learner/study/StudyPlanForm";
+import { StudyProgressGauge } from "@/components/learner/study/StudyProgressGauge";
+import { StudySaveTemplateForm } from "@/components/learner/study/StudySaveTemplateForm";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import {
   customSubjectOption,
