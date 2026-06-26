@@ -91,7 +91,7 @@ export default function CreatorStartPage() {
         </button>
       </form>
       <p style={{ marginTop: "1rem", fontSize: "0.88rem" }}>
-        <Link href="/learner">学習者ホームに戻る</Link>
+        <Link href="/learner">学習管理へ戻る</Link>
       </p>
     </div>
   );

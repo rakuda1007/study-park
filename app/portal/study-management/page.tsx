@@ -58,7 +58,7 @@ export default function PortalStudyManagementPage() {
       closingBody="教材を解くだけでなく、日々の勉強全体を見渡したい方におすすめです。"
       closingActions={[
         { href: "/signup/learner", label: "学習者登録（無料）", primary: true, large: true },
-        { href: "/learner/study", label: "学習管理を開く" },
+        { href: "/learner", label: "学習管理を開く" },
         { href: "/portal", label: "ポータルに戻る" },
       ]}
     />

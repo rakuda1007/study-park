@@ -63,7 +63,7 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
         <Link
           href={homeHref}
           className="app-header-logo-link"
-          aria-label={homeHref === "/learner" ? "学習者ホームへ" : "トップへ"}
+          aria-label={homeHref === "/learner" ? "学習管理へ" : "トップへ"}
         >
           <img
             className="app-header-logo"

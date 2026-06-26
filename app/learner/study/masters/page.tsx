@@ -34,7 +34,7 @@ export default function LearnerStudyMastersPage() {
   return (
     <LearnerShell title="学習管理">
       <p className="study-back-link-wrap">
-        <Link href="/learner/study" className="study-back-link">
+        <Link href="/learner" className="study-back-link">
           ← 学習管理に戻る
         </Link>
       </p>

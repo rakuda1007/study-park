@@ -1,76 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  subjectDisplayName,
-  subjectSortOrder,
-} from "@/lib/content/subject-names";
-import type { ContentManifest } from "@/lib/content/types";
-import { loadLearnerHomeRows, type LearnerHomeRow } from "@/lib/learner/home-rows";
-import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
-import { JoinWorkspaceInviteForm } from "@/components/learner/JoinWorkspaceInviteForm";
-import { LearnerBecomeCreatorCard } from "@/components/learner/LearnerBecomeCreatorCard";
+import { StudyPlanCard } from "@/components/learner/study/StudyPlanCard";
+import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
+import { StudyWeekNav } from "@/components/learner/study/StudyWeekNav";
 import { LearnerShell } from "@/components/learner/LearnerShell";
-import { LearnerSubjectSection } from "@/components/learner/LearnerSubjectSection";
-import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
-import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { fetchWeekStudyPlansCached } from "@/lib/study/plans-loader";
+import { countActiveStudyPlans } from "@/lib/study/firestore";
 import {
-  CONTENT_PERIOD_FILTER_ALL,
-} from "@/lib/content/period";
-import { countContentsForDisplay } from "@/lib/content/pinned";
-import { backfillLearnerNamesIfEmpty, getUserProfile } from "@/lib/users/firestore";
-import contentManifest from "@/public/content-manifest.json";
+  isStudyActivePlanAtLimit,
+  studyActivePlanUsageLabel,
+} from "@/lib/study/limits";
+import {
+  averageProgress,
+  delayStatus,
+  delayStatusLabel,
+} from "@/lib/study/progress";
+import type { StudyPlanWithItems } from "@/lib/study/types";
+import { getWeekEnd, getWeekStart } from "@/lib/study/week";
+import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
-type SubjectGroup = {
-  subjectId: string;
-  subjectName: string;
-  items: WorkspaceContentDoc[];
-};
-
-function groupBySubject(
-  contents: WorkspaceContentDoc[],
-  subjectNames: Map<string, string>,
-  manifest: ContentManifest,
-): SubjectGroup[] {
-  const byId = new Map<string, WorkspaceContentDoc[]>();
-  for (const c of contents) {
-    const list = byId.get(c.subjectId) ?? [];
-    list.push(c);
-    byId.set(c.subjectId, list);
+function groupPlansBySubject(plans: StudyPlanWithItems[]): Map<string, StudyPlanWithItems[]> {
+  const map = new Map<string, StudyPlanWithItems[]>();
+  for (const plan of plans) {
+    const key = plan.subjectName;
+    const list = map.get(key) ?? [];
+    list.push(plan);
+    map.set(key, list);
   }
-  return [...byId.entries()]
-    .map(([subjectId, items]) => ({
-      subjectId,
-      subjectName: subjectDisplayName(subjectNames, subjectId),
-      items: items.sort((a, b) => a.order - b.order),
-    }))
-    .sort(
-      (a, b) =>
-        subjectSortOrder(manifest, a.subjectId) - subjectSortOrder(manifest, b.subjectId),
-    );
+  return map;
 }
 
 export default function LearnerHomePage() {
-  const manifest = contentManifest as ContentManifest;
-  const searchParams = useSearchParams();
-  const joinedWorkspaceId = searchParams.get("joined")?.trim() || undefined;
-  const [rows, setRows] = useState<LearnerHomeRow[]>([]);
-  const [subjectNames, setSubjectNames] = useState<Map<string, string>>(new Map());
-  const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
-  const [showCreatorUpgrade, setShowCreatorUpgrade] = useState(false);
-  const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
+  const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
+  const [activeCount, setActiveCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
 
-  const refreshRows = useCallback(
-    async (uid: string, ensureWorkspaceId?: string) => {
-      const data = await loadLearnerHomeRows(uid, manifest, { ensureWorkspaceId });
-      setRows(data.rows);
-      setSubjectNames(data.subjectNames);
-    },
-    [manifest],
-  );
+  const refresh = useCallback(async (uid: string) => {
+    const [data, active] = await Promise.all([
+      fetchWeekStudyPlansCached(uid, weekStart, weekEnd),
+      countActiveStudyPlans(uid),
+    ]);
+    setPlans(data);
+    setActiveCount(active);
+  }, [weekStart, weekEnd]);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -78,103 +56,177 @@ export default function LearnerHomePage() {
         if (!user) return;
         setUserId(user.uid);
         try {
-          await backfillLearnerNamesIfEmpty(user.uid);
-          const profile = await getUserProfile(user.uid);
-          setShowCreatorUpgrade(profile?.role === "learner");
-          await refreshRows(user.uid, joinedWorkspaceId);
+          await refresh(user.uid);
         } finally {
           setLoading(false);
         }
       })();
     });
     return unsub;
-  }, [refreshRows, joinedWorkspaceId]);
+  }, [refresh]);
 
-  const rowsWithGroups = useMemo(
-    () =>
-      rows.map((r) => ({
-        ...r,
-        subjectGroups: groupBySubject(r.contents, subjectNames, manifest),
-      })),
-    [rows, subjectNames, manifest],
-  );
+  const weekPlans = useMemo(() => plans, [plans]);
 
-  const allContents = useMemo(() => rows.flatMap((r) => r.contents), [rows]);
+  const overallProgress = useMemo(() => {
+    if (weekPlans.length === 0) return 0;
+    const values = weekPlans.map((plan) => averageProgress(plan.items));
+    return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+  }, [weekPlans]);
 
-  function visibleItemCount(subjectGroups: SubjectGroup[]): number {
-    return subjectGroups.reduce(
-      (total, group) => total + countContentsForDisplay(group.items, periodFilter),
-      0,
-    );
-  }
+  const alertCounts = useMemo(() => {
+    let nearDue = 0;
+    let behind = 0;
+    let completed = 0;
+    for (const plan of weekPlans) {
+      const progress = averageProgress(plan.items);
+      const status = delayStatus(progress, plan.startDate, plan.dueDate);
+      if (progress >= 100) {
+        completed += 1;
+        continue;
+      }
+      if (status === "urgent") {
+        nearDue += 1;
+      } else if (status === "warning" || status === "danger") {
+        behind += 1;
+      }
+    }
+    return { nearDue, behind, completed };
+  }, [weekPlans]);
+
+  const grouped = useMemo(() => groupPlansBySubject(weekPlans), [weekPlans]);
 
   return (
-    <LearnerShell>
+    <LearnerShell title="学習管理">
       <p className="admin-msg learner-welcome-msg">
-        ここから、参加している教材を選んで学習できます。九九・県庁所在地は{" "}
-        <Link href="/?park=1">トップページ</Link> からいつでも無料で利用できます。
+        いつまでに何をやるか、どこまで進んだかを週単位で確認できます。
+        {userId ? (
+          <span className="study-active-count-label">
+            {" "}
+            （{studyActivePlanUsageLabel(activeCount)}）
+          </span>
+        ) : null}
       </p>
+
+      <StudyActivePlanUsageBanner activeCount={activeCount} />
+
+      <StudyWeekNav weekStart={weekStart} onChange={setWeekStart} />
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
-      {!loading && allContents.length > 0 ? (
-        <div className="learner-period-toolbar">
-          <ContentPeriodFilter
-            contents={allContents}
-            value={periodFilter}
-            onChange={setPeriodFilter}
-            storageKey="study-park-learner-content-period-filter"
-          />
+      {!loading && weekPlans.length > 0 ? (
+        <section className="admin-card study-summary-card study-summary-card--compact">
+          <div className="study-summary-card__row study-summary-card__row--bar">
+            <span className="study-summary-card__title">
+              今週の進捗（{weekPlans.length}件）
+            </span>
+            <div className="study-summary-card__bar-wrap">
+              <StudyProgressBar percent={overallProgress} size="sm" hideBadge />
+            </div>
+          </div>
+          {(alertCounts.completed > 0 ||
+            alertCounts.behind > 0 ||
+            alertCounts.nearDue > 0) && (
+            <p className="study-summary-card__meta">
+              {alertCounts.completed > 0 ? (
+                <span className="study-summary-card__done">
+                  完了 {alertCounts.completed}件
+                </span>
+              ) : null}
+              {alertCounts.completed > 0 &&
+              (alertCounts.behind > 0 || alertCounts.nearDue > 0)
+                ? " · "
+                : null}
+              {alertCounts.behind > 0 ? (
+                <span className="study-summary-card__alert">
+                  遅れ {alertCounts.behind}件
+                </span>
+              ) : null}
+              {alertCounts.behind > 0 && alertCounts.nearDue > 0 ? " · " : null}
+              {alertCounts.nearDue > 0 ? (
+                <span className="study-summary-card__urgent">
+                  期限近 {alertCounts.nearDue}件
+                </span>
+              ) : null}
+            </p>
+          )}
+        </section>
+      ) : null}
+
+      {!loading && weekPlans.length === 0 ? (
+        <section className="admin-card">
+          <p>
+            この週に表示できる学習計画がありません。別の週を選ぶか、下のボタンから追加してください。
+          </p>
+        </section>
+      ) : null}
+
+      {!loading && weekPlans.length > 0 ? (
+        <div className="study-plan-list study-week-page__plans">
+          {[...grouped.entries()].map(([subjectName, subjectPlans]) => {
+            const singlePlan = subjectPlans.length === 1 ? subjectPlans[0] : null;
+            const singleProgress = singlePlan ? averageProgress(singlePlan.items) : 0;
+            const singleCompleted =
+              singlePlan &&
+              (singleProgress >= 100 || singlePlan.status === "completed");
+            const singleStatus =
+              singlePlan && !singleCompleted
+                ? delayStatus(
+                    singleProgress,
+                    singlePlan.startDate,
+                    singlePlan.dueDate,
+                  )
+                : null;
+            const singleBadge =
+              singleStatus && singlePlan ? delayStatusLabel(singleStatus) : null;
+
+            return (
+              <section key={subjectName} className="study-subject-section">
+                <div className="study-subject-section__head">
+                  <h2 className="study-subject-section__title">{subjectName}</h2>
+                  {singleBadge ? (
+                    <span
+                      className={`study-status-badge study-status-badge--${singleStatus}`}
+                    >
+                      {singleBadge}
+                    </span>
+                  ) : null}
+                </div>
+                {subjectPlans.map((plan) => (
+                  <StudyPlanCard
+                    key={plan.id}
+                    plan={plan}
+                    listView
+                    hideStatusBadge={subjectPlans.length === 1}
+                  />
+                ))}
+              </section>
+            );
+          })}
         </div>
       ) : null}
 
-      {!loading && rows.length === 0 ? (
-        <section className="admin-card">
-          <p>まだ参加している教材がありません。下のフォームから招待コードを入力して参加してください。</p>
-        </section>
-      ) : null}
-
-      {rowsWithGroups.map((r) => (
-        <section key={r.workspaceId} className="admin-card learner-workspace-card">
-          <h2 className="learner-workspace-title">{r.workspaceName}</h2>
-          <p className="learner-workspace-meta">
-            {r.isOwnWorkspace ? (
-              <>自分が作った教材</>
-            ) : (
-              <>
-                提供：<strong>{r.ownerLabel}</strong>
-              </>
-            )}
-          </p>
-          {r.contents.length === 0 ? (
-            <p className="admin-msg">公開中の教材はまだありません。</p>
-          ) : visibleItemCount(r.subjectGroups) === 0 ? (
-            <p className="admin-msg">選択した期間の教材はありません。</p>
-          ) : (
-            <div className="learner-subject-list">
-              {r.subjectGroups.map((g) => (
-                <LearnerSubjectSection
-                  key={g.subjectId}
-                  group={g}
-                  workspaceSlug={r.workspaceSlug}
-                  periodFilter={periodFilter}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      ))}
-
-      {!loading && userId && showCreatorUpgrade ? <LearnerBecomeCreatorCard /> : null}
-
-      {!loading && userId ? (
-        <JoinWorkspaceInviteForm
-          userId={userId}
-          onJoined={(result) => {
-            void refreshRows(userId, result.workspaceId);
-          }}
-        />
-      ) : null}
+      <div className="study-page-actions">
+        {isStudyActivePlanAtLimit(activeCount) ? (
+          <span className="admin-btn admin-btn--primary admin-btn--disabled" aria-disabled="true">
+            ＋ 学習計画を追加（上限）
+          </span>
+        ) : (
+          <Link href="/learner/study/new" className="admin-btn admin-btn--primary">
+            ＋ 学習計画を追加
+          </Link>
+        )}
+        {userId ? (
+          <Link href="/learner/study/all" className="admin-btn">
+            すべての計画を見る
+          </Link>
+        ) : null}
+        <Link href="/learner/study/templates" className="admin-btn">
+          テンプレート
+        </Link>
+        <Link href="/learner/study/masters" className="admin-btn">
+          よく使う項目
+        </Link>
+      </div>
     </LearnerShell>
   );
 }

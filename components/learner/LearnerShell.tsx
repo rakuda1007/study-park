@@ -14,15 +14,14 @@ import {
 
 const LEARNER_MENU_MAIN = [
   { label: "トップ", href: "/", title: "Study Park トップ" },
-  { label: "学習者ホーム", href: "/learner" },
-  { label: "学習管理", href: "/learner/study" },
+  { label: "教材", href: "/learner/materials" },
   PORTAL_MENU_ITEM,
 ];
 
 const LEARNER_MENU_BOTTOM = [{ label: "プロフィール", href: "/learner/profile" }];
 
 export function LearnerShell({
-  title = "あなたの学習",
+  title = "学習管理",
   children,
 }: {
   title?: string;

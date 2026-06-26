@@ -15,7 +15,7 @@ import {
 } from "@/lib/firebase/auth-client";
 
 function dashboardLabel(kind: AuthSessionKind): string {
-  if (kind === "learner") return "学習者ホーム";
+  if (kind === "learner") return "学習管理";
   return sessionModeMeta(kind).dashboardLinkLabel;
 }
 

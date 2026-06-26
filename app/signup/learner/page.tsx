@@ -25,7 +25,7 @@ export default function SignupLearnerPage() {
     if (inviteCode.trim()) {
       const r = await joinWorkspaceByInviteCode(inviteCode, uid);
       setJoinMsg(`${r.workspaceName} に参加しました。`);
-      router.replace(`/learner?joined=${encodeURIComponent(r.workspaceId)}`);
+      router.replace(`/learner/materials?joined=${encodeURIComponent(r.workspaceId)}`);
       return;
     }
     const path = await resolvePostLoginPath(uid);

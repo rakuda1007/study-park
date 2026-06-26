@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { StudyItemProgressEditor } from "@/components/learner/study/StudyItemProgressEditor";
-import { StudyPlanForm } from "@/components/learner/study/StudyPlanForm";
-import { StudyProgressGauge } from "@/components/learner/study/StudyProgressGauge";
-import { StudySaveTemplateForm } from "@/components/learner/study/StudySaveTemplateForm";
+import { StudyItemProgressEditor } from "@/components/learner/StudyItemProgressEditor";
+import { StudyPlanForm } from "@/components/learner/StudyPlanForm";
+import { StudyProgressGauge } from "@/components/learner/StudyProgressGauge";
+import { StudySaveTemplateForm } from "@/components/learner/StudySaveTemplateForm";
 import { LearnerShell } from "@/components/learner/LearnerShell";
 import {
   customSubjectOption,
@@ -143,7 +143,7 @@ function LearnerStudyPlanInner() {
     try {
       await deleteStudyPlan(userId, plan.id);
       invalidateStudyPlansCache(userId);
-      router.push("/learner/study");
+      router.push("/learner");
     } finally {
       setDeleting(false);
     }
@@ -173,7 +173,7 @@ function LearnerStudyPlanInner() {
       <LearnerShell title="学習管理">
         <section className="admin-card">
           <p>学習計画が指定されていません。</p>
-          <Link href="/learner/study" className="admin-btn">
+          <Link href="/learner" className="admin-btn">
             戻る
           </Link>
         </section>
@@ -194,7 +194,7 @@ function LearnerStudyPlanInner() {
       <LearnerShell title="学習管理">
         <section className="admin-card">
           <p>学習計画が見つかりません。</p>
-          <Link href="/learner/study" className="admin-btn">
+          <Link href="/learner" className="admin-btn">
             戻る
           </Link>
         </section>
@@ -205,7 +205,7 @@ function LearnerStudyPlanInner() {
   return (
     <LearnerShell title="学習管理">
       <p className="study-back-link-wrap">
-        <Link href="/learner/study" className="study-back-link">
+        <Link href="/learner" className="study-back-link">
           ← 学習管理に戻る
         </Link>
       </p>

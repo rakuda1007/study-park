@@ -14,7 +14,7 @@ const CREATOR_MENU_MAIN = [
   { label: "教科マスタ", href: "/creator/subjects" },
   { label: "参加者", href: "/creator/learners" },
   { label: "利用状況", href: "/creator/usage" },
-  { label: "学習者ホーム", href: "/learner" },
+  { label: "教材", href: "/learner/materials" },
   PORTAL_MENU_ITEM,
 ];
 

@@ -44,7 +44,7 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
       { label: "教科マスタ", href: "/admin/subjects" },
       { label: "学習者招待", href: "/admin/invitations" },
       { label: "利用者一覧", href: "/admin/users" },
-      { label: "学習者ホーム", href: "/learner" },
+      { label: "教材", href: "/learner/materials" },
     );
     bottomItems.push({ label: "プロフィール", href: "/admin/profile" });
   } else if (session === "creator") {
@@ -53,12 +53,12 @@ function menuItemsForSession(session: AuthSessionKind | null): HomeMenuConfig {
       { label: "教科マスタ", href: "/creator/subjects" },
       { label: "参加者", href: "/creator/learners" },
       { label: "利用状況", href: "/creator/usage" },
-      { label: "学習者ホーム", href: "/learner" },
+      { label: "教材", href: "/learner/materials" },
     );
     bottomItems.push({ label: "プロフィール", href: "/creator/profile" });
   } else if (session === "learner") {
     items.push({ label: meta.dashboardLinkLabel, href: homePathForSession(session) });
-    items.push({ label: "学習管理", href: "/learner/study" });
+    items.push({ label: "教材", href: "/learner/materials" });
     bottomItems.push({ label: "プロフィール", href: "/learner/profile" });
   }
 
@@ -122,7 +122,7 @@ export function HomeTopbar() {
             <>
               {session === "learner" ? (
                 <Link href="/learner" className="home-topbar__auth-btn home-topbar__auth-btn--primary">
-                  学習者ホーム
+                  学習管理
                 </Link>
               ) : null}
               <button type="button" className="home-topbar__auth-btn" onClick={() => void logout()}>

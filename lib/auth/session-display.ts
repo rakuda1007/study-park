@@ -27,8 +27,8 @@ export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
     badge: "学習モード",
     shortLabel: "学習者",
     homeStatus: "学習中",
-    shellHint: "あなたのペースで、好きな教材から始められます",
-    dashboardLinkLabel: "学習を続ける",
+    shellHint: "学習計画と進捗を管理し、メニューから教材を選んで学べます",
+    dashboardLinkLabel: "学習管理",
   },
 };
 

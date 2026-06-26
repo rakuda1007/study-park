@@ -182,7 +182,7 @@ export default function AdminInvitationsPage() {
           <li>下の「準備」でワークスペースと招待コードを作る</li>
           <li>「教材を移行」で /admin の教材を招待対応版へコピーする</li>
           <li>学習者に招待コードと <a href="/signup/learner">学習者登録</a> の URL を伝える</li>
-          <li>科目ごとに公開を設定し、学習者は <a href="/learner">学習者ホーム</a> から学習する</li>
+          <li>科目ごとに公開を設定し、学習者は <a href="/learner/materials">教材</a> から学習する</li>
         </ol>
       </section>
 
@@ -305,7 +305,7 @@ export default function AdminInvitationsPage() {
               3. 科目ごとの公開（公開中 {publishedSubjectCount} / {wsSubjects.length}）
             </h2>
             <p className="admin-msg" style={{ marginTop: 0, marginBottom: "0.75rem" }}>
-              学習者に見せる教材は科目単位で公開します。科目を公開すると、その中の教材が学習者ホームに表示されます。
+              学習者に見せる教材は科目単位で公開します。科目を公開すると、その中の教材が教材一覧に表示されます。
             </p>
             {wsSubjects.length === 0 ? (
               <p className="admin-msg">教材を移行すると、科目がここに表示されます。</p>
