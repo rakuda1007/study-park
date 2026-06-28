@@ -110,6 +110,29 @@
   border: 1px solid #86efac;
 }
 
+.session-mode-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.session-mode-switcher__btn {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-card);
+  color: var(--admin-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.session-mode-switcher__btn:hover {
+  color: var(--admin-accent);
+  border-color: var(--admin-accent);
+}
+
 .session-mode-learner-chip {
   display: inline-flex;
   align-items: center;

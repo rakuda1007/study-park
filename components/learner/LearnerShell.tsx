@@ -1,24 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
+import { useMemo } from "react";
+import { SessionModeSwitcher } from "@/components/auth/SessionModeSwitcher";
+import { ShellBrandLink } from "@/components/shell/ShellBrandLink";
 import { ShellHamburgerMenu } from "@/components/shell/ShellHamburgerMenu";
-import { PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
-import {
-  resolveAuthSession,
-  signOutUser,
-  subscribeAuth,
-  type AuthSessionKind,
-} from "@/lib/firebase/auth-client";
-
-const LEARNER_MENU_MAIN = [
-  { label: "トップ", href: "/", title: "Study Park トップ" },
-  { label: "教材", href: "/learner/materials" },
-  PORTAL_MENU_ITEM,
-];
-
-const LEARNER_MENU_BOTTOM = [{ label: "プロフィール", href: "/learner/profile" }];
+import { useShellSession } from "@/components/shell/useShellSession";
+import { getShellMenu } from "@/lib/shell/menu-config";
+import { signOutUser } from "@/lib/firebase/auth-client";
 
 export function LearnerShell({
   title = "学習管理",
@@ -28,16 +17,11 @@ export function LearnerShell({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [badgeKind, setBadgeKind] = useState<AuthSessionKind>("learner");
-
-  useEffect(() => {
-    const unsub = subscribeAuth((user) => {
-      void resolveAuthSession(user).then((kind) => {
-        if (kind) setBadgeKind(kind);
-      });
-    });
-    return unsub;
-  }, []);
+  const { ready, session, canSwitchMode, switchMode } = useShellSession();
+  const menu = useMemo(
+    () => (session ? getShellMenu(session) : { items: [], bottomItems: [] }),
+    [session],
+  );
 
   async function logout() {
     await signOutUser();
@@ -48,20 +32,29 @@ export function LearnerShell({
     <div className="admin-shell">
       <header className="admin-header shell-header">
         <div className="shell-header__title-row">
-          <h1 className="admin-title shell-header__title">{title}</h1>
-          <SessionModeBadge kind={badgeKind} />
+          <h1 className="admin-title shell-header__title">
+            <ShellBrandLink session={session} />
+          </h1>
+          {ready && session ? (
+            <SessionModeSwitcher
+              kind={session}
+              canSwitch={canSwitchMode}
+              onSwitch={switchMode}
+            />
+          ) : null}
         </div>
         <div className="shell-header__actions">
           <button type="button" className="admin-btn" onClick={() => void logout()}>
             ログアウト
           </button>
           <ShellHamburgerMenu
-            items={LEARNER_MENU_MAIN}
-            bottomItems={LEARNER_MENU_BOTTOM}
+            items={menu.items}
+            bottomItems={menu.bottomItems}
             ariaLabel="学習メニュー"
           />
         </div>
       </header>
+      {title ? <h2 className="shell-page-heading">{title}</h2> : null}
       {children}
     </div>
   );

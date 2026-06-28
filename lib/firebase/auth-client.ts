@@ -11,6 +11,7 @@ import {
 } from "firebase/auth";
 import { absoluteSiteUrl } from "@/lib/site-url";
 import { doc, getDoc } from "firebase/firestore";
+import { resolveDualRoleSession } from "@/lib/auth/active-session";
 import { createUserProfile, getUserProfile } from "@/lib/users/firestore";
 import type { UserRole } from "@/lib/users/types";
 import { createWorkspaceForCreator } from "@/lib/workspaces/firestore";
@@ -201,17 +202,31 @@ export function homePathForSession(kind: AuthSessionKind): string {
   }
 }
 
+export async function isDualRoleUser(user: User | null): Promise<boolean> {
+  if (!user) return false;
+  if (!(await isAdminUser(user))) return false;
+  const profile = await getUserProfile(user.uid);
+  return profile?.role === "creator";
+}
+
 export async function resolveAuthSession(user: User | null): Promise<AuthSessionKind | null> {
   if (!user) return null;
-  if (await isAdminUser(user)) return "admin";
+  const admin = await isAdminUser(user);
   const profile = await getUserProfile(user.uid);
+  if (admin) {
+    return resolveDualRoleSession(profile?.role === "creator");
+  }
   if (!profile) return null;
   return profile.role === "learner" ? "learner" : "creator";
 }
 
 export async function resolvePostLoginPath(uid: string): Promise<string> {
   const adminSnap = await getDoc(doc(getFirestoreClient(), "admins", uid));
-  if (adminSnap.exists()) return homePathForSession("admin");
+  if (adminSnap.exists()) {
+    const profile = await getUserProfile(uid);
+    if (profile?.role === "creator") return homePathForSession("creator");
+    return homePathForSession("admin");
+  }
   const profile = await getUserProfile(uid);
   if (!profile) return "/signup";
   return homePathForSession(profile.role === "learner" ? "learner" : "creator");

@@ -307,8 +307,8 @@ export default function AdminContentsPage() {
           />
         </div>
         <p className="admin-hint">
-          <strong>Firestore（/play?slug=）</strong> の「下書き」はトップに出ません（招待用は
-          /admin/invitations のワークスペース側）。
+          <strong>Firestore（/play?slug=）</strong> の「下書き」はトップに出ません（招待用教材は
+          クリエイターのワークスペース側で管理します）。
           <strong>静的アプリ</strong>（県庁・雪の地域など）は Firestore の legacy と public
           フォルダで管理します。manifest から外した静的アプリは、この画面を開くと一覧から自動削除されます。
           トップ表示オフにするとログアウト後のトップから消えます（工事中表示）。

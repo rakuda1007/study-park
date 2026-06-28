@@ -3,8 +3,9 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getUserProfile } from "@/lib/users/firestore";
-import { subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
+import { isAdminUser, subscribeAuth, waitForAuthReady } from "@/lib/firebase/auth-client";
 import { createWorkspaceForCreator, getWorkspaceByOwner } from "@/lib/workspaces/firestore";
+import { ensureInvitationSetup } from "@/lib/workspaces/invitation-setup";
 
 const PUBLIC_PATHS = ["/creator/login", "/creator/start"];
 
@@ -35,13 +36,23 @@ export function CreatorGate({ children }: { children: React.ReactNode }) {
           setReady(true);
           return;
         }
-        const profile = await getUserProfile(user.uid);
+
+        let profile = await getUserProfile(user.uid);
+        if (!profile || profile.role !== "creator") {
+          const admin = await isAdminUser(user);
+          if (admin) {
+            await ensureInvitationSetup(user.uid, user.email ?? "");
+            profile = await getUserProfile(user.uid);
+          }
+        }
+
         if (!profile || profile.role !== "creator") {
           router.replace("/signup/creator");
           setAllowed(false);
           setReady(true);
           return;
         }
+
         let ws = await getWorkspaceByOwner(user.uid);
         if (!ws) {
           try {
