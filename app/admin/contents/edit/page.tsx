@@ -228,7 +228,7 @@ function EditContentInner() {
   function removeBlank(qIndex: number, bIndex: number) {
     setQuestions((prev) =>
       prev.map((q, i) => {
-        if (i !== qIndex || q.blanks.length <= 1) return q;
+        if (i !== qIndex) return q;
         return { ...q, blanks: q.blanks.filter((_, j) => j !== bIndex) };
       }),
     );
@@ -418,13 +418,17 @@ function EditContentInner() {
                         type="button"
                         className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
                         onClick={() => removeBlank(qi, bi)}
-                        disabled={q.blanks.length <= 1}
                         aria-label={`空欄 ${b.marker || bi + 1} を削除`}
                       >
                         削除
                       </button>
                     </div>
                   ))}
+                  {q.blanks.length === 0 ? (
+                    <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
+                      正答の登録はありません（「はじめに」など、読むだけの導入に使えます）。
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     className="admin-btn"

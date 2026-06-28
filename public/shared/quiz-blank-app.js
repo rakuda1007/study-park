@@ -123,10 +123,26 @@
     if (Array.isArray(question.answerDisplay) && question.answerDisplay.length > 0) {
       return question.answerDisplay;
     }
+    if (!Array.isArray(question.blanks) || question.blanks.length === 0) {
+      return [];
+    }
     return question.blanks.map((b) => ({
       marker: b.marker,
       text: formatCorrectAnswer(b),
     }));
+  }
+
+  function isIntroQuestion(question) {
+    if (!question) return false;
+    if (Array.isArray(question.answerDisplay) && question.answerDisplay.length > 0) {
+      return false;
+    }
+    if (!Array.isArray(question.blanks) || question.blanks.length === 0) {
+      return true;
+    }
+    return !question.blanks.some(
+      (b) => Array.isArray(b.answers) && b.answers.some((a) => String(a).trim()),
+    );
   }
 
   function allCorrectSummary(question) {
@@ -285,16 +301,18 @@
 
   function setPhaseControls() {
     const finished = state.session.finished;
-    const think = state.phase === "think" && !finished;
+    const intro = state.current && isIntroQuestion(state.current);
+    const think = state.phase === "think" && !finished && !intro;
 
     if (els.thinkHint) els.thinkHint.hidden = !think || finished;
-    if (els.answerReveal) els.answerReveal.hidden = think || finished;
+    if (els.answerReveal) els.answerReveal.hidden = think || finished || intro;
     if (els.btnReveal) {
-      els.btnReveal.hidden = !think || finished;
+      els.btnReveal.hidden = finished;
       els.btnReveal.disabled = state.locked || finished;
+      els.btnReveal.textContent = intro ? "次へ" : "答えを見る";
     }
     if (els.selfGrade) {
-      els.selfGrade.hidden = think || finished;
+      els.selfGrade.hidden = think || finished || intro;
     }
     if (els.btnOk) els.btnOk.disabled = state.locked || finished || think;
     if (els.btnNg) els.btnNg.disabled = state.locked || finished || think;
@@ -373,6 +391,13 @@
 
   function onRevealAnswer() {
     if (state.locked || state.session.finished || !state.current) return;
+    if (isIntroQuestion(state.current)) {
+      state.locked = true;
+      setPhaseControls();
+      setSpeech("つぎに進もう");
+      advanceAfterAnswer();
+      return;
+    }
     if (state.phase !== "think") return;
 
     state.phase = "revealed";
@@ -537,7 +562,11 @@
     state.phase = "think";
     const id = state.session.queue[state.session.index];
     state.current = questionById(id);
-    setSpeech("心のなかで答えをかんがえてね");
+    setSpeech(
+      state.current && isIntroQuestion(state.current)
+        ? "読んだら「次へ」を押してね"
+        : "心のなかで答えをかんがえてね",
+    );
     renderStats();
     renderQuestion();
   }

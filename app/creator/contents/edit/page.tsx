@@ -199,10 +199,17 @@ function EditInner() {
   function removeBlank(qIndex: number, bIndex: number) {
     setQuestions((prev) =>
       prev.map((q, i) => {
-        if (i !== qIndex || q.blanks.length <= 1) return q;
+        if (i !== qIndex) return q;
         return { ...q, blanks: q.blanks.filter((_, j) => j !== bIndex) };
       }),
     );
+  }
+
+  function removeQuestion(index: number) {
+    const q = questions[index];
+    const label = q?.label?.trim() || `問${index + 1}`;
+    if (!confirm(`「${label}」を削除しますか？`)) return;
+    setQuestions((prev) => prev.filter((_, i) => i !== index));
   }
 
   function addQuestion() {
@@ -337,6 +344,14 @@ function EditInner() {
                         onChange={(e) => updateQuestion(qi, { label: e.target.value })}
                       />
                     </div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn--danger"
+                      onClick={() => removeQuestion(qi)}
+                      disabled={questions.length <= 1}
+                    >
+                      問題を削除
+                    </button>
                   </div>
                   <QuizQuestionBodyEditor
                     contentId={doc.id}
@@ -374,13 +389,17 @@ function EditInner() {
                         type="button"
                         className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
                         onClick={() => removeBlank(qi, bi)}
-                        disabled={q.blanks.length <= 1}
                         aria-label={`空欄 ${b.marker || bi + 1} を削除`}
                       >
                         削除
                       </button>
                     </div>
                   ))}
+                  {q.blanks.length === 0 ? (
+                    <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
+                      正答の登録はありません（「はじめに」など、読むだけの導入に使えます）。
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     className="admin-btn"

@@ -259,7 +259,7 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=6"
+        src="/shared/quiz-blank-app.js?v=7"
         strategy="afterInteractive"
         key={content.slug}
       />
