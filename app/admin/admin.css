@@ -483,6 +483,41 @@
   font-size: 0.85rem;
 }
 
+.admin-radio-field {
+  border: 0;
+  padding: 0;
+  margin: 0 0 0.85rem;
+  min-width: 0;
+}
+
+.admin-radio-field legend {
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+  margin-bottom: 0.35rem;
+  padding: 0;
+}
+
+.admin-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.admin-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  color: var(--admin-text);
+  cursor: pointer;
+}
+
+.admin-radio-option input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--admin-accent, #2563eb);
+}
+
 .admin-rich-textarea--resizable {
   resize: both;
   min-height: 5.5rem;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
@@ -19,6 +19,12 @@ import {
 import { listWorkspaceSubjectsForForm } from "@/lib/workspaces/subjects-firestore";
 import type { WorkspaceDoc, WorkspaceSubjectDoc } from "@/lib/workspaces/types";
 
+const EXCLUDED_SUBJECT_IDS = new Set(["general"]);
+
+function selectableSubjects(subjects: WorkspaceSubjectDoc[]): WorkspaceSubjectDoc[] {
+  return subjects.filter((s) => !EXCLUDED_SUBJECT_IDS.has(s.id) && s.name !== "教材");
+}
+
 export default function CreatorContentNewPage() {
   const router = useRouter();
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
@@ -28,7 +34,7 @@ export default function CreatorContentNewPage() {
   const [err, setErr] = useState("");
   const [subjects, setSubjects] = useState<WorkspaceSubjectDoc[]>([]);
   const [newType, setNewType] = useState<ContentType>("quiz");
-  const [newSubjectId, setNewSubjectId] = useState("math");
+  const [newSubjectId, setNewSubjectId] = useState("");
   const [newSlug, setNewSlug] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newPeriodYear, setNewPeriodYear] = useState(currentContentPeriod().year);
@@ -44,8 +50,9 @@ export default function CreatorContentNewPage() {
       await ensureWorkspaceSubjects(workspace.id);
       const formSubjects = await listWorkspaceSubjectsForForm(workspace.id);
       setSubjects(formSubjects);
-      if (formSubjects.length) {
-        setNewSubjectId(formSubjects[0].id);
+      const choices = selectableSubjects(formSubjects);
+      if (choices.length) {
+        setNewSubjectId(choices[0].id);
       }
     }
   }, []);
@@ -66,6 +73,8 @@ export default function CreatorContentNewPage() {
     });
     return unsub;
   }, [load]);
+
+  const subjectChoices = useMemo(() => selectableSubjects(subjects), [subjects]);
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
@@ -127,30 +136,56 @@ export default function CreatorContentNewPage() {
 
       {!loading && ws ? (
         <form className="admin-card" onSubmit={(e) => void onCreate(e)}>
-          <div className="admin-field">
-            <label htmlFor="new-type">形式</label>
-            <select
-              id="new-type"
-              value={newType}
-              onChange={(e) => setNewType(e.target.value as ContentType)}
-            >
-              <option value="quiz">クイズ</option>
-              <option value="lesson">レッスン</option>
-            </select>
-          </div>
-          <div className="admin-field">
-            <label htmlFor="new-subject">教科</label>
-            <select
-              id="new-subject"
-              value={newSubjectId}
-              onChange={(e) => setNewSubjectId(e.target.value)}
-            >
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
+          <fieldset className="admin-field admin-radio-field">
+            <legend>形式</legend>
+            <div className="admin-radio-group">
+              <label className="admin-radio-option">
+                <input
+                  type="radio"
+                  name="new-type"
+                  value="quiz"
+                  checked={newType === "quiz"}
+                  onChange={() => setNewType("quiz")}
+                />
+                <span>クイズ</span>
+              </label>
+              <label className="admin-radio-option">
+                <input
+                  type="radio"
+                  name="new-type"
+                  value="lesson"
+                  checked={newType === "lesson"}
+                  onChange={() => setNewType("lesson")}
+                />
+                <span>レッスン</span>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset className="admin-field admin-radio-field">
+            <legend>教科</legend>
+            <div className="admin-radio-group">
+              {subjectChoices.map((s) => (
+                <label key={s.id} className="admin-radio-option">
+                  <input
+                    type="radio"
+                    name="new-subject"
+                    value={s.id}
+                    checked={newSubjectId === s.id}
+                    onChange={() => setNewSubjectId(s.id)}
+                  />
+                  <span>{s.name}</span>
+                </label>
               ))}
-            </select>
+            </div>
+          </fieldset>
+          <div className="admin-field">
+            <label htmlFor="new-title">タイトル</label>
+            <input
+              id="new-title"
+              placeholder="教材のタイトル"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+            />
           </div>
           <div className="admin-field">
             <label htmlFor="new-slug">スラッグ</label>
@@ -160,15 +195,6 @@ export default function CreatorContentNewPage() {
               value={newSlug}
               onChange={(e) => setNewSlug(e.target.value)}
               required
-            />
-          </div>
-          <div className="admin-field">
-            <label htmlFor="new-title">タイトル</label>
-            <input
-              id="new-title"
-              placeholder="教材のタイトル"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
             />
           </div>
           <ContentPeriodFields
@@ -181,9 +207,9 @@ export default function CreatorContentNewPage() {
             <button
               type="submit"
               className="admin-btn admin-btn--primary"
-              disabled={creating}
+              disabled={creating || subjectChoices.length === 0}
             >
-              {creating ? "作成中…" : "作成して編集へ"}
+              {creating ? "作成中…" : "本編を作成する"}
             </button>
             <Link href="/creator" className="admin-btn">
               キャンセル
