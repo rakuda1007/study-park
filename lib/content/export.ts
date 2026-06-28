@@ -1,4 +1,5 @@
 import type { ContentDoc, ContentManifest, LegacyContentDoc, SubjectDoc } from "./types";
+import { hasIntroText, normalizeIntroText } from "./intro";
 import { lessonBlockToHtml } from "./lesson-html";
 import { richTextToHtml } from "./rich-text";
 import { contentPlayHref } from "./urls";
@@ -30,7 +31,15 @@ window.__STUDY_PARK_QUIZ__ = ${JSON.stringify(payload, null, 2)};
 export function buildQuizIndexHtml(content: ContentDoc): string {
   const slug = content.slug;
   const title = escHtml(content.title);
-  const intro = richTextToHtml(content.intro ?? "問題に挑戦してみましょう。", "intro-body");
+  const introText = normalizeIntroText(content.intro);
+  const introSection = hasIntroText(introText)
+    ? `      <section class="intro-card" aria-labelledby="intro-heading">
+        <h2 id="intro-heading" class="intro-heading">はじめに</h2>
+        <div class="intro-body">${richTextToHtml(introText, "intro-body")}</div>
+      </section>
+
+`
+    : "";
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -108,12 +117,7 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </section>
 
     <main class="quiz-main">
-      <section class="intro-card" aria-labelledby="intro-heading">
-        <h2 id="intro-heading" class="intro-heading">はじめに</h2>
-        <div class="intro-body">${intro}</div>
-      </section>
-
-      <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
+${introSection}      <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
         <h2 class="review-panel-heading">まとめて確認</h2>
         <p class="review-panel-lead">全問の問題と答えを一覧で見ながら、スクロールして復習できます。</p>
         <div id="reviewList" class="review-list"></div>

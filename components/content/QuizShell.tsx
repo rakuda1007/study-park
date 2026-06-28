@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import type { ContentDoc } from "@/lib/content/types";
+import { hasIntroText, normalizeIntroText } from "@/lib/content/intro";
 import { richTextToHtml } from "@/lib/content/rich-text";
 
 declare global {
@@ -30,7 +31,8 @@ const ASSET_V = "8";
 
 export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
   const title = content.title;
-  const intro = content.intro ?? "問題に挑戦してみましょう。";
+  const introText = normalizeIntroText(content.intro);
+  const showIntro = hasIntroText(introText);
   const [showFinishAd, setShowFinishAd] = useState(false);
 
   useEffect(() => {
@@ -157,17 +159,19 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
       </section>
 
       <main className="quiz-main">
-        <section className="intro-card" aria-labelledby="intro-heading">
-          <h2 id="intro-heading" className="intro-heading">
-            はじめに
-          </h2>
-          <div
-            className="intro-body"
-            dangerouslySetInnerHTML={{
-              __html: richTextToHtml(intro, "intro-body"),
-            }}
-          />
-        </section>
+        {showIntro ? (
+          <section className="intro-card" aria-labelledby="intro-heading">
+            <h2 id="intro-heading" className="intro-heading">
+              はじめに
+            </h2>
+            <div
+              className="intro-body"
+              dangerouslySetInnerHTML={{
+                __html: richTextToHtml(introText, "intro-body"),
+              }}
+            />
+          </section>
+        ) : null}
 
         <section id="reviewPanel" className="review-panel" hidden aria-label="まとめて確認">
           <h2 className="review-panel-heading">まとめて確認</h2>
