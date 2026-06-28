@@ -10,7 +10,6 @@ import {
   listStudyPlansWithItemsForWeek,
 } from "./firestore";
 import type { StudyPlanWithItems } from "./types";
-import { planOverlapsWeek } from "./week";
 
 function mergePlans(
   base: StudyPlanWithItems[],
@@ -44,19 +43,7 @@ export async function fetchWeekStudyPlansCached(
   userId: string,
   weekStart: Date,
   weekEnd: Date,
-  options?: { force?: boolean },
 ): Promise<StudyPlanWithItems[]> {
-  if (!options?.force) {
-    const cached = getCachedStudyPlans(userId);
-    if (cached) {
-      return cached.filter(
-        (plan) =>
-          plan.status !== "archived" &&
-          planOverlapsWeek(plan, weekStart, weekEnd),
-      );
-    }
-  }
-
   const weekPlans = await listStudyPlansWithItemsForWeek(userId, weekStart, weekEnd);
   const existing = getCachedStudyPlans(userId);
   if (existing) {

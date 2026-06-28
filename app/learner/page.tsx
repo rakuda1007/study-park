@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StudyPlanCard } from "@/components/learner/study/StudyPlanCard";
 import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
 import { StudyWeekNav } from "@/components/learner/study/StudyWeekNav";
@@ -41,29 +41,35 @@ export default function LearnerHomePage() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
 
-  const refresh = useCallback(async (uid: string) => {
-    const [data, active] = await Promise.all([
-      fetchWeekStudyPlansCached(uid, weekStart, weekEnd),
-      countActiveStudyPlans(uid),
-    ]);
-    setPlans(data);
-    setActiveCount(active);
-  }, [weekStart, weekEnd]);
-
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
-      void (async () => {
-        if (!user) return;
-        setUserId(user.uid);
-        try {
-          await refresh(user.uid);
-        } finally {
-          setLoading(false);
-        }
-      })();
+      setUserId(user?.uid ?? "");
     });
     return unsub;
-  }, [refresh]);
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    setLoading(true);
+    void (async () => {
+      try {
+        const [data, active] = await Promise.all([
+          fetchWeekStudyPlansCached(userId, weekStart, weekEnd),
+          countActiveStudyPlans(userId),
+        ]);
+        if (!cancelled) {
+          setPlans(data);
+          setActiveCount(active);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, weekStart, weekEnd]);
 
   const weekPlans = useMemo(() => plans, [plans]);
 
