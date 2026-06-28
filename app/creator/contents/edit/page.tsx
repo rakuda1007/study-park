@@ -8,6 +8,7 @@ import { QuizQuestionBodyEditor } from "@/components/admin/QuizQuestionBodyEdito
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { ContentPinnedField } from "@/components/admin/ContentPinnedField";
+import { RichTextArea } from "@/components/admin/RichTextArea";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
@@ -19,13 +20,12 @@ import {
   normalizeQuizQuestion,
   prepareQuizQuestionForSave,
 } from "@/lib/content/quiz-question";
-import { DEFAULT_QUIZ_BLANK_ANSWERS } from "@/lib/content/quiz-answers";
+import { DEFAULT_QUIZ_BLANK_ANSWERS, blankAnswersToInput, parseBlankAnswersInput } from "@/lib/content/quiz-answers";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
 import { DEFAULT_QUIZ_QUESTION_BODY } from "@/lib/content/quiz-question";
-import type { ContentStatus, LessonSection, QuizQuestion } from "@/lib/content/types";
+import type { BlankAnswer, ContentStatus, LessonSection, QuizQuestion } from "@/lib/content/types";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
-import { getUserProfile } from "@/lib/users/firestore";
 import {
   deleteWorkspaceContent,
   getWorkspaceContent,
@@ -182,6 +182,29 @@ function EditInner() {
     window.location.href = "/creator";
   }
 
+  function updateQuestion(index: number, patch: Partial<QuizQuestion>) {
+    setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, ...patch } : q)));
+  }
+
+  function updateBlank(qIndex: number, bIndex: number, patch: Partial<BlankAnswer>) {
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIndex) return q;
+        const blanks = q.blanks.map((b, j) => (j === bIndex ? { ...b, ...patch } : b));
+        return { ...q, blanks };
+      }),
+    );
+  }
+
+  function removeBlank(qIndex: number, bIndex: number) {
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIndex || q.blanks.length <= 1) return q;
+        return { ...q, blanks: q.blanks.filter((_, j) => j !== bIndex) };
+      }),
+    );
+  }
+
   function addQuestion() {
     if (!ws) return;
     void (async () => {
@@ -311,13 +334,7 @@ function EditInner() {
                       <label>ラベル</label>
                       <input
                         value={q.label}
-                        onChange={(e) =>
-                          setQuestions((prev) =>
-                            prev.map((item, i) =>
-                              i === qi ? { ...item, label: e.target.value } : item,
-                            ),
-                          )
-                        }
+                        onChange={(e) => updateQuestion(qi, { label: e.target.value })}
                       />
                     </div>
                   </div>
@@ -326,12 +343,61 @@ function EditInner() {
                     workspaceId={ws.id}
                     workspace={ws}
                     blocks={q.blocks ?? [{ kind: "paragraph", text: q.template }]}
-                    onChange={(blocks, template) =>
-                      setQuestions((prev) =>
-                        prev.map((item, i) => (i === qi ? { ...item, blocks, template } : item)),
-                      )
-                    }
+                    onChange={(blocks, template) => updateQuestion(qi, { blocks, template })}
                   />
+                  {q.blanks.map((b, bi) => (
+                    <div key={`${q.id}-blank-${bi}`} className="admin-blank-row">
+                      <div className="admin-blank-marker">
+                        <label htmlFor={`blank-${q.id}-${bi}-marker`}>記号</label>
+                        <input
+                          id={`blank-${q.id}-${bi}-marker`}
+                          value={b.marker}
+                          onChange={(e) => updateBlank(qi, bi, { marker: e.target.value })}
+                        />
+                      </div>
+                      <div className="admin-blank-answer">
+                        <RichTextArea
+                          id={`blank-${q.id}-${bi}-answers`}
+                          label="正答（別解は半角カンマ区切り。読点「、」は本文に使えます）"
+                          value={blankAnswersToInput(b.answers)}
+                          onChange={(v) =>
+                            updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })
+                          }
+                          rows={2}
+                          resizable
+                          showPreview={false}
+                          showHint={false}
+                          previewClass="answer-rich"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
+                        onClick={() => removeBlank(qi, bi)}
+                        disabled={q.blanks.length <= 1}
+                        aria-label={`空欄 ${b.marker || bi + 1} を削除`}
+                      >
+                        削除
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={() =>
+                      updateQuestion(qi, {
+                        blanks: [
+                          ...q.blanks,
+                          {
+                            marker: defaultQuizBlankMarker(q.blanks.length),
+                            answers: DEFAULT_QUIZ_BLANK_ANSWERS,
+                          },
+                        ],
+                      })
+                    }
+                  >
+                    空欄を追加
+                  </button>
                 </div>
               ))}
               <button type="button" className="admin-btn" onClick={() => addQuestion()}>
