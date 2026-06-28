@@ -54,11 +54,18 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
     case "creator":
       return {
         items: [
-          { label: "クリエイター画面へ", href: "/creator" },
-          { label: "教科マスタ", href: "/creator/subjects" },
-          { label: "参加者", href: "/creator/learners" },
-          { label: "利用状況", href: "/creator/usage" },
-          { label: "教材", href: "/learner/materials" },
+          { label: "学習者招待", href: "/creator/learners" },
+          { label: "ご利用プランと利用状況", href: "/creator/usage" },
+          {
+            label: "教材の確認",
+            href: "/learner/materials",
+            hint: "学習者と同じ画面で教材を確認できます",
+          },
+          {
+            label: "教科マスタ",
+            href: "/creator/subjects",
+            dividerBefore: true,
+          },
         ],
         bottomItems: loggedInBottom(session),
       };

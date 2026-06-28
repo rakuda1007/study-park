@@ -260,6 +260,10 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
+.shell-menu__panel:has(.shell-menu__link--with-hint) {
+  min-width: 14.5rem;
+}
+
 .shell-menu__list {
   margin: 0;
   padding: 0;
@@ -272,6 +276,23 @@
   color: var(--admin-text);
   text-decoration: none;
   font-size: 0.9rem;
+}
+
+.shell-menu__link--with-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.shell-menu__link-label {
+  font-weight: 600;
+}
+
+.shell-menu__hint {
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--admin-muted);
 }
 
 .shell-menu__link:hover {

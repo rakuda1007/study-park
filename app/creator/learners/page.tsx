@@ -42,7 +42,7 @@ export default function CreatorLearnersPage() {
 
   return (
     <CreatorShell>
-      <h2 className="shell-page-heading">参加者</h2>
+      <h2 className="shell-page-heading">学習者招待</h2>
       {ws ? (
         <section className="admin-card">
           <h3 className="admin-card__heading">招待コード</h3>

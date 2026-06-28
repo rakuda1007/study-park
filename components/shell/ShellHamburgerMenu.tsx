@@ -7,6 +7,8 @@ export type ShellMenuItem = {
   label: string;
   href: string;
   title?: string;
+  /** リンク直下の補足（1行） */
+  hint?: string;
   /** この項目の直前に区切り線を表示 */
   dividerBefore?: boolean;
 };
@@ -35,11 +37,12 @@ function MenuLinks({
         >
           <Link
             href={item.href}
-            className="shell-menu__link"
+            className={`shell-menu__link${item.hint ? " shell-menu__link--with-hint" : ""}`}
             title={item.title}
             onClick={onNavigate}
           >
-            {item.label}
+            <span className="shell-menu__link-label">{item.label}</span>
+            {item.hint ? <span className="shell-menu__hint">{item.hint}</span> : null}
           </Link>
         </li>
       ))}

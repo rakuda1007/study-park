@@ -264,6 +264,10 @@ body {
   box-shadow: 0 8px 24px rgba(26, 31, 46, 0.12);
 }
 
+.home .shell-menu__panel:has(.shell-menu__link--with-hint) {
+  min-width: 14.5rem;
+}
+
 .home .shell-menu__list {
   margin: 0;
   padding: 0;
@@ -275,6 +279,23 @@ body {
   padding: 0.55rem 1rem;
   text-decoration: none;
   font-size: 0.9rem;
+}
+
+.home .shell-menu__link--with-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.home .shell-menu__link-label {
+  font-weight: 600;
+}
+
+.home .shell-menu__hint {
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--home-muted);
 }
 
 .home .shell-menu__toggle:hover {
