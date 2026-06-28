@@ -10,14 +10,14 @@ export type SessionModeMeta = {
 
 export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
   admin: {
-    badge: "管理者モード",
+    badge: "管理者",
     shortLabel: "管理者",
     homeStatus: "管理者としてログイン中",
     shellHint: "Study Park 全体の設定とコンテンツを管理できます",
     dashboardLinkLabel: "管理画面へ",
   },
   creator: {
-    badge: "クリエイターモード",
+    badge: "クリエイター",
     shortLabel: "クリエイター",
     homeStatus: "クリエイターとしてログイン中",
     shellHint: "あなたの教材を作成し、学習者に届けられます",

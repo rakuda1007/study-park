@@ -53,14 +53,12 @@ export function ShellHeader({
         ) : null}
       </div>
       <div className="shell-header__actions">
-        <button type="button" className="admin-btn" onClick={() => void logout()}>
-          ログアウト
-        </button>
         <ShellHamburgerMenu
           items={menu.items}
           bottomItems={menu.bottomItems}
           ariaLabel={ariaLabel}
           footer={menuFooter}
+          onLogout={() => void logout()}
         />
       </div>
     </header>

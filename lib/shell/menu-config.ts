@@ -10,6 +10,7 @@ export type ShellMenuConfig = {
 const LOGGED_IN_BOTTOM: ShellMenuItem[] = [
   { label: "プロフィール", href: "" },
   { label: "別のアカウントでログイン", href: "/login" },
+  { label: "ログアウト", action: "logout" },
 ];
 
 function profilePath(session: AuthSessionKind): string {

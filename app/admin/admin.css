@@ -300,6 +300,15 @@
   color: var(--admin-accent);
 }
 
+.shell-menu__button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
 .shell-menu__list--bottom {
   border-top: 1px solid var(--admin-border);
 }

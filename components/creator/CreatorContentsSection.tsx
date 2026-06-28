@@ -4,11 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { CreatorSubjectSection, type CreatorSubjectGroup } from "@/components/creator/CreatorSubjectSection";
-import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
-import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { CONTENT_PERIOD_FILTER_ALL } from "@/lib/content/period";
 import { countContentsForDisplay } from "@/lib/content/pinned";
-import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
   ensureWorkspaceSubjects,
   listWorkspaceContents,
@@ -43,44 +40,44 @@ function groupBySubject(
     );
 }
 
-export function CreatorContentsSection() {
-  const [ws, setWs] = useState<WorkspaceDoc | null>(null);
+type Props = {
+  workspace: WorkspaceDoc | null;
+};
+
+export function CreatorContentsSection({ workspace }: Props) {
   const [items, setItems] = useState<WorkspaceContentDoc[]>([]);
   const [subjects, setSubjects] = useState<WorkspaceSubjectDoc[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [contentsLoading, setContentsLoading] = useState(false);
   const [err, setErr] = useState("");
   const [periodFilter, setPeriodFilter] = useState(CONTENT_PERIOD_FILTER_ALL);
 
-  const reload = useCallback(async (workspaceId: string) => {
-    await ensureWorkspaceSubjects(workspaceId);
-    const [list, formSubjects] = await Promise.all([
-      listWorkspaceContents(workspaceId),
-      listWorkspaceSubjectsForForm(workspaceId),
-    ]);
-    setItems(list);
-    setSubjects(formSubjects);
+  const reloadContents = useCallback(async (workspaceId: string) => {
+    setContentsLoading(true);
+    setErr("");
+    try {
+      await ensureWorkspaceSubjects(workspaceId);
+      const [list, formSubjects] = await Promise.all([
+        listWorkspaceContents(workspaceId),
+        listWorkspaceSubjectsForForm(workspaceId),
+      ]);
+      setItems(list);
+      setSubjects(formSubjects);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "読み込みに失敗しました。");
+    } finally {
+      setContentsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    const unsub = subscribeAuth((user) => {
-      void (async () => {
-        if (!user) return;
-        try {
-          let workspace = await syncCreatorBillingState(user.uid);
-          if (workspace) {
-            workspace = (await refreshWorkspaceUsageSnapshot(workspace.id)) ?? workspace;
-          }
-          setWs(workspace);
-          if (workspace) await reload(workspace.id);
-        } catch (e) {
-          setErr(e instanceof Error ? e.message : "読み込みに失敗しました。");
-        } finally {
-          setLoading(false);
-        }
-      })();
-    });
-    return unsub;
-  }, [reload]);
+    if (!workspace) {
+      setItems([]);
+      setSubjects([]);
+      setContentsLoading(false);
+      return;
+    }
+    void reloadContents(workspace.id);
+  }, [workspace, reloadContents]);
 
   const subjectGroups = useMemo(
     () => groupBySubject(items, subjects),
@@ -96,27 +93,38 @@ export function CreatorContentsSection() {
     );
   }
 
-  if (loading) {
-    return <p className="admin-loading">教材を読み込み中…</p>;
-  }
-
-  if (!ws) return null;
+  const workspaceName = workspace?.name ?? "…";
+  const listReady = workspace != null && !contentsLoading;
 
   return (
     <>
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
 
       <div className="creator-contents-header">
-        <Link href="/creator/contents/new" className="admin-btn admin-btn--primary">
+        <Link
+          href="/creator/contents/new"
+          className="admin-btn admin-btn--primary"
+          aria-disabled={!workspace}
+          tabIndex={workspace ? undefined : -1}
+          style={workspace ? undefined : { pointerEvents: "none", opacity: 0.6 }}
+        >
           教材を新規作成
         </Link>
       </div>
 
       <section className="admin-card learner-workspace-card">
-        <h2 className="learner-workspace-title">{ws.name}</h2>
+        <h2 className="learner-workspace-title">{workspaceName}</h2>
         <p className="learner-workspace-meta">自分が作った教材</p>
 
-        {items.length > 0 ? (
+        {!workspace ? (
+          <p className="admin-loading" role="status">
+            ワークスペースを確認中…
+          </p>
+        ) : contentsLoading ? (
+          <p className="admin-loading" role="status">
+            教材を読み込み中…
+          </p>
+        ) : items.length > 0 ? (
           <div className="learner-period-toolbar">
             <ContentPeriodFilter
               contents={items}
@@ -127,13 +135,17 @@ export function CreatorContentsSection() {
           </div>
         ) : null}
 
-        {items.length === 0 ? (
+        {listReady && items.length === 0 ? (
           <p className="admin-msg">
             まだ教材がありません。「教材を新規作成」から追加してください。
           </p>
-        ) : visibleItemCount(subjectGroups) === 0 ? (
+        ) : null}
+
+        {listReady && items.length > 0 && visibleItemCount(subjectGroups) === 0 ? (
           <p className="admin-msg">選択した期間の教材はありません。</p>
-        ) : (
+        ) : null}
+
+        {listReady && visibleItemCount(subjectGroups) > 0 ? (
           <div className="learner-subject-list">
             {subjectGroups.map((g) => (
               <CreatorSubjectSection
@@ -143,9 +155,9 @@ export function CreatorContentsSection() {
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {items.length > 0 ? (
+        {listReady && items.length > 0 ? (
           <p className="admin-msg creator-contents-count" role="status">
             表示 {visibleCount}件 / 全 {items.length}件
           </p>

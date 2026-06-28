@@ -5,8 +5,10 @@ import { useEffect, useId, useRef, useState } from "react";
 
 export type ShellMenuItem = {
   label: string;
-  href: string;
+  href?: string;
   title?: string;
+  /** リンクではなくメニュー内アクション（例: ログアウト） */
+  action?: "logout";
   /** リンク直下の補足（1行） */
   hint?: string;
   /** この項目の直前に区切り線を表示 */
@@ -19,31 +21,51 @@ type Props = {
   bottomItems?: ShellMenuItem[];
   footer?: React.ReactNode;
   ariaLabel?: string;
+  onLogout?: () => void | Promise<void>;
 };
 
-function MenuLinks({
+function itemKey(item: ShellMenuItem): string {
+  return `${item.action ?? item.href ?? ""}-${item.label}`;
+}
+
+function MenuEntries({
   items,
   onNavigate,
+  onLogout,
 }: {
   items: ShellMenuItem[];
   onNavigate: () => void;
+  onLogout?: () => void | Promise<void>;
 }) {
   return (
     <>
       {items.map((item) => (
         <li
-          key={`${item.href}-${item.label}`}
+          key={itemKey(item)}
           className={item.dividerBefore ? "shell-menu__item--divider" : undefined}
         >
-          <Link
-            href={item.href}
-            className={`shell-menu__link${item.hint ? " shell-menu__link--with-hint" : ""}`}
-            title={item.title}
-            onClick={onNavigate}
-          >
-            <span className="shell-menu__link-label">{item.label}</span>
-            {item.hint ? <span className="shell-menu__hint">{item.hint}</span> : null}
-          </Link>
+          {item.action === "logout" ? (
+            <button
+              type="button"
+              className="shell-menu__link shell-menu__button"
+              onClick={() => {
+                onNavigate();
+                void onLogout?.();
+              }}
+            >
+              {item.label}
+            </button>
+          ) : (
+            <Link
+              href={item.href ?? "#"}
+              className={`shell-menu__link${item.hint ? " shell-menu__link--with-hint" : ""}`}
+              title={item.title}
+              onClick={onNavigate}
+            >
+              <span className="shell-menu__link-label">{item.label}</span>
+              {item.hint ? <span className="shell-menu__hint">{item.hint}</span> : null}
+            </Link>
+          )}
         </li>
       ))}
     </>
@@ -55,6 +77,7 @@ export function ShellHamburgerMenu({
   bottomItems = [],
   footer,
   ariaLabel = "メニュー",
+  onLogout,
 }: Props) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
@@ -101,11 +124,11 @@ export function ShellHamburgerMenu({
       {open ? (
         <nav id={panelId} className="shell-menu__panel" aria-label={ariaLabel}>
           <ul className="shell-menu__list">
-            <MenuLinks items={items} onNavigate={close} />
+            <MenuEntries items={items} onNavigate={close} onLogout={onLogout} />
           </ul>
           {bottomItems.length > 0 ? (
             <ul className="shell-menu__list shell-menu__list--bottom">
-              <MenuLinks items={bottomItems} onNavigate={close} />
+              <MenuEntries items={bottomItems} onNavigate={close} onLogout={onLogout} />
             </ul>
           ) : null}
           {footer ? <div className="shell-menu__footer">{footer}</div> : null}

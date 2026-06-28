@@ -41,19 +41,16 @@ export function HomeTopbar() {
             <span className="home-topbar__auth-muted" role="status">
               …
             </span>
-          ) : session ? (
-            <button type="button" className="home-topbar__auth-btn" onClick={() => void logout()}>
-              ログアウト
-            </button>
-          ) : (
+          ) : !session ? (
             <Link href="/login" className="home-topbar__auth-btn">
               ログイン
             </Link>
-          )}
+          ) : null}
           <ShellHamburgerMenu
             items={menu.items}
             bottomItems={menu.bottomItems}
             ariaLabel="Study Park メニュー"
+            onLogout={session ? () => void logout() : undefined}
           />
         </div>
       </div>

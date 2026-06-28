@@ -311,6 +311,21 @@ body {
   color: var(--home-accent);
 }
 
+.home .shell-menu__button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--home-ink);
+}
+
+.home .shell-menu__button:hover {
+  background: var(--home-accent-soft);
+  color: var(--home-accent);
+}
+
 .home .shell-menu__list--bottom {
   border-top: 1px solid var(--home-border);
 }
