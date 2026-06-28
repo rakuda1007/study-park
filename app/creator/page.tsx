@@ -57,14 +57,6 @@ export default function CreatorDashboardPage() {
     <CreatorShell>
       <CreatorBillingBanner ws={ws} purchaseStatus={purchaseStatus} />
 
-      <section className="admin-card">
-        <h2 className="admin-card__heading">{ws.name}</h2>
-        <p className="admin-card__meta">
-          URL ID: <code>{ws.slug}</code> · 招待コード:{" "}
-          <strong className="admin-invite-code">{ws.inviteCode}</strong>
-        </p>
-      </section>
-
       <CreatorContentsSection />
     </CreatorShell>
   );
