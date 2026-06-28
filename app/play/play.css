@@ -25,3 +25,16 @@
   color: var(--accent-dark, #4a6fa5);
   font-weight: 700;
 }
+
+.play-preview-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0.55rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #5c4a1e;
+  background: #fff3cd;
+  border-bottom: 2px solid #e6c200;
+}

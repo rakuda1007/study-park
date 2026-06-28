@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { ContentPublishBadge } from "@/components/creator/ContentPublishBadge";
 import {
   contentMatchesPeriodFilter,
   groupByContentPeriod,
@@ -29,7 +30,10 @@ function ContentItemList({ items }: { items: WorkspaceContentDoc[] }) {
             className="learner-study-link"
           >
             <span className="learner-study-link__text">
-              <span className="learner-study-link__title">{c.title}</span>
+              <span className="learner-study-link__title-row">
+                <span className="learner-study-link__title">{c.title}</span>
+                <ContentPublishBadge status={c.status} />
+              </span>
               <span className="learner-study-link__meta">
                 {c.type === "quiz" ? "クイズ" : "レッスン"} · 編集
               </span>

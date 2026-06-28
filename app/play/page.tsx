@@ -13,6 +13,7 @@ import {
   getPublishedWorkspaceContentById,
   getPublishedWorkspaceContentBySlug,
   getPublishedWorkspaceContentInWorkspace,
+  getWorkspaceContentForOwnerPreview,
   type WorkspaceContentDoc,
 } from "@/lib/workspaces/content-firestore";
 import {
@@ -36,8 +37,9 @@ function playLoadKey(
   wsSlug: string,
   workspaceId: string,
   contentId: string,
+  preview: boolean,
 ): string {
-  return `${slug}|${wsSlug}|${workspaceId}|${contentId}`;
+  return `${slug}|${wsSlug}|${workspaceId}|${contentId}|${preview ? "1" : "0"}`;
 }
 
 async function fetchWorkspacePlayContent(
@@ -46,7 +48,14 @@ async function fetchWorkspacePlayContent(
   contentId: string,
   slug: string,
   uid: string | null,
+  preview: boolean,
 ): Promise<WorkspaceContentDoc | null> {
+  if (preview && workspaceId && uid) {
+    return getWorkspaceContentForOwnerPreview(workspaceId, uid, {
+      contentId: contentId || undefined,
+      slug: slug || undefined,
+    });
+  }
   if (workspaceId && contentId) {
     return getPublishedWorkspaceContentById(workspaceId, contentId);
   }
@@ -59,14 +68,24 @@ async function fetchWorkspacePlayContent(
   return null;
 }
 
+function PlayPreviewBanner() {
+  return (
+    <div className="play-preview-banner" role="status">
+      プレビュー（非公開）— あなただけが閲覧しています
+    </div>
+  );
+}
+
 function PlayInner() {
   const params = useSearchParams();
   const wsSlug = (params.get("ws") ?? "").trim().toLowerCase();
   const workspaceId = (params.get("wid") ?? "").trim();
   const contentId = (params.get("cid") ?? "").trim();
   const slug = (params.get("slug") ?? "").trim().toLowerCase();
+  const preview = params.get("preview") === "1";
   const [content, setContent] = useState<ContentDoc | null>(null);
   const [showAds, setShowAds] = useState(false);
+  const [isPreview, setIsPreview] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [denied, setDenied] = useState(false);
@@ -82,7 +101,7 @@ function PlayInner() {
 
     let cancelled = false;
     let unsub: (() => void) | undefined;
-    const loadKey = playLoadKey(slug, wsSlug, workspaceId, contentId);
+    const loadKey = playLoadKey(slug, wsSlug, workspaceId, contentId, preview);
     const isWorkspacePlay = !!(wsSlug || workspaceId);
 
     async function load(authUser: User | null) {
@@ -95,6 +114,7 @@ function PlayInner() {
         setLoading(true);
         setNotFound(false);
         setDenied(false);
+        setIsPreview(false);
         setContent(null);
       }
 
@@ -102,17 +122,28 @@ function PlayInner() {
         const sessionPromise = resolveAuthSession(authUser);
 
         if (isWorkspacePlay) {
+          if (preview && !uid) {
+            const session = await sessionPromise;
+            if (cancelled) return;
+            setHomeHref(session === "learner" ? "/learner" : "/creator");
+            setDenied(true);
+            return;
+          }
+
           const docPromise = fetchWorkspacePlayContent(
             wsSlug,
             workspaceId,
             contentId,
             slug,
             uid,
+            preview,
           );
           const [session, doc] = await Promise.all([sessionPromise, docPromise]);
           if (cancelled) return;
 
-          setHomeHref(session === "learner" ? "/learner" : "/");
+          setHomeHref(
+            preview || session === "creator" ? "/creator" : session === "learner" ? "/learner" : "/",
+          );
 
           if (!doc) {
             if (!uid) {
@@ -120,6 +151,15 @@ function PlayInner() {
               return;
             }
             setNotFound(true);
+            return;
+          }
+
+          const ownerPreview = preview && doc.status !== "published";
+          if (ownerPreview) {
+            setContent(doc);
+            setShowAds(false);
+            setIsPreview(true);
+            loadedRef.current = { uid, key: loadKey };
             return;
           }
 
@@ -145,6 +185,7 @@ function PlayInner() {
 
           setContent(doc);
           setShowAds(ads);
+          setIsPreview(false);
           loadedRef.current = { uid, key: loadKey };
 
           if (!uid) {
@@ -172,6 +213,7 @@ function PlayInner() {
           } else {
             setContent(doc);
             setShowAds(false);
+            setIsPreview(false);
             loadedRef.current = { uid, key: loadKey };
             if (!uid) {
               void recordGuestContentUse(`play:slug=${slug}`);
@@ -205,7 +247,7 @@ function PlayInner() {
       unsub?.();
       loadedRef.current = null;
     };
-  }, [slug, wsSlug, workspaceId, contentId]);
+  }, [slug, wsSlug, workspaceId, contentId, preview]);
 
   if ((!slug && !contentId) || notFound) {
     return (
@@ -221,9 +263,19 @@ function PlayInner() {
   if (denied) {
     return (
       <div className="play-status">
-        <p>この教材はログインした学習者のみ利用できます。</p>
         <p>
-          <Link href="/login">ログイン</Link> · <Link href="/signup/learner">学習者登録</Link>
+          {preview
+            ? "プレビューはクリエイター本人のログインが必要です。"
+            : "この教材はログインした学習者のみ利用できます。"}
+        </p>
+        <p>
+          <Link href="/login">ログイン</Link>
+          {!preview ? (
+            <>
+              {" "}
+              · <Link href="/signup/learner">学習者登録</Link>
+            </>
+          ) : null}
         </p>
       </div>
     );
@@ -234,10 +286,20 @@ function PlayInner() {
   }
 
   if (content.type === "quiz") {
-    return <QuizShell content={content} showAds={showAds} homeHref={homeHref} />;
+    return (
+      <>
+        {isPreview ? <PlayPreviewBanner /> : null}
+        <QuizShell content={content} showAds={showAds} homeHref={homeHref} />
+      </>
+    );
   }
 
-  return <LessonView content={content} homeHref={homeHref} />;
+  return (
+    <>
+      {isPreview ? <PlayPreviewBanner /> : null}
+      <LessonView content={content} homeHref={homeHref} />
+    </>
+  );
 }
 
 export default function PlayPage() {

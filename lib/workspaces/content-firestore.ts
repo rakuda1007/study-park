@@ -30,6 +30,7 @@ import type {
 import { getFirestoreClient } from "@/lib/firebase/client";
 import type { ContentVisibility } from "./types";
 import { resolveWorkspaceBySlug } from "./members";
+import { getWorkspace } from "./firestore";
 import {
   ensureWorkspaceSubjects,
   publishWorkspaceSubjectForContent,
@@ -122,6 +123,31 @@ export async function getWorkspaceContent(
   const snap = await getDoc(doc(getFirestoreClient(), "workspaces", workspaceId, "contents", contentId));
   if (!snap.exists()) return null;
   return mapContent(workspaceId, snap.id, snap.data());
+}
+
+/** クリエイター本人のプレビュー用（公開前の教材も取得可） */
+export async function getWorkspaceContentForOwnerPreview(
+  workspaceId: string,
+  ownerId: string,
+  opts: { contentId?: string; slug?: string },
+): Promise<WorkspaceContentDoc | null> {
+  const ws = await getWorkspace(workspaceId);
+  if (!ws || ws.ownerId !== ownerId) return null;
+
+  const contentId = opts.contentId?.trim();
+  if (contentId) {
+    return getWorkspaceContent(workspaceId, contentId);
+  }
+
+  const normalized = opts.slug?.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const snap = await getDocs(
+    query(contentsCol(workspaceId), where("slug", "==", normalized), limit(1)),
+  );
+  const hit = snap.docs[0];
+  if (!hit) return null;
+  return mapContent(workspaceId, hit.id, hit.data());
 }
 
 export async function isWorkspaceSlugTaken(

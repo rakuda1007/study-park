@@ -9,13 +9,13 @@ import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { ContentPinnedField } from "@/components/admin/ContentPinnedField";
 import { RichTextArea } from "@/components/admin/RichTextArea";
+import { CreatorContentPublishFields } from "@/components/creator/CreatorContentPublishFields";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { shouldShowAdsForPlan } from "@/lib/ads/visibility";
 import { getWorkspaceShowAds } from "@/lib/workspaces/ad-flags";
 import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
 import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
-import { workspacePlayHref } from "@/lib/content/urls";
 import {
   DEFAULT_QUIZ_QUESTION_BODY,
   nextQuizQuestionLabel,
@@ -25,7 +25,14 @@ import {
 } from "@/lib/content/quiz-question";
 import { DEFAULT_QUIZ_BLANK_ANSWERS, blankAnswersToInput, parseBlankAnswersInput } from "@/lib/content/quiz-answers";
 import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
-import type { BlankAnswer, ContentStatus, LessonSection, QuizQuestion } from "@/lib/content/types";
+import type { BlankAnswer, LessonSection, QuizQuestion } from "@/lib/content/types";
+import {
+  contentToPublishMode,
+  contentToPublishScope,
+  publishFieldsFromMode,
+  type CreatorPublishMode,
+  type CreatorPublishScope,
+} from "@/lib/content/publish-status";
 import { SLUG_PATTERN } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
@@ -37,9 +44,7 @@ import {
   updateWorkspaceContent,
 } from "@/lib/workspaces/content-firestore";
 import type { WorkspaceContentDoc } from "@/lib/workspaces/content-firestore";
-import type { ContentVisibility } from "@/lib/workspaces/types";
 import { syncWorkspaceAdFlag } from "@/lib/workspaces/ad-flags";
-import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import { listWorkspaceSubjectsForForm } from "@/lib/workspaces/subjects-firestore";
 import type { WorkspaceDoc, WorkspaceSubjectDoc } from "@/lib/workspaces/types";
 
@@ -59,9 +64,8 @@ function EditInner() {
   const [slug, setSlug] = useState("");
   const [subjectId, setSubjectId] = useState("math");
   const [intro, setIntro] = useState("");
-  const [status, setStatus] = useState<ContentStatus>("draft");
-  const [ready, setReady] = useState(false);
-  const [visibility, setVisibility] = useState<ContentVisibility>("members");
+  const [publishMode, setPublishMode] = useState<CreatorPublishMode>("draft");
+  const [publishScope, setPublishScope] = useState<CreatorPublishScope>("members");
   const [periodYear, setPeriodYear] = useState(new Date().getFullYear());
   const [periodMonth, setPeriodMonth] = useState(new Date().getMonth() + 1);
   const [pinned, setPinned] = useState(false);
@@ -103,9 +107,8 @@ function EditInner() {
     setSlug(c.slug);
     setSubjectId(c.subjectId);
     setIntro(c.intro ?? "");
-    setStatus(c.status);
-    setReady(c.ready);
-    setVisibility(c.visibility);
+    setPublishMode(contentToPublishMode(c));
+    setPublishScope(contentToPublishScope(c));
     setPeriodYear(c.periodYear);
     setPeriodMonth(c.periodMonth);
     setPinned(c.pinned === true);
@@ -144,7 +147,7 @@ function EditInner() {
       return;
     }
     setSaving(true);
-    const readyForSite = status === "published" ? true : ready;
+    const { status, ready, visibility } = publishFieldsFromMode(publishMode, publishScope);
     try {
       await updateWorkspaceContent(ws.id, doc.id, {
         title: title.trim(),
@@ -152,7 +155,7 @@ function EditInner() {
         intro: intro.trim(),
         subjectId,
         status,
-        ready: readyForSite,
+        ready,
         visibility,
         periodYear,
         periodMonth,
@@ -298,41 +301,16 @@ function EditInner() {
               onMonthChange={setPeriodMonth}
             />
             <ContentPinnedField checked={pinned} onChange={setPinned} />
-            <div className="admin-field">
-              <label htmlFor="visibility">公開範囲</label>
-              <select
-                id="visibility"
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value as ContentVisibility)}
-              >
-                <option value="members">学習者ログイン必須</option>
-                <option value="unlisted">リンクを知っていれば可（ログイン不要）</option>
-                <option value="private">非公開（下書き）</option>
-              </select>
-            </div>
-            <div className="admin-row">
-              <select value={status} onChange={(e) => setStatus(e.target.value as ContentStatus)}>
-                <option value="draft">下書き</option>
-                <option value="published">公開</option>
-                <option value="archived">アーカイブ</option>
-              </select>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={ready}
-                  onChange={(e) => setReady(e.target.checked)}
-                />{" "}
-                表示準備 OK
-              </label>
-            </div>
-            {status === "published" ? (
-              <p className="admin-msg">
-                プレイ URL:{" "}
-                <Link href={workspacePlayHref(ws.slug, slug)} target="_blank">
-                  {workspacePlayHref(ws.slug, slug)}
-                </Link>
-              </p>
-            ) : null}
+            <CreatorContentPublishFields
+              publishMode={publishMode}
+              publishScope={publishScope}
+              onPublishModeChange={setPublishMode}
+              onPublishScopeChange={setPublishScope}
+              workspaceSlug={ws.slug}
+              workspaceId={ws.id}
+              contentId={doc.id}
+              contentSlug={slug}
+            />
           </section>
 
           {doc.type === "quiz" ? (

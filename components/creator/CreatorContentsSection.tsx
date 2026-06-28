@@ -102,6 +102,9 @@ export function CreatorContentsSection({ workspace }: Props) {
       <section className="admin-card learner-workspace-card">
         <h2 className="learner-workspace-title">{workspaceName}</h2>
         <p className="learner-workspace-meta">自分が作った教材</p>
+        <p className="admin-field-hint creator-contents-hint">
+          下書きの教材は学習者には表示されません。編集画面から公開できます。
+        </p>
 
         {!workspace ? (
           <p className="admin-loading" role="status">

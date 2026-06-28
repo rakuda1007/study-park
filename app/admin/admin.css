@@ -847,6 +847,46 @@
   color: var(--admin-muted);
 }
 
+.creator-contents-hint {
+  margin: 0 0 0.75rem;
+}
+
+.creator-publish-links .admin-msg {
+  margin-bottom: 0.5rem;
+}
+
+.creator-publish-scope {
+  margin-top: 0.5rem;
+}
+
+.content-publish-badge--draft {
+  background: #2a3140;
+  color: #b8c4d4;
+}
+
+.content-publish-badge--archived {
+  background: #2a2a32;
+  color: #9a9aa8;
+}
+
+.learner-study-link__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.learner-study-link__title-row .learner-study-link__title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.content-publish-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  padding: 0.1rem 0.4rem;
+}
+
 .learner-workspace-card {
   border-color: #d4e3f8;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);

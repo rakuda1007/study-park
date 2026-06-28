@@ -160,6 +160,9 @@ export default function CreatorContentNewPage() {
       <p className="admin-msg" style={{ marginTop: 0 }}>
         <Link href="/creator">← 教材一覧へ</Link>
       </p>
+      <p className="admin-field-hint creator-contents-hint">
+        作成後は非公開（下書き）です。編集画面から公開できます。
+      </p>
 
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
 
