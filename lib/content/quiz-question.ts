@@ -27,6 +27,45 @@ export function templateFromBlocks(blocks: LessonBlock[]): string {
     .join("\n\n");
 }
 
+const QUIZ_MON_LABEL_PATTERN = /^問\s*([0-9０-９]+)\s*$/;
+
+function toHalfWidthDigits(value: string): string {
+  return value.replace(/[０-９]/g, (char) =>
+    String.fromCharCode(char.charCodeAt(0) - 0xfee0),
+  );
+}
+
+function toFullWidthDigits(value: string): string {
+  return value.replace(/[0-9]/g, (char) =>
+    String.fromCharCode(char.charCodeAt(0) + 0xfee0),
+  );
+}
+
+/** 直前のラベルから、追加する問題のラベルを決める */
+export function nextQuizQuestionLabel(previousLabel: string | undefined): string {
+  const prev = previousLabel?.trim() ?? "";
+  const match = prev.match(QUIZ_MON_LABEL_PATTERN);
+  if (!match) {
+    return "問１";
+  }
+  const rawNum = match[1];
+  const useFullWidth = /[０-９]/.test(rawNum);
+  const current = Number.parseInt(toHalfWidthDigits(rawNum), 10);
+  if (!Number.isFinite(current) || current < 0) {
+    return "問１";
+  }
+  const next = String(current + 1);
+  return `問${useFullWidth ? toFullWidthDigits(next) : next}`;
+}
+
+/** ラベル「問N」から番号を取り出す（取れなければ fallback） */
+export function quizQuestionNumberFromLabel(label: string, fallback: number): number {
+  const match = label.trim().match(QUIZ_MON_LABEL_PATTERN);
+  if (!match) return fallback;
+  const n = Number.parseInt(toHalfWidthDigits(match[1]), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
 function normalizeQuizQuestionBlanks(q: QuizQuestion): QuizQuestion {
   if (!q.blanks?.length) return q;
   return {

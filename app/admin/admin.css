@@ -572,6 +572,24 @@
   align-items: flex-start;
 }
 
+.admin-quiz-answers {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-quiz-answers__heading {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.admin-quiz-answers__hint,
+.admin-quiz-answers__empty {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+
 .admin-blank-row {
   display: grid;
   grid-template-columns: 3.75rem minmax(0, 1fr) auto;

@@ -25,7 +25,9 @@ import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
 import {
   DEFAULT_QUIZ_QUESTION_BODY,
   normalizeQuizQuestion,
+  nextQuizQuestionLabel,
   prepareQuizQuestionForSave,
+  quizQuestionNumberFromLabel,
 } from "@/lib/content/quiz-question";
 import type {
   BlankAnswer,
@@ -236,14 +238,16 @@ function EditContentInner() {
 
   function addQuestion() {
     const n = questions.length + 1;
+    const label = nextQuizQuestionLabel(questions[questions.length - 1]?.label);
+    const number = quizQuestionNumberFromLabel(label, n);
     const id = `q${String(n).padStart(2, "0")}`;
     const defaultText = DEFAULT_QUIZ_QUESTION_BODY;
     setQuestions((prev) => [
       ...prev,
       {
         id,
-        number: n,
-        label: `問${n}`,
+        number,
+        label,
         blocks: [{ kind: "paragraph", text: defaultText }],
         template: defaultText,
         blanks: [{ marker: defaultQuizBlankMarker(0), answers: DEFAULT_QUIZ_BLANK_ANSWERS }],
@@ -389,67 +393,73 @@ function EditContentInner() {
                       }
                     />
                   ) : null}
-                  {q.blanks.map((b, bi) => (
-                    <div key={`${q.id}-blank-${bi}`} className="admin-blank-row">
-                      <div className="admin-blank-marker">
-                        <label htmlFor={`blank-${q.id}-${bi}-marker`}>記号</label>
-                        <input
-                          id={`blank-${q.id}-${bi}-marker`}
-                          value={b.marker}
-                          onChange={(e) => updateBlank(qi, bi, { marker: e.target.value })}
-                        />
-                      </div>
-                      <div className="admin-blank-answer">
-                        <RichTextArea
-                          id={`blank-${q.id}-${bi}-answers`}
-                          label="正答（別解は半角カンマ区切り。読点「、」は本文に使えます）"
-                          value={blankAnswersToInput(b.answers)}
-                          onChange={(v) =>
-                            updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })
-                          }
-                          rows={2}
-                          resizable
-                          showPreview={false}
-                          showHint={false}
-                          previewClass="answer-rich"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
-                        onClick={() => removeBlank(qi, bi)}
-                        aria-label={`空欄 ${b.marker || bi + 1} を削除`}
-                      >
-                        削除
-                      </button>
-                    </div>
-                  ))}
-                  {q.blanks.length === 0 ? (
-                    <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-                      正答の登録はありません（「はじめに」など、読むだけの導入に使えます）。
+                  <div className="admin-quiz-answers">
+                    <h3 className="admin-quiz-answers__heading">答えの登録</h3>
+                    <p className="admin-field-hint admin-quiz-answers__hint">
+                      本文に入れた空欄記号（① など）と同じ記号で答えを書きます。別解は半角カンマ区切り。読点「、」は答えの本文に使えます。
                     </p>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="admin-btn"
-                    onClick={() =>
-                      updateQuestion(qi, {
-                        blanks: [
-                          ...q.blanks,
-                          {
-                            marker: defaultQuizBlankMarker(q.blanks.length),
-                            answers: DEFAULT_QUIZ_BLANK_ANSWERS,
-                          },
-                        ],
-                      })
-                    }
-                  >
-                    空欄を追加
-                  </button>
+                    {q.blanks.map((b, bi) => (
+                      <div key={`${q.id}-blank-${bi}`} className="admin-blank-row">
+                        <div className="admin-blank-marker">
+                          <label htmlFor={`blank-${q.id}-${bi}-marker`}>空欄記号</label>
+                          <input
+                            id={`blank-${q.id}-${bi}-marker`}
+                            value={b.marker}
+                            onChange={(e) => updateBlank(qi, bi, { marker: e.target.value })}
+                          />
+                        </div>
+                        <div className="admin-blank-answer">
+                          <RichTextArea
+                            id={`blank-${q.id}-${bi}-answers`}
+                            label="答え"
+                            value={blankAnswersToInput(b.answers)}
+                            onChange={(v) =>
+                              updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })
+                            }
+                            rows={2}
+                            resizable
+                            showPreview={false}
+                            showHint={false}
+                            previewClass="answer-rich"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
+                          onClick={() => removeBlank(qi, bi)}
+                          aria-label={`答え ${b.marker || bi + 1} を削除`}
+                        >
+                          削除
+                        </button>
+                      </div>
+                    ))}
+                    {q.blanks.length === 0 ? (
+                      <p className="admin-field-hint admin-quiz-answers__empty">
+                        答えの登録はありません（「はじめに」など、読むだけの導入に使えます）。
+                      </p>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="admin-btn"
+                      onClick={() =>
+                        updateQuestion(qi, {
+                          blanks: [
+                            ...q.blanks,
+                            {
+                              marker: defaultQuizBlankMarker(q.blanks.length),
+                              answers: DEFAULT_QUIZ_BLANK_ANSWERS,
+                            },
+                          ],
+                        })
+                      }
+                    >
+                      ＋ 答えを追加
+                    </button>
+                  </div>
                 </div>
               ))}
               <button type="button" className="admin-btn" onClick={addQuestion}>
-                問題を追加
+                ＋ 問題を追加
               </button>
             </section>
           ) : (

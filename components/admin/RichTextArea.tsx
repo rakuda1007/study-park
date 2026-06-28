@@ -178,13 +178,13 @@ export function RichTextArea({
             </button>
           </div>
           {showBlankMarkers ? (
-            <div className="admin-rich-marker-group" role="group" aria-label="空欄記号">
+            <div className="admin-rich-marker-group" role="group" aria-label="空欄を挿入">
               {listQuizBlankMarkersForInsert(VISIBLE_QUIZ_BLANK_MARKER_COUNT).map((marker) => (
                 <button
                   key={marker}
                   type="button"
                   className="admin-btn admin-btn--compact admin-rich-marker-btn"
-                  title={`空欄記号 ${marker} を挿入`}
+                  title={`空欄 ${marker} を挿入`}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => insertBlankMarker(marker)}
                 >

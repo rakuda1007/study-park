@@ -6,6 +6,13 @@ import type { LessonBlock } from "@/lib/content/types";
 import { templateFromBlocks } from "@/lib/content/quiz-question";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
+function quizParagraphBlockLabel(blocks: LessonBlock[], blockIndex: number): string {
+  const paragraphIndex = blocks
+    .slice(0, blockIndex + 1)
+    .filter((block) => block.kind === "paragraph").length;
+  return paragraphIndex <= 1 ? "本文" : `補足 ${paragraphIndex}`;
+}
+
 type Props = {
   contentId: string;
   workspaceId?: string;
@@ -47,8 +54,7 @@ export function QuizQuestionBodyEditor({
   return (
     <div className="admin-lesson-blocks">
       <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-        問題文に空欄を入れるときは、ツールバーから「①」「②」…「⑮」を挿入してください。太字・サイズ・箇条書きも使えます。段落のほか「＋
-        画像」で図を挿入できます。
+        1枚の中に、本文・補足・画像を並べられます。空欄記号 ①②… は本文のツールバー「空欄を挿入」から入れてください。
       </p>
       {blocks.map((block, bi) => (
         <div key={`quiz-block-${bi}`} className="admin-block-wrap">
@@ -76,7 +82,9 @@ export function QuizQuestionBodyEditor({
           {block.kind === "paragraph" ? (
             <div className="admin-block">
               <div className="admin-row" style={{ justifyContent: "space-between" }}>
-                <span className="admin-block-label">段落 {bi + 1}</span>
+                <span className="admin-block-label">
+                  {quizParagraphBlockLabel(blocks, bi)}
+                </span>
                 <button
                   type="button"
                   className="admin-btn admin-btn--danger"
@@ -117,7 +125,7 @@ export function QuizQuestionBodyEditor({
           className="admin-btn"
           onClick={() => sync([...blocks, { kind: "paragraph", text: "" }])}
         >
-          ＋ 段落
+          ＋ 補足を追加
         </button>
         <button
           type="button"
@@ -126,7 +134,7 @@ export function QuizQuestionBodyEditor({
             sync([...blocks, { kind: "image", src: "", alt: "", caption: "" }])
           }
         >
-          ＋ 画像
+          ＋ 画像を追加
         </button>
       </div>
     </div>
