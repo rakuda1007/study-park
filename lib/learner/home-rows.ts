@@ -27,26 +27,41 @@ export type LearnerHomeData = {
   subjectNames: Map<string, string>;
 };
 
-export async function loadLearnerHomeRows(
+export async function loadLearnerWorkspaceContents(
+  workspaceId: string,
+): Promise<WorkspaceContentDoc[]> {
+  let items: WorkspaceContentDoc[];
+  try {
+    items = await listPublishedContentsForMember(workspaceId);
+  } catch {
+    return [];
+  }
+  try {
+    return await enrichWorkspaceContentsFromAdmin(items);
+  } catch {
+    return items;
+  }
+}
+
+async function buildLearnerMembershipList(
   userId: string,
-  manifest: ContentManifest,
-  options?: { ensureWorkspaceId?: string },
-): Promise<LearnerHomeData> {
+  ensureWorkspaceId?: string,
+) {
   const [memberships, subjects, ownedWs] = await Promise.all([
     listWorkspacesForLearner(userId),
     listPublicSubjects(),
     getWorkspaceByOwner(userId),
   ]);
 
-  const ensureWorkspaceId = options?.ensureWorkspaceId?.trim();
+  const trimmedEnsureId = ensureWorkspaceId?.trim();
   if (
-    ensureWorkspaceId &&
-    !memberships.some((m) => m.workspaceId === ensureWorkspaceId) &&
-    (await isActiveMember(ensureWorkspaceId, userId))
+    trimmedEnsureId &&
+    !memberships.some((m) => m.workspaceId === trimmedEnsureId) &&
+    (await isActiveMember(trimmedEnsureId, userId))
   ) {
     memberships.push({
-      id: `${ensureWorkspaceId}_${userId}`,
-      workspaceId: ensureWorkspaceId,
+      id: `${trimmedEnsureId}_${userId}`,
+      workspaceId: trimmedEnsureId,
       userId,
       role: "learner",
       status: "active",
@@ -54,6 +69,19 @@ export async function loadLearnerHomeRows(
       createdAt: new Date().toISOString(),
     });
   }
+
+  return { memberships, subjects, ownedWs };
+}
+
+export async function loadLearnerHomeScaffold(
+  userId: string,
+  manifest: ContentManifest,
+  options?: { ensureWorkspaceId?: string },
+): Promise<LearnerHomeData> {
+  const { memberships, subjects, ownedWs } = await buildLearnerMembershipList(
+    userId,
+    options?.ensureWorkspaceId,
+  );
   const subjectNames = buildSubjectNameMap(manifest, subjects);
   const rows: LearnerHomeRow[] = [];
   const seen = new Set<string>();
@@ -68,35 +96,18 @@ export async function loadLearnerHomeRows(
     return label;
   }
 
-  async function loadMemberContents(workspaceId: string): Promise<WorkspaceContentDoc[]> {
-    let items: WorkspaceContentDoc[];
-    try {
-      items = await listPublishedContentsForMember(workspaceId);
-    } catch {
-      return [];
-    }
-    try {
-      return await enrichWorkspaceContentsFromAdmin(items);
-    } catch {
-      return items;
-    }
-  }
-
   const membershipRows = await Promise.all(
     memberships.map(async (m) => {
       const ws = await getWorkspace(m.workspaceId);
       if (!ws) return null;
-      const [contents, label] = await Promise.all([
-        loadMemberContents(m.workspaceId),
-        ownerLabel(ws.ownerId),
-      ]);
+      const label = await ownerLabel(ws.ownerId);
       return {
         workspaceId: m.workspaceId,
         workspaceName: ws.name,
         workspaceSlug: ws.slug,
         ownerLabel: label,
         isOwnWorkspace: ws.ownerId === userId,
-        contents,
+        contents: [],
       } satisfies LearnerHomeRow;
     }),
   );
@@ -108,16 +119,30 @@ export async function loadLearnerHomeRows(
   }
 
   if (ownedWs && !seen.has(ownedWs.id)) {
-    const contents = await loadMemberContents(ownedWs.id);
     rows.push({
       workspaceId: ownedWs.id,
       workspaceName: ownedWs.name,
       workspaceSlug: ownedWs.slug,
       ownerLabel: await ownerLabel(ownedWs.ownerId),
       isOwnWorkspace: true,
-      contents,
+      contents: [],
     });
   }
 
   return { rows, subjectNames };
+}
+
+export async function loadLearnerHomeRows(
+  userId: string,
+  manifest: ContentManifest,
+  options?: { ensureWorkspaceId?: string },
+): Promise<LearnerHomeData> {
+  const { rows, subjectNames } = await loadLearnerHomeScaffold(userId, manifest, options);
+  const withContents = await Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      contents: await loadLearnerWorkspaceContents(row.workspaceId),
+    })),
+  );
+  return { rows: withContents, subjectNames };
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ContentPeriodFilter } from "@/components/admin/ContentPeriodFilter";
 import { CreatorSubjectSection, type CreatorSubjectGroup } from "@/components/creator/CreatorSubjectSection";
@@ -99,18 +98,6 @@ export function CreatorContentsSection({ workspace }: Props) {
   return (
     <>
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
-
-      <div className="creator-contents-header">
-        <Link
-          href="/creator/contents/new"
-          className="admin-btn admin-btn--primary"
-          aria-disabled={!workspace}
-          tabIndex={workspace ? undefined : -1}
-          style={workspace ? undefined : { pointerEvents: "none", opacity: 0.6 }}
-        >
-          教材を新規作成
-        </Link>
-      </div>
 
       <section className="admin-card learner-workspace-card">
         <h2 className="learner-workspace-title">{workspaceName}</h2>

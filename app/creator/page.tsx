@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CreatorBillingBanner } from "@/components/creator/CreatorBillingBanner";
 import { CreatorContentsSection } from "@/components/creator/CreatorContentsSection";
@@ -55,7 +56,20 @@ export default function CreatorDashboardPage() {
 
   return (
     <CreatorShell>
-      <h2 className="shell-page-heading">教材</h2>
+      <div className="creator-page-toolbar">
+        <h2 className="shell-page-heading creator-page-toolbar__title">教材</h2>
+        {!wsMissing ? (
+          <Link
+            href="/creator/contents/new"
+            className="admin-btn admin-btn--primary creator-page-toolbar__action"
+            aria-disabled={!ws}
+            tabIndex={ws ? undefined : -1}
+            style={ws ? undefined : { pointerEvents: "none", opacity: 0.6 }}
+          >
+            教材を新規作成
+          </Link>
+        ) : null}
+      </div>
 
       {wsMissing ? (
         <p className="admin-msg admin-msg--error">
