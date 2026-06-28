@@ -55,6 +55,7 @@ export default function CreatorDashboardPage() {
 
   return (
     <CreatorShell>
+      <h2 className="shell-page-heading">教材</h2>
       <CreatorBillingBanner ws={ws} purchaseStatus={purchaseStatus} />
 
       <CreatorContentsSection />

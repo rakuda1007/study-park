@@ -727,6 +727,18 @@
   align-self: stretch;
 }
 
+.creator-contents-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.creator-contents-count {
+  margin: 1rem 0 0;
+  font-size: 0.82rem;
+  color: var(--admin-muted);
+}
+
 .learner-workspace-card {
   border-color: #d4e3f8;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
