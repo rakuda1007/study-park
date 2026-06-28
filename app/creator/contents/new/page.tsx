@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
 import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { currentContentPeriod } from "@/lib/content/period";
+import { DEFAULT_SUBJECTS } from "@/lib/content/subject-defaults";
 import { SLUG_PATTERN, type ContentType } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
@@ -16,10 +17,21 @@ import {
   ensureWorkspaceSubjects,
   isWorkspaceSlugTaken,
 } from "@/lib/workspaces/content-firestore";
+import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import { listWorkspaceSubjectsForForm } from "@/lib/workspaces/subjects-firestore";
 import type { WorkspaceDoc, WorkspaceSubjectDoc } from "@/lib/workspaces/types";
 
 const EXCLUDED_SUBJECT_IDS = new Set(["general"]);
+
+function defaultSubjectChoices(): WorkspaceSubjectDoc[] {
+  return DEFAULT_SUBJECTS.map((s) => ({
+    id: s.id,
+    name: s.name,
+    order: s.order,
+    status: "published",
+    enabledInForm: s.enabledInForm,
+  }));
+}
 
 function selectableSubjects(subjects: WorkspaceSubjectDoc[]): WorkspaceSubjectDoc[] {
   return subjects.filter((s) => !EXCLUDED_SUBJECT_IDS.has(s.id) && s.name !== "教材");
@@ -28,53 +40,77 @@ function selectableSubjects(subjects: WorkspaceSubjectDoc[]): WorkspaceSubjectDo
 export default function CreatorContentNewPage() {
   const router = useRouter();
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
+  const [wsMissing, setWsMissing] = useState(false);
+  const [wsPending, setWsPending] = useState(true);
   const [uid, setUid] = useState("");
-  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [err, setErr] = useState("");
-  const [subjects, setSubjects] = useState<WorkspaceSubjectDoc[]>([]);
+  const [subjects, setSubjects] = useState<WorkspaceSubjectDoc[]>(defaultSubjectChoices);
+  const [subjectsLoading, setSubjectsLoading] = useState(false);
   const [newType, setNewType] = useState<ContentType>("quiz");
-  const [newSubjectId, setNewSubjectId] = useState("");
+  const [newSubjectId, setNewSubjectId] = useState("math");
   const [newSlug, setNewSlug] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newPeriodYear, setNewPeriodYear] = useState(currentContentPeriod().year);
   const [newPeriodMonth, setNewPeriodMonth] = useState(currentContentPeriod().month);
 
-  const load = useCallback(async (userId: string) => {
-    let workspace = await syncCreatorBillingState(userId);
-    if (workspace) {
-      workspace = (await refreshWorkspaceUsageSnapshot(workspace.id)) ?? workspace;
-    }
-    setWs(workspace);
-    if (workspace) {
-      await ensureWorkspaceSubjects(workspace.id);
-      const formSubjects = await listWorkspaceSubjectsForForm(workspace.id);
-      setSubjects(formSubjects);
-      const choices = selectableSubjects(formSubjects);
-      if (choices.length) {
-        setNewSubjectId(choices[0].id);
-      }
-    }
-  }, []);
-
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
-      setUid(user?.uid ?? "");
+      if (!user) return;
+      setUid(user.uid);
+      setWsPending(true);
+      setWsMissing(false);
+
       void (async () => {
-        if (!user) return;
-        try {
-          await load(user.uid);
-        } catch (e) {
-          setErr(e instanceof Error ? e.message : "読み込みに失敗しました。");
-        } finally {
-          setLoading(false);
+        const workspace = await getWorkspaceByOwner(user.uid);
+        if (!workspace) {
+          setWsMissing(true);
+          setWs(null);
+          setWsPending(false);
+          return;
         }
+
+        setWsMissing(false);
+        setWs(workspace);
+        setWsPending(false);
+
+        void (async () => {
+          try {
+            let updated = await syncCreatorBillingState(user.uid);
+            if (updated) {
+              updated = (await refreshWorkspaceUsageSnapshot(updated.id)) ?? updated;
+            }
+            if (updated) setWs(updated);
+          } catch {
+            /* 送信時の利用状況チェック用。初期 WS があればフォームは使える */
+          }
+        })();
+
+        setSubjectsLoading(true);
+        void (async () => {
+          try {
+            await ensureWorkspaceSubjects(workspace.id);
+            const formSubjects = await listWorkspaceSubjectsForForm(workspace.id);
+            setSubjects(formSubjects);
+            const choices = selectableSubjects(formSubjects);
+            if (choices.length) {
+              setNewSubjectId((prev) =>
+                choices.some((c) => c.id === prev) ? prev : choices[0].id,
+              );
+            }
+          } catch (e) {
+            setErr(e instanceof Error ? e.message : "教科の読み込みに失敗しました。");
+          } finally {
+            setSubjectsLoading(false);
+          }
+        })();
       })();
     });
     return unsub;
-  }, [load]);
+  }, []);
 
   const subjectChoices = useMemo(() => selectableSubjects(subjects), [subjects]);
+  const formReady = !wsPending && ws != null && !subjectsLoading;
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
@@ -125,17 +161,24 @@ export default function CreatorContentNewPage() {
         <Link href="/creator">← 教材一覧へ</Link>
       </p>
 
-      {loading ? <p className="admin-loading">読み込み中…</p> : null}
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
 
-      {!loading && !ws ? (
+      {wsMissing ? (
         <p className="admin-msg admin-msg--error">
           ワークスペースがありません。一度ログアウトし、クリエイター登録からやり直してください。
         </p>
-      ) : null}
-
-      {!loading && ws ? (
+      ) : (
         <form className="admin-card creator-content-new-form" onSubmit={(e) => void onCreate(e)}>
+          {wsPending ? (
+            <p className="admin-loading creator-content-new-form__status" role="status">
+              ワークスペースを確認中…
+            </p>
+          ) : subjectsLoading ? (
+            <p className="admin-loading creator-content-new-form__status" role="status">
+              教科を読み込み中…
+            </p>
+          ) : null}
+
           <div className="admin-form-row">
             <fieldset className="admin-field admin-radio-field creator-content-new-form__type">
               <legend>形式</legend>
@@ -173,6 +216,7 @@ export default function CreatorContentNewPage() {
                       value={s.id}
                       checked={newSubjectId === s.id}
                       onChange={() => setNewSubjectId(s.id)}
+                      disabled={subjectsLoading}
                     />
                     <span>{s.name}</span>
                   </label>
@@ -211,7 +255,7 @@ export default function CreatorContentNewPage() {
             <button
               type="submit"
               className="admin-btn admin-btn--primary"
-              disabled={creating || subjectChoices.length === 0}
+              disabled={creating || !formReady || subjectChoices.length === 0}
             >
               {creating ? "作成中…" : "本編を作成する"}
             </button>
@@ -220,7 +264,7 @@ export default function CreatorContentNewPage() {
             </Link>
           </div>
         </form>
-      ) : null}
+      )}
     </CreatorShell>
   );
 }

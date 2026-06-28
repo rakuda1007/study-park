@@ -549,6 +549,10 @@
   max-width: 14rem;
 }
 
+.creator-content-new-form__status {
+  margin: 0 0 0.75rem;
+}
+
 .admin-rich-textarea--resizable {
   resize: both;
   min-height: 5.5rem;
