@@ -518,6 +518,37 @@
   accent-color: var(--admin-accent, #2563eb);
 }
 
+.admin-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+}
+
+.admin-form-row > .admin-field,
+.admin-form-row > .admin-radio-field {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.creator-content-new-form__type {
+  flex: 0 1 auto;
+}
+
+.creator-content-new-form__subject {
+  flex: 1 1 12rem;
+}
+
+.creator-content-new-form__title {
+  flex: 1 1 16rem;
+}
+
+.creator-content-new-form__slug {
+  flex: 0 1 10rem;
+  max-width: 14rem;
+}
+
 .admin-rich-textarea--resizable {
   resize: both;
   min-height: 5.5rem;

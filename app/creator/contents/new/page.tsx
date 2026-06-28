@@ -135,67 +135,71 @@ export default function CreatorContentNewPage() {
       ) : null}
 
       {!loading && ws ? (
-        <form className="admin-card" onSubmit={(e) => void onCreate(e)}>
-          <fieldset className="admin-field admin-radio-field">
-            <legend>形式</legend>
-            <div className="admin-radio-group">
-              <label className="admin-radio-option">
-                <input
-                  type="radio"
-                  name="new-type"
-                  value="quiz"
-                  checked={newType === "quiz"}
-                  onChange={() => setNewType("quiz")}
-                />
-                <span>クイズ</span>
-              </label>
-              <label className="admin-radio-option">
-                <input
-                  type="radio"
-                  name="new-type"
-                  value="lesson"
-                  checked={newType === "lesson"}
-                  onChange={() => setNewType("lesson")}
-                />
-                <span>レッスン</span>
-              </label>
-            </div>
-          </fieldset>
-          <fieldset className="admin-field admin-radio-field">
-            <legend>教科</legend>
-            <div className="admin-radio-group">
-              {subjectChoices.map((s) => (
-                <label key={s.id} className="admin-radio-option">
+        <form className="admin-card creator-content-new-form" onSubmit={(e) => void onCreate(e)}>
+          <div className="admin-form-row">
+            <fieldset className="admin-field admin-radio-field creator-content-new-form__type">
+              <legend>形式</legend>
+              <div className="admin-radio-group">
+                <label className="admin-radio-option">
                   <input
                     type="radio"
-                    name="new-subject"
-                    value={s.id}
-                    checked={newSubjectId === s.id}
-                    onChange={() => setNewSubjectId(s.id)}
+                    name="new-type"
+                    value="quiz"
+                    checked={newType === "quiz"}
+                    onChange={() => setNewType("quiz")}
                   />
-                  <span>{s.name}</span>
+                  <span>クイズ</span>
                 </label>
-              ))}
-            </div>
-          </fieldset>
-          <div className="admin-field">
-            <label htmlFor="new-title">タイトル</label>
-            <input
-              id="new-title"
-              placeholder="教材のタイトル"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-            />
+                <label className="admin-radio-option">
+                  <input
+                    type="radio"
+                    name="new-type"
+                    value="lesson"
+                    checked={newType === "lesson"}
+                    onChange={() => setNewType("lesson")}
+                  />
+                  <span>レッスン</span>
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="admin-field admin-radio-field creator-content-new-form__subject">
+              <legend>教科</legend>
+              <div className="admin-radio-group">
+                {subjectChoices.map((s) => (
+                  <label key={s.id} className="admin-radio-option">
+                    <input
+                      type="radio"
+                      name="new-subject"
+                      value={s.id}
+                      checked={newSubjectId === s.id}
+                      onChange={() => setNewSubjectId(s.id)}
+                    />
+                    <span>{s.name}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </div>
-          <div className="admin-field">
-            <label htmlFor="new-slug">スラッグ</label>
-            <input
-              id="new-slug"
-              placeholder="例: moon-move"
-              value={newSlug}
-              onChange={(e) => setNewSlug(e.target.value)}
-              required
-            />
+          <div className="admin-form-row">
+            <div className="admin-field creator-content-new-form__title">
+              <label htmlFor="new-title">タイトル</label>
+              <input
+                id="new-title"
+                placeholder="教材のタイトル"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
+            </div>
+            <div className="admin-field creator-content-new-form__slug">
+              <label htmlFor="new-slug">スラッグ</label>
+              <input
+                id="new-slug"
+                placeholder="例: moon-move"
+                value={newSlug}
+                onChange={(e) => setNewSlug(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <ContentPeriodFields
             year={newPeriodYear}
