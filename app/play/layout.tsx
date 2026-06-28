@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./play.css";
 
 export const metadata: Metadata = {
@@ -12,15 +13,16 @@ export const viewport: Viewport = {
 export default function PlayLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <Script src="/shared/rich-text.js?v=5" strategy="beforeInteractive" />
       {/* public 配下の既存クイズ CSS（静的アセット） */}
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
       {/* eslint-disable-next-line @next/next/no-css-tags */}
-      <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
+      <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=2" />
       <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
-      <link rel="stylesheet" href="/shared/rich-text.css?v=4" />
+      <link rel="stylesheet" href="/shared/rich-text.css?v=5" />
       <link rel="stylesheet" href="/shared/lesson-theme.css?v=5" />
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/shared/quiz-desktop.css?v=1" />

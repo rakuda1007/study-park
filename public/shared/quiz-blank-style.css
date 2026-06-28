@@ -401,6 +401,13 @@ select.mode-select {
   text-align: left;
 }
 
+.question-body .rich-text-large,
+.review-item-question .rich-text-large {
+  font-size: 1.2em;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .question-body .question-paragraph {
   margin: 0 0 0.75rem;
   white-space: pre-line;

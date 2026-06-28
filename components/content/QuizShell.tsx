@@ -26,7 +26,7 @@ type Props = {
   homeHref?: string;
 };
 
-const ASSET_V = "7";
+const ASSET_V = "8";
 
 export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
   const title = content.title;
@@ -250,16 +250,15 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
       </div>
 
       <Script src={`/study-park-asset-version.js?v=${ASSET_V}`} strategy="afterInteractive" />
-      <Script src="/shared/rich-text.js?v=4" strategy="afterInteractive" />
       <Script src="/shared/quiz-format.js?v=13" strategy="afterInteractive" />
-      <Script src="/shared/quiz-review-mode.js?v=2" strategy="afterInteractive" />
+      <Script src="/shared/quiz-review-mode.js?v=3" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-controller.js?v=2" strategy="afterInteractive" />
       <Script src="/shared/quiz-streak-fx.js?v=10" strategy="afterInteractive" />
       <Script src={`/pwa-update.js?v=${ASSET_V}`} strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=7"
+        src="/shared/quiz-blank-app.js?v=8"
         strategy="afterInteractive"
         key={content.slug}
       />

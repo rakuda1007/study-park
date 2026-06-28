@@ -3,7 +3,7 @@ import { lessonBlockToHtml } from "./lesson-html";
 import { richTextToHtml } from "./rich-text";
 import { contentPlayHref } from "./urls";
 
-const ASSET_V = "7";
+const ASSET_V = "8";
 
 function escHtml(s: string): string {
   return s
@@ -46,9 +46,9 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <link rel="apple-touch-icon" href="/icon-180.png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
     <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
-    <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=1" />
+    <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=2" />
     <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
-    <link rel="stylesheet" href="/shared/rich-text.css?v=4" />
+    <link rel="stylesheet" href="/shared/rich-text.css?v=5" />
   </head>
   <body>
     <header class="app-header app-header--unified">
@@ -157,16 +157,16 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     </div>
 
     <script src="/study-park-asset-version.js?v=${ASSET_V}"></script>
-    <script src="/shared/rich-text.js?v=4"></script>
+    <script src="/shared/rich-text.js?v=5"></script>
     <script src="/shared/quiz-format.js?v=13"></script>
-    <script src="/shared/quiz-review-mode.js?v=2"></script>
+    <script src="/shared/quiz-review-mode.js?v=3"></script>
     <script src="/shared/quiz-review-controller.js?v=1"></script>
     <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=${ASSET_V}"></script>
     <script src="/${slug}/data.js?v=1"></script>
     <script src="/shared/quiz-blank-characters.js?v=1"></script>
     <script src="/shared/quiz-blank-storage.js?v=1"></script>
-    <script src="/shared/quiz-blank-app.js?v=4"></script>
+    <script src="/shared/quiz-blank-app.js?v=8"></script>
   </body>
 </html>
 `;
@@ -206,7 +206,7 @@ ${blocks}
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
     <link rel="stylesheet" href="/shared/lesson-theme.css?v=5" />
-    <link rel="stylesheet" href="/shared/rich-text.css?v=4" />
+    <link rel="stylesheet" href="/shared/rich-text.css?v=5" />
   </head>
   <body class="lesson-page">
     <header class="app-header app-header--unified">
