@@ -2,16 +2,12 @@
   "use strict";
 
   const store = window.KukuStorage;
-  const CORRECT_PER_LEVEL = 10;
   const TIMED_LIMIT_MS = 100000;
   const TIMED_TICK_MS = 100;
   const TIMED_TOTAL = 81;
   const KUKU_TOTAL = 81;
 
-  const CHARS = window.KUKU_CHARACTERS || [];
-  const ROSTER_IDS = window.KUKU_CHAR_ROSTER_IDS || CHARS.map((c) => c.id);
-
-  /** @type {{ mode: 'sequential'|'random'|'weak'|'timed', a: number, b: number, seqIndex: number, seqOrder: {a:number,b:number}[], input: string, streak: number, totalCorrect: number, manualCharId: string|null, useAutoChar: boolean, timed: { active: boolean, remainingMs: number, solved: number, intervalId: number|null, ended: boolean } }} */
+  /** @type {{ mode: 'sequential'|'random'|'weak'|'timed', a: number, b: number, seqIndex: number, seqOrder: {a:number,b:number}[], input: string, streak: number, totalCorrect: number, timed: { active: boolean, remainingMs: number, solved: number, intervalId: number|null, ended: boolean } }} */
   const state = {
     mode: "sequential",
     a: 1,
@@ -21,8 +17,6 @@
     input: "",
     streak: 0,
     totalCorrect: 0,
-    manualCharId: null,
-    useAutoChar: true,
     /** 順番・ランダム・苦手で「やめる」後、つづけるまで操作停止 */
     sessionStopped: false,
     inReview: false,
@@ -44,27 +38,6 @@
     return document.getElementById(id);
   }
 
-  function charById(id) {
-    return CHARS.find((c) => c.id === id) || CHARS[0];
-  }
-
-  function rosterIndexFromTotal() {
-    const idx =
-      Math.floor(state.totalCorrect / CORRECT_PER_LEVEL) % ROSTER_IDS.length;
-    return Math.max(0, idx);
-  }
-
-  function currentCharacterId() {
-    if (!state.useAutoChar && state.manualCharId) {
-      return state.manualCharId;
-    }
-    return ROSTER_IDS[rosterIndexFromTotal()] || "orange";
-  }
-
-  function currentCharacter() {
-    return charById(currentCharacterId());
-  }
-
   /** 進捗をブラウザ（localStorage）へ保存 */
   function persistProgress() {
     if (!store) return;
@@ -74,8 +47,6 @@
       totalCorrect: state.totalCorrect,
       streak: state.streak,
       weakProblems: store.getWeakList(),
-      manualCharacterId: state.manualCharId,
-      useAutoCharacter: state.useAutoChar,
     });
   }
 
@@ -111,8 +82,6 @@
     state.seqIndex = data.seqIndex;
     state.totalCorrect = data.totalCorrect;
     state.streak = data.streak;
-    state.manualCharId = data.manualCharacterId;
-    state.useAutoChar = data.useAutoCharacter;
   }
 
   function recordWrong(a, b) {
@@ -247,7 +216,6 @@
     state.timed.intervalId = window.setInterval(tickTimed, TIMED_TICK_MS);
     closeTimedModal();
     renderTimedBar();
-    setSpeech("100秒で81問ぜんぶ！ がんばって！");
     nextQuestion();
     renderFooter();
     setNumpadDisabled(false);
@@ -268,36 +236,28 @@
     stopTimedTimer();
     state.timed.ended = true;
     state.timed.lastResult = "fail";
-    setSpeech("時間ぎれ… あと少しだったね！");
     renderTimedBar();
     renderFooter();
     showTimedFailModal();
   }
 
-  function streakTierFromCount(streak) {
-    if (streak <= 0 || streak % 5 !== 0) return 0;
-    const block = Math.floor(streak / 5) - 1;
-    return [3, 10, 20][block % 3];
-  }
-
   function getTimedCelebrateMessages(sec, prevBest, isNewRecord) {
     const lines = [];
-    lines.push("みんなでお祝い！ ぜんぶクリアだよ！");
     if (isNewRecord) {
       if (prevBest == null) {
-        lines.push("🎉 はじめてのクリア！ 記録をのこしたよ！");
+        lines.push("はじめてのクリアです。");
       } else {
-        lines.push(`🏆 タイム更新！ ${prevBest}秒 → ${sec}秒！`);
+        lines.push(`タイム更新: ${prevBest}秒 → ${sec}秒`);
       }
     } else if (prevBest != null) {
-      lines.push(`クリア！ ${sec}秒（ベスト ${prevBest}秒のまま）`);
+      lines.push(`クリア ${sec}秒（ベスト ${prevBest}秒のまま）`);
     } else {
-      lines.push(`クリア！ タイム ${sec}秒`);
+      lines.push(`クリア タイム ${sec}秒`);
     }
     if (sec <= 80) {
-      lines.push("⚡ 80秒切り！ ちょっと待って、はやすぎるよ！");
+      lines.push("80秒切りです。");
     } else if (sec <= 90) {
-      lines.push("🌟 90秒切り！ すごいスピードだね！");
+      lines.push("90秒切りです。");
     }
     return lines.join("\n");
   }
@@ -322,11 +282,9 @@
     state.quitKind = null;
     setNumpadDisabled(true);
     if (!els.timedModal) return;
-    if (els.timedModalTitle) {
-      els.timedModalTitle.textContent = isNewRecord
-        ? "🎊 新記録！"
-        : "🎊 タイムアタッククリア！";
-    }
+    if (els.timedModalTitle) els.timedModalTitle.textContent = isNewRecord
+      ? "新記録"
+      : "タイムアタッククリア";
     if (els.timedModalMsg) {
       els.timedModalMsg.textContent = getTimedCelebrateMessages(
         sec,
@@ -337,9 +295,8 @@
     if (els.timedModalTime) {
       els.timedModalTime.textContent = `タイム ${sec}秒 / 制限 100秒`;
     }
-    if (els.timedModalImg) els.timedModalImg.hidden = false;
     if (els.btnTimedRetry) els.btnTimedRetry.hidden = true;
-    if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "やったね！";
+    if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "とじる";
     if (isNewRecord) playRecordBurst();
     els.timedModal.hidden = false;
   }
@@ -357,9 +314,8 @@
       const best = getBestTimedSeconds();
       els.timedModalTime.textContent = best
         ? `いまのベスト ${best}秒`
-        : "100秒以内に81問クリアをめざそう！";
+        : "100秒以内に81問クリアをめざそう";
     }
-    if (els.timedModalImg) els.timedModalImg.hidden = true;
     if (els.btnTimedRetry) els.btnTimedRetry.hidden = false;
     if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "とじる";
     els.timedModal.hidden = false;
@@ -373,7 +329,6 @@
     const prevBest = getBestTimedSeconds();
     const isNewRecord = prevBest === null || sec < prevBest;
     if (isNewRecord && store) store.setBestTimedSeconds(sec);
-    setSpeech("クリア！！ みんなもよろこんでるよ！");
     persistProgress();
     renderFooter();
     renderTimedBar();
@@ -399,7 +354,6 @@
     }
     persistProgress();
     renderFooter();
-    renderCharacter();
     setNumpadDisabled(false);
   }
 
@@ -418,8 +372,6 @@
     if (store) store.patch({ weakProblems: [] });
     if (state.mode === "weak") {
       onModeChange("sequential");
-    } else {
-      setSpeech("苦手問題をリセットしたよ");
     }
   }
 
@@ -436,7 +388,6 @@
     if (els.timedModalMsg) {
       els.timedModalMsg.textContent = `${state.timed.solved}問 せいかい / ${TIMED_TOTAL}問\n残り ${sec}秒\n\nベストタイムは、最後までクリアしたときだけ更新されます。`;
     }
-    if (els.timedModalImg) els.timedModalImg.hidden = true;
     if (els.timedModalTime) els.timedModalTime.textContent = "";
     if (els.btnTimedRetry) {
       els.btnTimedRetry.hidden = false;
@@ -456,7 +407,6 @@
       els.timedModalMsg.textContent =
         "またあとでつづきから遊べます。\n「つづける」でつぎの問題へ。";
     }
-    if (els.timedModalImg) els.timedModalImg.hidden = true;
     if (els.timedModalTime) els.timedModalTime.textContent = "";
     if (els.btnTimedRetry) els.btnTimedRetry.hidden = true;
     if (els.btnTimedModalClose) els.btnTimedModalClose.textContent = "つづける";
@@ -471,8 +421,6 @@
     setNumpadDisabled(false);
     nextQuestion();
     renderFooter();
-    const ch = currentCharacter();
-    setSpeech(randomPhrase(ch));
   }
 
   function quitSession() {
@@ -487,8 +435,6 @@
     }
 
     state.input = "";
-    clearFxClasses(els.characterPanel);
-    setSpeech("またつぎにがんばろう！");
 
     if (state.mode === "timed") {
       stopTimedTimer();
@@ -507,58 +453,6 @@
 
   function expected() {
     return state.a * state.b;
-  }
-
-  function clearFxClasses(panel) {
-    if (!panel) return;
-    const toRemove = [...panel.classList].filter(
-      (c) => c.startsWith("fx-") || c === "fx-playing",
-    );
-    toRemove.forEach((c) => panel.classList.remove(c));
-  }
-
-  /** 連続正解 5問ごと（5,10,15…）のマイルストーン演出 */
-  function applyStreakFxMilestone(streak) {
-    const panel = els.characterPanel;
-    const ch = currentCharacter();
-    if (!panel || !ch) return;
-
-    clearFxClasses(panel);
-
-    const tier = streakTierFromCount(streak);
-    let charFx = "";
-    if (tier === 20) charFx = ch.fx20;
-    else if (tier === 10) charFx = ch.fx10;
-    else if (tier === 3) charFx = ch.fx3;
-    if (!tier) return;
-
-    panel.classList.add("fx-playing", `fx-tier-${tier}`);
-    if (charFx) panel.classList.add(charFx);
-
-    const duration = tier === 20 ? 3200 : tier === 10 ? 2800 : 2200;
-    window.setTimeout(() => clearFxClasses(panel), duration);
-  }
-
-  function randomPhrase(ch) {
-    const list = ch.phrases && ch.phrases.length ? ch.phrases : ["がんばって！"];
-    return list[Math.floor(Math.random() * list.length)];
-  }
-
-  function setSpeech(text) {
-    if (els.speech) els.speech.textContent = text;
-  }
-
-  function renderCharacter() {
-    const ch = currentCharacter();
-    if (!ch) return;
-    if (els.charImg) {
-      els.charImg.src = ch.image;
-      els.charImg.alt = ch.name;
-    }
-    if (els.charLabel) {
-      els.charLabel.textContent = `${ch.emoji} ${ch.name}`;
-    }
-    setSpeech(randomPhrase(ch));
   }
 
   function renderProblem() {
@@ -586,80 +480,17 @@
   }
 
   function renderFooter() {
-    if (els.streakEl) els.streakEl.textContent = String(state.streak);
     if (els.remainEl) els.remainEl.textContent = remainingInMode();
-    if (els.levelEl) {
-      const lv = 1 + Math.floor(state.totalCorrect / CORRECT_PER_LEVEL);
-      els.levelEl.textContent = `Lv.${lv}`;
-    }
-  }
-
-  function renderCharModal() {
-    if (!els.charGrid) return;
-    els.charGrid.innerHTML = "";
-    const active = currentCharacterId();
-    CHARS.forEach((c) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "char-pick" + (c.id === active ? " selected" : "");
-      btn.dataset.id = c.id;
-      const img = document.createElement("img");
-      img.src = c.image;
-      img.alt = c.name;
-      const cap = document.createElement("span");
-      cap.textContent = `${c.emoji} ${c.name}`;
-      btn.appendChild(img);
-      btn.appendChild(cap);
-      btn.addEventListener("click", () => {
-        state.manualCharId = c.id;
-        state.useAutoChar = false;
-        [...els.charGrid.querySelectorAll(".char-pick")].forEach((n) =>
-          n.classList.toggle("selected", n.dataset.id === c.id),
-        );
-        persistProgress();
-        renderCharacter();
-        renderFooter();
-      });
-      els.charGrid.appendChild(btn);
-    });
-  }
-
-  function showLevelUp(prevRosterIdx, nextRosterIdx) {
-    if (prevRosterIdx === nextRosterIdx) return;
-    const nextId = ROSTER_IDS[nextRosterIdx];
-    const ch = charById(nextId);
-    if (!els.levelBanner || !ch) return;
-    els.levelBanner.textContent = `レベルアップ！ ${ch.emoji}${ch.name}に出会ったよ`;
-    els.levelBanner.classList.add("show");
-    window.setTimeout(() => els.levelBanner.classList.remove("show"), 2200);
   }
 
   function onCorrect() {
-    const prevRoster = rosterIndexFromTotal();
-
     state.streak += 1;
     state.totalCorrect += 1;
-
-    if (state.streak > 0 && state.streak % 5 === 0) {
-      applyStreakFxMilestone(state.streak);
-    }
-
-    const ch = currentCharacter();
-    setSpeech(`せいかい！ ${randomPhrase(ch)}`);
 
     if (els.problemCard) {
       els.problemCard.classList.remove("flash-ng");
       void els.problemCard.offsetWidth;
       els.problemCard.classList.add("flash-ok");
-    }
-
-    const newRoster = rosterIndexFromTotal();
-    if (
-      state.useAutoChar &&
-      Math.floor((state.totalCorrect - 1) / CORRECT_PER_LEVEL) !==
-        Math.floor(state.totalCorrect / CORRECT_PER_LEVEL)
-    ) {
-      showLevelUp(prevRoster, newRoster);
     }
 
     if (state.mode === "timed") {
@@ -669,7 +500,6 @@
       persistProgress();
       renderFooter();
       renderTimedBar();
-      renderCharacter();
       if (state.timed.solved >= TIMED_TOTAL) {
         finishTimedSuccess();
         return;
@@ -682,15 +512,12 @@
     state.input = "";
     persistProgress();
     renderFooter();
-    renderCharacter();
     window.setTimeout(() => nextQuestion(), 450);
   }
 
   function onWrong() {
     state.streak = 0;
     recordWrong(state.a, state.b);
-    const ch = currentCharacter();
-    setSpeech(`ざんねん… もういちど！ ${ch.emoji}`);
 
     if (els.problemCard) {
       els.problemCard.classList.remove("flash-ok");
@@ -698,7 +525,6 @@
       els.problemCard.classList.add("flash-ng");
     }
 
-    clearFxClasses(els.characterPanel);
     state.input = "";
     persistProgress();
     renderFooter();
@@ -732,31 +558,13 @@
     renderProblem();
   }
 
-  function openModal() {
-    renderCharModal();
-    if (els.modal) els.modal.hidden = false;
-  }
-
-  function closeModal() {
-    if (els.modal) els.modal.hidden = true;
-  }
-
   function init() {
     if (typeof window.recordStudyParkGuestUse === "function") {
       window.recordStudyParkGuestUse("kuku");
     }
-    els.characterPanel = $("characterPanel");
-    els.charImg = $("charImg");
-    els.charLabel = $("charLabel");
-    els.speech = $("speech");
     els.problemCard = $("problemCard");
     els.problemText = $("problemText");
-    els.streakEl = $("streak");
     els.remainEl = $("remain");
-    els.levelEl = $("levelPill");
-    els.modal = $("charModal");
-    els.charGrid = $("charGrid");
-    els.levelBanner = $("levelBanner");
     els.timedBar = $("timedBar");
     els.timedRemainSec = $("timedRemainSec");
     els.timedProgressFill = $("timedProgressFill");
@@ -765,7 +573,6 @@
     els.timedModalCard = $("timedModalCard");
     els.timedModalTitle = $("timedModalTitle");
     els.timedModalMsg = $("timedModalMsg");
-    els.timedModalImg = $("timedModalImg");
     els.timedModalTime = $("timedModalTime");
     els.btnTimedModalClose = $("btnTimedModalClose");
     els.btnTimedRetry = $("btnTimedRetry");
@@ -779,13 +586,6 @@
       applySavedData(saved);
       if (saved.mode === "timed") {
         store.patch({ mode: "sequential" });
-      }
-      if (
-        saved.manualCharacterId &&
-        !CHARS.some((c) => c.id === saved.manualCharacterId)
-      ) {
-        state.manualCharId = null;
-        state.useAutoChar = true;
       }
     }
 
@@ -844,19 +644,6 @@
 
     $("btnQuit")?.addEventListener("click", quitSession);
 
-    $("btnCharPick")?.addEventListener("click", openModal);
-    $("btnModalClose")?.addEventListener("click", closeModal);
-    els.modal?.addEventListener("click", (ev) => {
-      if (ev.target === els.modal) closeModal();
-    });
-    $("btnAutoChar")?.addEventListener("click", () => {
-      state.useAutoChar = true;
-      state.manualCharId = null;
-      persistProgress();
-      renderCharModal();
-      renderCharacter();
-    });
-
     for (let d = 0; d <= 9; d++) {
       const btn = $("d" + d);
       btn?.addEventListener("click", () => appendDigit(String(d)));
@@ -866,7 +653,6 @@
 
     nextQuestion();
     renderTimedBar();
-    renderCharacter();
     renderFooter();
     setNumpadDisabled(false);
   }

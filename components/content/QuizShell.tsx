@@ -115,48 +115,12 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
           できた <strong id="sessionScore">0</strong>
         </span>
         <span className="stat-pill">
-          連続 <strong id="streak">0</strong>
-        </span>
-        <span className="stat-pill">
-          最高 <strong id="highStreak">0</strong>
-        </span>
-        <span className="stat-pill">
           マスター <strong id="masteredCount">0 / 10</strong>
         </span>
         <div className="session-progress" aria-hidden="true">
           <div id="sessionFill" className="session-progress-fill" />
         </div>
       </div>
-
-      <section id="characterPanel" className="character-panel" aria-live="polite">
-        <p id="speech" className="speech-bubble">
-          10問チャレンジ！ がんばって！
-        </p>
-        <div id="charSingle" className="char-single">
-          <div className="char-img-wrap">
-            <div className="fx-layer" aria-hidden="true">
-              <div className="fx-stars" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-              </div>
-            </div>
-            <img id="charImg" src="/orange.png" alt="みかんぼうや" />
-          </div>
-          <p id="charLabel" className="char-label">
-            🍊 みかんぼうや
-          </p>
-        </div>
-        <div id="charSquad" className="char-squad" hidden>
-          <div id="squadGrid" className="squad-grid" />
-          <p className="char-label squad-caption">みんなで応援中！</p>
-        </div>
-      </section>
 
       <main className="quiz-main">
         {showIntro ? (
@@ -216,13 +180,6 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
         </div>
       </main>
 
-      <div
-        id="celebrateBanner"
-        className="celebrate-banner"
-        role="status"
-        aria-live="assertive"
-      />
-
       <div id="celebrateModal" className="modal-backdrop" hidden>
         <div
           className="celebrate-modal-card"
@@ -232,13 +189,6 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
         >
           <p id="celebrateModalTitle" className="celebrate-modal-title" />
           <p id="celebrateModalMsg" className="celebrate-modal-msg" />
-          <img
-            id="celebrateModalImg"
-            className="celebrate-modal-img"
-            src="/characters.png"
-            alt="みんなでお祝い"
-            hidden
-          />
           {showAds && showFinishAd ? (
             <AdSenseUnit slotKey="quiz_finish" className="adsense-unit--modal" />
           ) : null}
@@ -257,12 +207,10 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
       <Script src="/shared/quiz-format.js?v=13" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-mode.js?v=3" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-controller.js?v=2" strategy="afterInteractive" />
-      <Script src="/shared/quiz-streak-fx.js?v=10" strategy="afterInteractive" />
       <Script src={`/pwa-update.js?v=${ASSET_V}`} strategy="afterInteractive" />
-      <Script src="/shared/quiz-blank-characters.js?v=1" strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=8"
+        src="/shared/quiz-blank-app.js?v=9"
         strategy="afterInteractive"
         key={content.slug}
       />

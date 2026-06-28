@@ -42,10 +42,6 @@
             <button type="button" id="btnResetWeak" aria-label="苦手をリセット" class="btn-header-util btn-reset-weak">リセット</button>
           </div>
         </div>
-        <div class="app-header-extra">
-          <span id="levelPill" class="level-pill" aria-live="polite">Lv.1</span>
-          <button type="button" id="btnCharPick" class="btn-ghost">キャラ</button>
-        </div>
       </div>
     </header>
 
@@ -60,22 +56,6 @@
           <div id="timedProgressFill" class="timed-progress-fill"></div>
         </div>
       </div>
-
-      <section id="characterPanel" class="character-panel" aria-live="polite">
-        <div id="speech" class="speech-bubble">はじめよう！</div>
-        <div class="char-stage-block">
-          <div class="fx-layer" aria-hidden="true">
-            <div class="fx-stars" aria-hidden="true">
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-            </div>
-          </div>
-          <div class="char-stage">
-            <img id="charImg" src="/orange.png" alt="みかんぼうや" />
-          </div>
-          <p id="charLabel" class="char-name">🍊 みかんぼうや</p>
-        </div>
-      </section>
     </div>
 
     <div class="zone-input">
@@ -103,45 +83,20 @@
       </div>
 
       <footer class="footer-stats">
-        <span>連続せいかい <strong id="streak">0</strong></span>
         <span>のこり <strong id="remain">81 / 81</strong></span>
       </footer>
     </div>
-
-    <div id="levelBanner" class="levelup-banner" role="status" aria-live="assertive"></div>
 
     <div id="timedModal" class="modal-backdrop timed-modal" hidden>
       <div class="timed-modal-card" id="timedModalCard" role="dialog" aria-modal="true">
         <p id="timedModalTitle" class="timed-modal-title"></p>
         <p id="timedModalMsg" class="timed-modal-msg"></p>
-        <img
-          id="timedModalImg"
-          class="timed-modal-img"
-          src="/characters.png"
-          alt="みんなでお祝い"
-          hidden
-        />
         <p id="timedModalTime" class="timed-modal-time"></p>
         <div class="timed-modal-actions">
           <button type="button" id="btnTimedRetry" class="btn-secondary" hidden>
             もういちど
           </button>
           <button type="button" id="btnTimedModalClose" class="btn-primary">やったね！</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="charModal" class="modal-backdrop" hidden>
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="charModalTitle">
-        <h2 id="charModalTitle">キャラをえらぶ</h2>
-        <p style="margin: 0 0 10px; font-size: 0.88rem; color: var(--muted)">
-          おまかせにすると、レベルが上がるたびにキャラがかわるよ（最初はみかんぼうや）。<br />
-          つづきはこのスマホ・パソコンの中に保存されます（クラウドには送りません）。
-        </p>
-        <div id="charGrid" class="char-grid"></div>
-        <div class="modal-actions">
-          <button type="button" id="btnAutoChar" class="btn-secondary">おまかせ（レベルでかわる）</button>
-          <button type="button" id="btnModalClose" class="btn-primary">とじる</button>
         </div>
       </div>
     </div>
@@ -154,8 +109,7 @@
     <script>window.__STUDY_PARK_QUIZ_REVIEW_DISABLED__ = true;</script>
     <script src="/pwa-update.js?v=7"></script>
     <script src="/shared/quiz-format.js?v=13"></script>
-    <script src="/kuku/characters.js?v=7"></script>
     <script src="/kuku/storage.js?v=7"></script>
-    <script src="/kuku/app.js?v=8"></script>
+    <script src="/kuku/app.js?v=9"></script>
   </body>
 </html>

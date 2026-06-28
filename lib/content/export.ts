@@ -54,7 +54,6 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
     <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/icon-180.png" />
     <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
-    <link rel="stylesheet" href="/shared/quiz-character-fx.css?v=10" />
     <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=2" />
     <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />
     <link rel="stylesheet" href="/shared/rich-text.css?v=5" />
@@ -88,33 +87,11 @@ export function buildQuizIndexHtml(content: ContentDoc): string {
       <span class="stat-pill">第 <strong id="questionNum">1</strong> / <strong id="sessionTotal">10</strong> 問</span>
       <span class="stat-pill">苦手 <strong id="weakCount">0</strong> 件</span>
       <span class="stat-pill">できた <strong id="sessionScore">0</strong></span>
-      <span class="stat-pill">連続 <strong id="streak">0</strong></span>
-      <span class="stat-pill">最高 <strong id="highStreak">0</strong></span>
       <span class="stat-pill">マスター <strong id="masteredCount">0 / 10</strong></span>
       <div class="session-progress" aria-hidden="true">
         <div id="sessionFill" class="session-progress-fill"></div>
       </div>
     </div>
-
-    <section id="characterPanel" class="character-panel" aria-live="polite">
-      <p id="speech" class="speech-bubble">10問チャレンジ！ がんばって！</p>
-      <div id="charSingle" class="char-single">
-        <div class="char-img-wrap">
-          <div class="fx-layer" aria-hidden="true">
-            <div class="fx-stars" aria-hidden="true">
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-            </div>
-          </div>
-          <img id="charImg" src="/orange.png" alt="みかんぼうや" />
-        </div>
-        <p id="charLabel" class="char-label">🍊 みかんぼうや</p>
-      </div>
-      <div id="charSquad" class="char-squad" hidden>
-        <div id="squadGrid" class="squad-grid"></div>
-        <p class="char-label squad-caption">みんなで応援中！</p>
-      </div>
-    </section>
 
     <main class="quiz-main">
 ${introSection}      <section id="reviewPanel" class="review-panel" hidden aria-label="まとめて確認">
@@ -146,13 +123,10 @@ ${introSection}      <section id="reviewPanel" class="review-panel" hidden aria-
       </div>
     </main>
 
-    <div id="celebrateBanner" class="celebrate-banner" role="status" aria-live="assertive"></div>
-
     <div id="celebrateModal" class="modal-backdrop" hidden>
       <div class="celebrate-modal-card" id="celebrateModalCard" role="dialog" aria-modal="true">
         <p id="celebrateModalTitle" class="celebrate-modal-title"></p>
         <p id="celebrateModalMsg" class="celebrate-modal-msg"></p>
-        <img id="celebrateModalImg" class="celebrate-modal-img" src="/characters.png" alt="みんなでお祝い" hidden />
         <div class="celebrate-modal-actions">
           <button type="button" id="btnModalRestart" class="btn-primary">もういちど</button>
           <button type="button" id="btnModalClose" class="btn-secondary" hidden>とじる</button>
@@ -165,12 +139,10 @@ ${introSection}      <section id="reviewPanel" class="review-panel" hidden aria-
     <script src="/shared/quiz-format.js?v=13"></script>
     <script src="/shared/quiz-review-mode.js?v=3"></script>
     <script src="/shared/quiz-review-controller.js?v=1"></script>
-    <script src="/shared/quiz-streak-fx.js?v=10"></script>
     <script src="/pwa-update.js?v=${ASSET_V}"></script>
     <script src="/${slug}/data.js?v=1"></script>
-    <script src="/shared/quiz-blank-characters.js?v=1"></script>
     <script src="/shared/quiz-blank-storage.js?v=1"></script>
-    <script src="/shared/quiz-blank-app.js?v=8"></script>
+    <script src="/shared/quiz-blank-app.js?v=9"></script>
   </body>
 </html>
 `;

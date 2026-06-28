@@ -48,9 +48,9 @@ body {
   margin: 0 auto;
 }
 
-/* 上半分：ヘッダー＋キャラ */
+/* 上半分：ヘッダー */
 .zone-top {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
