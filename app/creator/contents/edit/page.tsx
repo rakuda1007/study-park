@@ -345,7 +345,7 @@ function EditInner() {
                   <div className="admin-quiz-answers">
                     <h3 className="admin-quiz-answers__heading">答えの登録</h3>
                     <p className="admin-field-hint admin-quiz-answers__hint">
-                      本文に入れた空欄記号（① など）と同じ記号で答えを書きます。別解は半角カンマ区切り。読点「、」は答えの本文に使えます。
+                      本文に入れた空欄記号（① など）と同じ記号で答えを書きます。カンマ（,）や読点（、）も答えの本文に使えます。
                     </p>
                     {q.blanks.map((b, bi) => (
                       <div key={`${q.id}-blank-${bi}`} className="admin-blank-row">

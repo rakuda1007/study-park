@@ -94,7 +94,9 @@
   }
 
   function formatCorrectAnswer(blank) {
-    return blank.answers[0];
+    if (!Array.isArray(blank.answers) || blank.answers.length === 0) return "";
+    if (blank.answers.length === 1) return blank.answers[0];
+    return blank.answers.map((a) => String(a)).filter((a) => a.trim()).join(", ");
   }
 
   function escHtml(s) {

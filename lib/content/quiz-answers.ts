@@ -24,23 +24,23 @@ export function normalizeBlankAnswerList(answers: string[], marker: string): str
   return answers;
 }
 
-/** 別解の区切り文字（半角カンマのみ。読点「、」は正答本文に使える） */
+/** 旧データ互換: 複数別解が配列で保存されていたときの連結用 */
 export const BLANK_ANSWER_ALT_SEPARATOR = ",";
 
-/** 空欄の別解リストを編集用の1文字列に */
+/** 空欄の正答を編集用の1文字列に（カンマを含む本文はそのまま保持） */
 export function blankAnswersToInput(answers: string[]): string {
+  if (answers.length === 0) return "";
+  if (answers.length === 1) return answers[0];
   return answers.join(BLANK_ANSWER_ALT_SEPARATOR);
 }
 
-/** 別解1件の前後のスペース・タブのみ除去（改行は保持） */
-function trimBlankAnswerSegment(segment: string): string {
-  return segment.replace(/^[ \t]+|[ \t]+$/g, "");
+/** 前後のスペース・タブのみ除去（改行・カンマは保持） */
+function trimBlankAnswerInput(value: string): string {
+  return value.replace(/^[ \t]+|[ \t]+$/g, "");
 }
 
-/** 編集欄の文字列を別解リストに（半角カンマ区切り。読点「、」は分割しない） */
+/** 編集欄の文字列を正答リストに（入力全体を1つの答えとして扱う） */
 export function parseBlankAnswersInput(value: string): string[] {
-  return value
-    .split(BLANK_ANSWER_ALT_SEPARATOR)
-    .map(trimBlankAnswerSegment)
-    .filter((a) => a.length > 0);
+  const trimmed = trimBlankAnswerInput(value);
+  return trimmed.length > 0 ? [trimmed] : [];
 }
