@@ -1,4 +1,5 @@
 import type { ShellMenuItem } from "@/components/shell/ShellHamburgerMenu";
+import { MANUAL_MENU_ITEM } from "@/components/shell/manual-menu-item";
 import { PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
 import type { AuthSessionKind } from "@/lib/firebase/auth-client";
 
@@ -37,6 +38,7 @@ export function getGuestShellMenu(): ShellMenuConfig {
       { label: "学習者登録", href: "/signup/learner" },
       { label: "教材を作る", href: "/signup/creator" },
       PORTAL_MENU_ITEM,
+      { ...MANUAL_MENU_ITEM, dividerBefore: true },
     ],
     bottomItems: [],
   };
@@ -49,6 +51,7 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
         items: [
           { label: "学習管理", href: "/learner" },
           { label: "教材", href: "/learner/materials" },
+          { ...MANUAL_MENU_ITEM, dividerBefore: true },
         ],
         bottomItems: loggedInBottom(session),
       };
@@ -67,6 +70,7 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
             href: "/creator/subjects",
             dividerBefore: true,
           },
+          MANUAL_MENU_ITEM,
         ],
         bottomItems: loggedInBottom(session),
       };
@@ -78,6 +82,7 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
           { label: "利用者一覧", href: "/admin/users" },
           { label: "学習管理の運用", href: "/admin/study-ops" },
           { label: "教材", href: "/learner/materials" },
+          { ...MANUAL_MENU_ITEM, dividerBefore: true },
         ],
         bottomItems: loggedInBottom(session),
       };

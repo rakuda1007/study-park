@@ -28,6 +28,23 @@ function itemKey(item: ShellMenuItem): string {
   return `${item.action ?? item.href ?? ""}-${item.label}`;
 }
 
+function isExternalHref(href: string | undefined): boolean {
+  return !!href && /^https?:\/\//i.test(href);
+}
+
+function linkClassName(item: ShellMenuItem): string {
+  return `shell-menu__link${item.hint ? " shell-menu__link--with-hint" : ""}`;
+}
+
+function LinkLabel({ item }: { item: ShellMenuItem }) {
+  return (
+    <>
+      <span className="shell-menu__link-label">{item.label}</span>
+      {item.hint ? <span className="shell-menu__hint">{item.hint}</span> : null}
+    </>
+  );
+}
+
 function MenuEntries({
   items,
   onNavigate,
@@ -55,15 +72,25 @@ function MenuEntries({
             >
               {item.label}
             </button>
+          ) : isExternalHref(item.href) ? (
+            <a
+              href={item.href}
+              className={linkClassName(item)}
+              title={item.title}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onNavigate}
+            >
+              <LinkLabel item={item} />
+            </a>
           ) : (
             <Link
               href={item.href ?? "#"}
-              className={`shell-menu__link${item.hint ? " shell-menu__link--with-hint" : ""}`}
+              className={linkClassName(item)}
               title={item.title}
               onClick={onNavigate}
             >
-              <span className="shell-menu__link-label">{item.label}</span>
-              {item.hint ? <span className="shell-menu__hint">{item.hint}</span> : null}
+              <LinkLabel item={item} />
             </Link>
           )}
         </li>
