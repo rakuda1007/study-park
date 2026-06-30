@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { PortalHeader } from "@/components/portal/PortalHeader";
+import {
+  PortalClosingActions,
+  PortalHeroCta,
+  PortalHeroNote,
+} from "@/components/portal/PortalPageActions";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
 const FEATURES = [
@@ -99,9 +104,7 @@ export default function PortalPage() {
               <br />
               あなた専用のデジタル問題集を、今すぐ作ろう。
             </h1>
-            <Link href="/signup/creator" className="portal-btn portal-btn--primary portal-btn--large">
-              今すぐ教材をつくる（無料）
-            </Link>
+            <PortalHeroCta />
           </div>
         </div>
         <div className="portal-hero__below">
@@ -111,13 +114,7 @@ export default function PortalPage() {
             できたら友達や子供、生徒にシェアして届ける。
             もっと自由で、もっと効率的な新しい学びのカタチが、ここから始まります。
           </p>
-          <p className="portal-hero__note">
-            学習者の方は
-            <Link href="/signup/learner"> こちらから参加</Link>
-            。九九・県庁所在地など公式コンテンツは
-            <Link href="/"> トップ</Link>
-            から登録なしで学べます。
-          </p>
+          <PortalHeroNote />
         </div>
       </section>
 
@@ -167,14 +164,7 @@ export default function PortalPage() {
             教材づくり、配信、復習、計画、達成感までつながるから、
             「教える人」と「学ぶ人」のどちらも、学習そのものに集中できます。
           </p>
-          <div className="portal-closing__actions">
-            <Link href="/signup" className="portal-btn portal-btn--primary portal-btn--large">
-              今すぐ Study Park をはじめる（無料）
-            </Link>
-            <Link href="/" className="portal-btn portal-btn--ghost">
-              学習メニューへ
-            </Link>
-          </div>
+          <PortalClosingActions />
         </div>
       </section>
 

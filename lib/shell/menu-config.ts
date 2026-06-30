@@ -58,6 +58,7 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
     case "creator":
       return {
         items: [
+          { label: "クリエイター画面", href: "/creator" },
           { label: "学習者招待", href: "/creator/learners" },
           { label: "ご利用プランと利用状況", href: "/creator/usage" },
           {

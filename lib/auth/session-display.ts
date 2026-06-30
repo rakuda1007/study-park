@@ -6,6 +6,10 @@ export type SessionModeMeta = {
   homeStatus: string;
   shellHint: string;
   dashboardLinkLabel: string;
+  /** ポータルなど紹介ページからアプリ本体へ戻るリンク */
+  dashboardBackLinkLabel: string;
+  /** ポータルトップの主CTA（ログイン中） */
+  portalHeroPrimaryLabel: string;
 };
 
 export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
@@ -15,6 +19,8 @@ export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
     homeStatus: "管理者としてログイン中",
     shellHint: "Study Park 全体の設定とコンテンツを管理できます",
     dashboardLinkLabel: "管理画面へ",
+    dashboardBackLinkLabel: "管理画面に戻る",
+    portalHeroPrimaryLabel: "管理画面へ",
   },
   creator: {
     badge: "クリエイター",
@@ -22,6 +28,8 @@ export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
     homeStatus: "クリエイターとしてログイン中",
     shellHint: "あなたの教材を作成し、学習者に届けられます",
     dashboardLinkLabel: "クリエイター画面へ",
+    dashboardBackLinkLabel: "クリエイター画面に戻る",
+    portalHeroPrimaryLabel: "クリエイター画面へ",
   },
   learner: {
     badge: "学習モード",
@@ -29,6 +37,8 @@ export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
     homeStatus: "学習中",
     shellHint: "学習計画と進捗を管理し、メニューから教材を選んで学べます",
     dashboardLinkLabel: "学習管理",
+    dashboardBackLinkLabel: "学習管理に戻る",
+    portalHeroPrimaryLabel: "学習を続ける",
   },
 };
 

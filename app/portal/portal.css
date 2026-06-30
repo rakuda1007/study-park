@@ -14,7 +14,7 @@
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-.portal a:not(.portal-header-btn):not(.portal-btn) {
+.portal a:not(.portal-header-btn):not(.portal-btn):not(.shell-menu__link):not(.shell-menu__button) {
   color: var(--portal-green);
 }
 
@@ -115,6 +115,118 @@
 .portal-header-muted {
   font-size: 0.9rem;
   color: var(--portal-muted);
+}
+
+.portal .shell-menu {
+  position: relative;
+}
+
+.portal .shell-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--portal-border);
+  background: #fff;
+  color: var(--portal-ink);
+  cursor: pointer;
+}
+
+.portal .shell-menu__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  width: 1rem;
+}
+
+.portal .shell-menu__bars span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.portal .shell-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 100;
+  min-width: 11rem;
+  padding: 0.35rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--portal-border);
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(26, 31, 46, 0.12);
+}
+
+.portal .shell-menu__panel:has(.shell-menu__link--with-hint) {
+  min-width: 14.5rem;
+}
+
+.portal .shell-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portal .shell-menu__link {
+  display: block;
+  padding: 0.55rem 1rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+  color: var(--portal-ink);
+}
+
+.portal .shell-menu__link--with-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.portal .shell-menu__link-label {
+  font-weight: 600;
+}
+
+.portal .shell-menu__hint {
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--portal-muted);
+}
+
+.portal .shell-menu__toggle:hover {
+  border-color: var(--portal-green);
+}
+
+.portal .shell-menu__link:hover {
+  background: var(--portal-green-soft);
+  color: var(--portal-green);
+}
+
+.portal .shell-menu__button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--portal-ink);
+}
+
+.portal .shell-menu__button:hover {
+  background: var(--portal-green-soft);
+  color: var(--portal-green);
+}
+
+.portal .shell-menu__list--bottom {
+  border-top: 1px solid var(--portal-border);
+}
+
+.portal .shell-menu__item--divider .shell-menu__link {
+  border-top: 1px solid var(--portal-border);
 }
 
 .portal .session-mode-badge {

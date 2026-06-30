@@ -2,49 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
+import { ShellHamburgerMenu } from "@/components/shell/ShellHamburgerMenu";
+import { useShellSession } from "@/components/shell/useShellSession";
 import { sessionModeMeta } from "@/lib/auth/session-display";
-import {
-  homePathForSession,
-  resolveAuthSession,
-  signOutUser,
-  subscribeAuth,
-  waitForAuthReady,
-  type AuthSessionKind,
-} from "@/lib/firebase/auth-client";
-
-function dashboardLabel(kind: AuthSessionKind): string {
-  if (kind === "learner") return "学習管理";
-  return sessionModeMeta(kind).dashboardLinkLabel;
-}
+import { homePathForSession, signOutUser } from "@/lib/firebase/auth-client";
+import { getShellMenu } from "@/lib/shell/menu-config";
 
 export function PortalHeader() {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
-  const [session, setSession] = useState<AuthSessionKind | null>(null);
-
-  useEffect(() => {
-    let unsub: (() => void) | undefined;
-    let cancelled = false;
-
-    void waitForAuthReady().then(() => {
-      if (cancelled) return;
-      unsub = subscribeAuth((user) => {
-        void resolveAuthSession(user).then((kind) => {
-          if (!cancelled) {
-            setSession(kind);
-            setReady(true);
-          }
-        });
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      unsub?.();
-    };
-  }, []);
+  const { ready, session } = useShellSession();
+  const menu = useMemo(() => (session ? getShellMenu(session) : null), [session]);
+  const brandHref = session ? homePathForSession(session) : "/portal";
 
   async function logout() {
     await signOutUser();
@@ -56,7 +26,7 @@ export function PortalHeader() {
     <header className="portal-header">
       <div className="portal-header__inner">
         <div className="portal-header__brand-row">
-          <Link href="/portal" className="portal-brand">
+          <Link href={brandHref} className="portal-brand" title={session ? "アプリに戻る" : undefined}>
             <img
               src="/study-park-logo.png?v=8"
               alt=""
@@ -76,19 +46,20 @@ export function PortalHeader() {
             </span>
           ) : session ? (
             <>
-              <Link
-                href={homePathForSession(session)}
-                className="portal-header-btn"
-              >
-                {dashboardLabel(session)}
-              </Link>
-              <button
-                type="button"
-                className="portal-header-btn portal-header-btn--ghost"
-                onClick={() => void logout()}
-              >
-                ログアウト
-              </button>
+              {session === "creator" ? (
+                <Link
+                  href={homePathForSession(session)}
+                  className="portal-header-btn"
+                >
+                  {sessionModeMeta(session).dashboardBackLinkLabel}
+                </Link>
+              ) : null}
+              <ShellHamburgerMenu
+                items={menu?.items ?? []}
+                bottomItems={menu?.bottomItems ?? []}
+                ariaLabel="Study Park メニュー"
+                onLogout={() => void logout()}
+              />
             </>
           ) : (
             <>
