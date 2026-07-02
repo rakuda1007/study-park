@@ -1791,13 +1791,13 @@
 }
 
 .study-summary-card--compact .study-progress__track {
-  /* サマリーは「全体」の情報なので少し強調する */
+  /* サマリーは「全体」の情報なので少し強調する（案A: インディゴ系） */
   height: 0.95rem;
-  background: rgba(79, 140, 255, 0.16);
+  background: rgba(91, 91, 214, 0.18);
 }
 
 .study-summary-card--compact .study-progress__fill {
-  background: linear-gradient(90deg, #2563eb, #4f8cff);
+  background: linear-gradient(90deg, #5b5bd6, #7c6ff7);
 }
 
 .study-summary-card--compact .study-summary-card__meta {
