@@ -1791,7 +1791,13 @@
 }
 
 .study-summary-card--compact .study-progress__track {
-  height: 0.62rem;
+  /* サマリーは「全体」の情報なので少し強調する */
+  height: 0.95rem;
+  background: rgba(79, 140, 255, 0.16);
+}
+
+.study-summary-card--compact .study-progress__fill {
+  background: linear-gradient(90deg, #2563eb, #4f8cff);
 }
 
 .study-summary-card--compact .study-summary-card__meta {
