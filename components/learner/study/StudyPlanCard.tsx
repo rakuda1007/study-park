@@ -93,7 +93,7 @@ export function StudyPlanCard({
       <StudyProgressGauge
         percent={progress}
         status={status}
-        size={listView || compact ? "sm" : "md"}
+        size={compact && !listView ? "sm" : "md"}
         hideBadge={listView}
       />
 
