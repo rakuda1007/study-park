@@ -1791,13 +1791,13 @@
 }
 
 .study-summary-card--compact .study-progress__track {
-  /* サマリーは暖色で強調（警告の黄オレンジ #f0b429 とは色相をずらす） */
+  /* サマリーは「全体」の情報なので少し強調する（インディゴ系） */
   height: 0.95rem;
-  background: rgba(234, 88, 12, 0.16);
+  background: rgba(91, 91, 214, 0.18);
 }
 
 .study-summary-card--compact .study-progress__fill {
-  background: linear-gradient(90deg, #ea580c, #f97316);
+  background: linear-gradient(90deg, #5b5bd6, #7c6ff7);
 }
 
 .study-summary-card--compact .study-summary-card__meta {
@@ -1961,13 +1961,33 @@
 
 .study-plan-card__item--list {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 0.65rem;
+  grid-template-columns: minmax(0, 13em) 7.25rem;
+  column-gap: 0.5rem;
   align-items: center;
 }
 
 .study-plan-card__item--list .study-plan-card__item-head {
   margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.study-plan-card__item--list .study-plan-card__item-label {
+  flex: 1 1 auto;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.84rem;
+}
+
+.study-plan-card__item--list .study-progress {
+  width: 7.25rem;
+  max-width: 7.25rem;
 }
 
 .study-plan-card__item--list .study-progress__track {
@@ -2007,10 +2027,6 @@
 .study-plan-card__meta-line .study-plan-card__days {
   margin-left: 0;
   font-size: 0.78rem;
-}
-
-.study-plan-card__item--list .study-plan-card__item-label {
-  font-size: 0.84rem;
 }
 
 .study-plan-card__item-actions {
@@ -2862,7 +2878,13 @@
   }
 
   .study-plan-card__item--list {
-    column-gap: 0.75rem;
+    column-gap: 0.6rem;
+    grid-template-columns: minmax(0, 13em) 7.5rem;
+  }
+
+  .study-plan-card__item--list .study-progress {
+    width: 7.5rem;
+    max-width: 7.5rem;
   }
 
   .study-plan-card__item--list .study-progress__track {
