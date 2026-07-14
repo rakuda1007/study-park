@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
 import { PlayAppMenu } from "@/components/content/PlayAppMenu";
 import { PlayFinishNav } from "@/components/content/PlayFinishNav";
-import { materialsHrefForHome, type PlayNav } from "@/lib/content/play-nav";
+import {
+  PlayMaterialPicker,
+  type QuizSwitchSnapshot,
+} from "@/components/content/PlayMaterialPicker";
+import { emptyPlayNav, materialsHrefForHome, type PlayNav } from "@/lib/content/play-nav";
 import type { ContentDoc } from "@/lib/content/types";
 import { hasIntroText, normalizeIntroText } from "@/lib/content/intro";
 import { richTextToHtml } from "@/lib/content/rich-text";
@@ -18,6 +22,9 @@ declare global {
       title: string;
       questions: NonNullable<ContentDoc["quiz"]>["questions"];
       showAds?: boolean;
+    };
+    __STUDY_PARK_QUIZ_API__?: {
+      getSwitchSnapshot: () => QuizSwitchSnapshot;
     };
   }
 }
@@ -44,11 +51,16 @@ export function QuizShell({
   const introText = normalizeIntroText(content.intro);
   const showIntro = hasIntroText(introText);
   const [showFinishAd, setShowFinishAd] = useState(false);
-  const finishNav: PlayNav = playNav ?? {
-    materialsHref: materialsHrefForHome(homeHref),
-    next: null,
-    more: [],
-  };
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [quizSnapshot, setQuizSnapshot] = useState<QuizSwitchSnapshot | null>(null);
+  const finishNav: PlayNav =
+    playNav ?? emptyPlayNav(materialsHrefForHome(homeHref), content.id);
+
+  const openMaterialPicker = useCallback(() => {
+    const snap = window.__STUDY_PARK_QUIZ_API__?.getSwitchSnapshot?.() ?? null;
+    setQuizSnapshot(snap);
+    setPickerOpen(true);
+  }, []);
 
   useEffect(() => {
     window.__STUDY_PARK_QUIZ__ = {
@@ -91,7 +103,7 @@ export function QuizShell({
           />
         </Link>
         <h1 className="app-header-title">{title}</h1>
-        <PlayAppMenu ariaLabel="学習メニュー" />
+        <PlayAppMenu ariaLabel="学習メニュー" onPickMaterial={openMaterialPicker} />
         <div className="app-header-toolbar">
           <div className="app-header-format-row">
             <label className="format-field">
@@ -220,6 +232,14 @@ export function QuizShell({
         </div>
       </div>
 
+      <PlayMaterialPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        nav={finishNav}
+        contentType="quiz"
+        quizSnapshot={quizSnapshot}
+      />
+
       <Script src={`/study-park-asset-version.js?v=${ASSET_V}`} strategy="afterInteractive" />
       <Script src="/shared/quiz-format.js?v=13" strategy="afterInteractive" />
       <Script src="/shared/quiz-review-mode.js?v=3" strategy="afterInteractive" />
@@ -227,7 +247,7 @@ export function QuizShell({
       <Script src={`/pwa-update.js?v=${ASSET_V}`} strategy="afterInteractive" />
       <Script src="/shared/quiz-blank-storage.js?v=1" strategy="afterInteractive" />
       <Script
-        src="/shared/quiz-blank-app.js?v=9"
+        src="/shared/quiz-blank-app.js?v=10"
         strategy="afterInteractive"
         key={content.slug}
       />

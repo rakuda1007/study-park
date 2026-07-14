@@ -583,6 +583,28 @@
     window.dispatchEvent(new CustomEvent("study-park-quiz-modal-closed"));
   }
 
+  /** 教材切り替えパネル用の途中状況（答えた分の記録は既に localStorage に残っている前提） */
+  function getSwitchSnapshot() {
+    const total = sessionTotal();
+    const idx = intStat(state.session.index);
+    const finished = !!state.session.finished;
+    const pendingGrade = !finished && state.phase === "revealed" && !state.inReview;
+    const gradedCount = finished ? total : idx;
+    return {
+      kind: state.mode === "review" || state.inReview ? "review" : "challenge",
+      finished,
+      atQuestion: total > 0 ? Math.min(idx + 1, total) : 0,
+      total,
+      correct: intStat(state.session.correct),
+      pendingGrade,
+      gradedCount,
+    };
+  }
+
+  window.__STUDY_PARK_QUIZ_API__ = {
+    getSwitchSnapshot,
+  };
+
   function quitSession() {
     if (state.session.finished) return;
     if (

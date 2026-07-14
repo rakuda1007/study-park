@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
+export type ShellMenuAction = "logout" | "pick-material";
+
 export type ShellMenuItem = {
   label: string;
   href?: string;
   title?: string;
   /** リンクではなくメニュー内アクション（例: ログアウト） */
-  action?: "logout";
+  action?: ShellMenuAction;
   /** リンク直下の補足（1行） */
   hint?: string;
   /** この項目の直前に区切り線を表示 */
@@ -22,6 +24,8 @@ type Props = {
   footer?: React.ReactNode;
   ariaLabel?: string;
   onLogout?: () => void | Promise<void>;
+  /** logout 以外のメニューアクション */
+  onAction?: (action: Exclude<ShellMenuAction, "logout">) => void;
 };
 
 function itemKey(item: ShellMenuItem): string {
@@ -49,10 +53,12 @@ function MenuEntries({
   items,
   onNavigate,
   onLogout,
+  onAction,
 }: {
   items: ShellMenuItem[];
   onNavigate: () => void;
   onLogout?: () => void | Promise<void>;
+  onAction?: (action: Exclude<ShellMenuAction, "logout">) => void;
 }) {
   return (
     <>
@@ -71,6 +77,17 @@ function MenuEntries({
               }}
             >
               {item.label}
+            </button>
+          ) : item.action ? (
+            <button
+              type="button"
+              className="shell-menu__link shell-menu__button"
+              onClick={() => {
+                onNavigate();
+                onAction?.(item.action as Exclude<ShellMenuAction, "logout">);
+              }}
+            >
+              {item.hint ? <LinkLabel item={item} /> : item.label}
             </button>
           ) : isExternalHref(item.href) ? (
             <a
@@ -105,6 +122,7 @@ export function ShellHamburgerMenu({
   footer,
   ariaLabel = "メニュー",
   onLogout,
+  onAction,
 }: Props) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
@@ -151,11 +169,21 @@ export function ShellHamburgerMenu({
       {open ? (
         <nav id={panelId} className="shell-menu__panel" aria-label={ariaLabel}>
           <ul className="shell-menu__list">
-            <MenuEntries items={items} onNavigate={close} onLogout={onLogout} />
+            <MenuEntries
+              items={items}
+              onNavigate={close}
+              onLogout={onLogout}
+              onAction={onAction}
+            />
           </ul>
           {bottomItems.length > 0 ? (
             <ul className="shell-menu__list shell-menu__list--bottom">
-              <MenuEntries items={bottomItems} onNavigate={close} onLogout={onLogout} />
+              <MenuEntries
+                items={bottomItems}
+                onNavigate={close}
+                onLogout={onLogout}
+                onAction={onAction}
+              />
             </ul>
           ) : null}
           {footer ? <div className="shell-menu__footer">{footer}</div> : null}

@@ -10,8 +10,12 @@ export type PlayNavItem = {
 
 export type PlayNav = {
   materialsHref: string;
+  /** いま開いている教材 id */
+  currentId: string;
   next: PlayNavItem | null;
   more: PlayNavItem[];
+  /** 同じ教科の教材（order 順・現在含む） */
+  siblings: PlayNavItem[];
 };
 
 type NavSourceItem = {
@@ -81,5 +85,18 @@ export function buildPlayNav(
     if (more.length >= 3) break;
   }
 
-  return { materialsHref, next, more };
+  const siblings = sorted.map((item) => toNavItem(item, workspaceSlug));
+
+  return { materialsHref, currentId, next, more, siblings };
+}
+
+/** playNav 未取得時の空ナビ */
+export function emptyPlayNav(materialsHref: string, currentId = ""): PlayNav {
+  return {
+    materialsHref,
+    currentId,
+    next: null,
+    more: [],
+    siblings: [],
+  };
 }

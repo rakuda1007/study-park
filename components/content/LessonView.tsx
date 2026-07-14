@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useState } from "react";
 import { LessonBlocks } from "@/components/content/LessonBlocks";
 import { PlayAppMenu } from "@/components/content/PlayAppMenu";
 import { PlayFinishNav } from "@/components/content/PlayFinishNav";
-import { materialsHrefForHome, type PlayNav } from "@/lib/content/play-nav";
+import { PlayMaterialPicker } from "@/components/content/PlayMaterialPicker";
+import { emptyPlayNav, materialsHrefForHome, type PlayNav } from "@/lib/content/play-nav";
 import { RichTextContent } from "@/lib/content/rich-text-react";
 import type { ContentDoc } from "@/lib/content/types";
 
@@ -19,11 +21,13 @@ type Props = {
 export function LessonView({ content, homeHref = "/", playNav = null }: Props) {
   const intro = content.intro ?? "";
   const sections = content.lesson?.sections ?? [];
-  const finishNav: PlayNav = playNav ?? {
-    materialsHref: materialsHrefForHome(homeHref),
-    next: null,
-    more: [],
-  };
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const finishNav: PlayNav =
+    playNav ?? emptyPlayNav(materialsHrefForHome(homeHref), content.id);
+
+  const openMaterialPicker = useCallback(() => {
+    setPickerOpen(true);
+  }, []);
 
   return (
     <div className="lesson-page">
@@ -42,7 +46,7 @@ export function LessonView({ content, homeHref = "/", playNav = null }: Props) {
           />
         </Link>
         <h1 className="app-header-title">{content.title}</h1>
-        <PlayAppMenu ariaLabel="学習メニュー" />
+        <PlayAppMenu ariaLabel="学習メニュー" onPickMaterial={openMaterialPicker} />
       </header>
       <main className="lesson-main">
         {intro ? (
@@ -80,6 +84,13 @@ export function LessonView({ content, homeHref = "/", playNav = null }: Props) {
           <PlayFinishNav nav={finishNav} variant="footer" />
         </section>
       </main>
+
+      <PlayMaterialPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        nav={finishNav}
+        contentType="lesson"
+      />
     </div>
   );
 }
