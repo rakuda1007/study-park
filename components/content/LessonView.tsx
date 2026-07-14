@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { LessonBlocks } from "@/components/content/LessonBlocks";
+import { PlayAppMenu } from "@/components/content/PlayAppMenu";
+import { PlayFinishNav } from "@/components/content/PlayFinishNav";
+import { materialsHrefForHome, type PlayNav } from "@/lib/content/play-nav";
 import { RichTextContent } from "@/lib/content/rich-text-react";
 import type { ContentDoc } from "@/lib/content/types";
 
@@ -9,15 +12,22 @@ type Props = {
   content: ContentDoc;
   /** ロゴのリンク先（学習者は /learner） */
   homeHref?: string;
+  /** 末尾の次教材ナビ */
+  playNav?: PlayNav | null;
 };
 
-export function LessonView({ content, homeHref = "/" }: Props) {
+export function LessonView({ content, homeHref = "/", playNav = null }: Props) {
   const intro = content.intro ?? "";
   const sections = content.lesson?.sections ?? [];
+  const finishNav: PlayNav = playNav ?? {
+    materialsHref: materialsHrefForHome(homeHref),
+    next: null,
+    more: [],
+  };
 
   return (
     <div className="lesson-page">
-      <header className="app-header app-header--unified">
+      <header className="app-header app-header--unified app-header--with-menu app-header--no-tools">
         <Link
           href={homeHref}
           className="app-header-logo-link"
@@ -32,6 +42,7 @@ export function LessonView({ content, homeHref = "/" }: Props) {
           />
         </Link>
         <h1 className="app-header-title">{content.title}</h1>
+        <PlayAppMenu ariaLabel="学習メニュー" />
       </header>
       <main className="lesson-main">
         {intro ? (
@@ -62,6 +73,12 @@ export function LessonView({ content, homeHref = "/" }: Props) {
             <LessonBlocks sectionId={s.id} blocks={s.blocks} />
           </article>
         ))}
+        <section className="lesson-finish" aria-labelledby="lesson-finish-heading">
+          <h2 id="lesson-finish-heading" className="lesson-finish-heading">
+            この教材をおわりに
+          </h2>
+          <PlayFinishNav nav={finishNav} variant="footer" />
+        </section>
       </main>
     </div>
   );

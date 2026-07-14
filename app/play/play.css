@@ -38,3 +38,265 @@
   background: #fff3cd;
   border-bottom: 2px solid #e6c200;
 }
+
+/* 再生画面の三線メニュー（シェルと同系統） */
+.shell-menu {
+  position: relative;
+}
+
+.shell-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--header-border, #d0d9e8);
+  background: var(--surface, #fff);
+  color: var(--ink, #1a2433);
+  cursor: pointer;
+}
+
+.shell-menu__toggle:hover {
+  border-color: var(--accent-dark, #3949ab);
+}
+
+.shell-menu__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  width: 1rem;
+}
+
+.shell-menu__bars span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.shell-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 60;
+  min-width: 11rem;
+  padding: 0.35rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--header-border, #d0d9e8);
+  background: var(--surface, #fff);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.shell-menu__panel:has(.shell-menu__link--with-hint) {
+  min-width: 14.5rem;
+}
+
+.shell-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shell-menu__link {
+  display: block;
+  padding: 0.55rem 1rem;
+  color: var(--ink, #1a2433);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.shell-menu__link--with-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.shell-menu__link-label {
+  font-weight: 600;
+}
+
+.shell-menu__hint {
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--muted, #5c6b7a);
+}
+
+.shell-menu__link:hover {
+  background: rgba(57, 73, 171, 0.08);
+  color: var(--accent-dark, #3949ab);
+}
+
+.shell-menu__button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.shell-menu__list--bottom {
+  border-top: 1px solid var(--header-border, #d0d9e8);
+}
+
+.shell-menu__item--divider .shell-menu__link {
+  border-top: 1px solid var(--header-border, #d0d9e8);
+}
+
+.shell-menu__footer {
+  padding: 0.5rem 1rem 0.35rem;
+  border-top: 1px solid var(--header-border, #d0d9e8);
+}
+
+/* 完了後の次教材ナビ */
+.play-finish-nav {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.play-finish-nav__lead {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted, #5c6b7a);
+}
+
+.play-finish-nav__next {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--accent, #5c6bc0);
+  background: linear-gradient(135deg, #e8eaf6, #fff);
+  color: var(--ink, #1a2433);
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.play-finish-nav__next:hover {
+  border-color: var(--accent-dark, #3949ab);
+  box-shadow: 0 4px 14px rgba(57, 73, 171, 0.18);
+}
+
+.play-finish-nav__next-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent-dark, #3949ab);
+}
+
+.play-finish-nav__next-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.play-finish-nav__next-meta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted, #5c6b7a);
+}
+
+.play-finish-nav__more {
+  margin: 10px 0 8px;
+}
+
+.play-finish-nav__more-heading {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted, #5c6b7a);
+}
+
+.play-finish-nav__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.play-finish-nav__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--header-border, #d0d9e8);
+  background: var(--surface, #fff);
+  color: var(--ink, #1a2433);
+  text-decoration: none;
+}
+
+.play-finish-nav__link:hover {
+  border-color: var(--accent-dark, #3949ab);
+  background: #f5f7ff;
+}
+
+.play-finish-nav__link-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.play-finish-nav__link-meta {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted, #5c6b7a);
+}
+
+.play-finish-nav__materials {
+  display: block;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--header-border, #d0d9e8);
+  background: #eceff1;
+  color: var(--ink, #1a2433);
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.play-finish-nav__materials:hover {
+  background: #e0e4e8;
+}
+
+.play-finish-nav--footer {
+  margin-top: 0;
+}
+
+.lesson-finish {
+  margin: 2rem 0 1.5rem;
+  padding: 1.1rem 1rem 1rem;
+  border-radius: 16px;
+  border: 2px solid var(--header-border, #d0d9e8);
+  background: linear-gradient(180deg, #f3f5fb, #fff);
+}
+
+.lesson-finish-heading {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink, #1a2433);
+}
+
+.celebrate-modal-card:has(.play-finish-nav) {
+  width: min(100%, 420px);
+  text-align: left;
+}
+
+.celebrate-modal-card:has(.play-finish-nav) .celebrate-modal-title,
+.celebrate-modal-card:has(.play-finish-nav) .celebrate-modal-msg {
+  text-align: center;
+}

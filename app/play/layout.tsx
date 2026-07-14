@@ -16,7 +16,7 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
       <Script src="/shared/rich-text.js?v=5" strategy="beforeInteractive" />
       {/* public 配下の既存クイズ CSS（静的アセット） */}
       {/* eslint-disable-next-line @next/next/no-css-tags */}
-      <link rel="stylesheet" href="/shared/quiz-header.css?v=16" />
+      <link rel="stylesheet" href="/shared/quiz-header.css?v=17" />
       {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link rel="stylesheet" href="/shared/quiz-blank-style.css?v=2" />
       <link rel="stylesheet" href="/shared/quiz-review-style.css?v=1" />

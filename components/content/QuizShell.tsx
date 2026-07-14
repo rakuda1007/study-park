@@ -4,6 +4,9 @@ import Link from "next/link";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 import { AdSenseUnit } from "@/components/ads/AdSenseUnit";
+import { PlayAppMenu } from "@/components/content/PlayAppMenu";
+import { PlayFinishNav } from "@/components/content/PlayFinishNav";
+import { materialsHrefForHome, type PlayNav } from "@/lib/content/play-nav";
 import type { ContentDoc } from "@/lib/content/types";
 import { hasIntroText, normalizeIntroText } from "@/lib/content/intro";
 import { richTextToHtml } from "@/lib/content/rich-text";
@@ -25,15 +28,27 @@ type Props = {
   showAds?: boolean;
   /** ロゴのリンク先（学習者は /learner） */
   homeHref?: string;
+  /** 完了後の次教材ナビ（未設定時は教材一覧リンクのみ） */
+  playNav?: PlayNav | null;
 };
 
 const ASSET_V = "8";
 
-export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
+export function QuizShell({
+  content,
+  showAds = false,
+  homeHref = "/",
+  playNav = null,
+}: Props) {
   const title = content.title;
   const introText = normalizeIntroText(content.intro);
   const showIntro = hasIntroText(introText);
   const [showFinishAd, setShowFinishAd] = useState(false);
+  const finishNav: PlayNav = playNav ?? {
+    materialsHref: materialsHrefForHome(homeHref),
+    next: null,
+    more: [],
+  };
 
   useEffect(() => {
     window.__STUDY_PARK_QUIZ__ = {
@@ -61,7 +76,7 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
 
   return (
     <>
-      <header className="app-header app-header--unified">
+      <header className="app-header app-header--unified app-header--with-menu">
         <Link
           href={homeHref}
           className="app-header-logo-link"
@@ -76,6 +91,7 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
           />
         </Link>
         <h1 className="app-header-title">{title}</h1>
+        <PlayAppMenu ariaLabel="学習メニュー" />
         <div className="app-header-toolbar">
           <div className="app-header-format-row">
             <label className="format-field">
@@ -196,6 +212,7 @@ export function QuizShell({ content, showAds = false, homeHref = "/" }: Props) {
             <button type="button" id="btnModalRestart" className="btn-primary">
               もういちど
             </button>
+            <PlayFinishNav nav={finishNav} variant="modal" />
             <button type="button" id="btnModalClose" className="btn-secondary" hidden>
               とじる
             </button>
