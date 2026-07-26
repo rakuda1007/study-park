@@ -2564,6 +2564,73 @@
 
 .study-item-add-row__submit {
   flex: 0 0 auto;
+  align-self: flex-end;
+}
+
+.study-scope-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.study-scope-input .admin-label {
+  margin: 0;
+}
+
+.study-scope-input__formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.study-scope-input__format {
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-bg);
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--admin-text, inherit);
+}
+
+.study-scope-input__format:hover {
+  border-color: var(--admin-accent);
+}
+
+.study-scope-input__format--active {
+  border-color: var(--admin-accent);
+  background: color-mix(in srgb, var(--admin-accent) 14%, var(--admin-bg));
+  font-weight: 600;
+}
+
+.study-scope-input__affix-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.study-scope-input__affix {
+  font-size: 0.92rem;
+  color: var(--admin-muted);
+  flex: 0 0 auto;
+}
+
+.study-scope-input__num {
+  width: 4.5rem;
+  flex: 0 0 auto;
+  text-align: center;
+}
+
+.study-scope-input__preview {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+}
+
+.study-scope-input__err {
+  margin: 0;
+  font-size: 0.82rem;
 }
 
 .study-app-picker-backdrop {

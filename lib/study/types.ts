@@ -69,7 +69,7 @@ export type StudyItemMasterDoc = {
   subjectId: string;
   subjectName?: string;
   name: string;
-  /** 対象範囲入力のヒント（例: ページ、問、第○単元） */
+  /** 対象範囲の単位（回 / ページ / 問 / 単元）。入力書式の初期値に使う */
   defaultUnit?: string;
   order: number;
   createdAt: string;

@@ -8,6 +8,7 @@ import {
   listStudyItemMasters,
 } from "@/lib/study/masters-firestore";
 import { isCustomSubjectId, type StudySubjectOption } from "@/lib/study/subject-options";
+import { STUDY_SCOPE_UNIT_OPTIONS } from "@/lib/study/scope-note";
 import type { StudyItemMasterDoc } from "@/lib/study/types";
 
 const ALL_SUBJECTS_ID = "";
@@ -99,12 +100,17 @@ export function StudyItemMasterManager({ userId, subjects }: Props) {
         </label>
         <label className="admin-field">
           <span className="admin-label">対象範囲の単位（任意）</span>
-          <input
+          <select
             className="admin-input"
             value={defaultUnit}
             onChange={(e) => setDefaultUnit(e.target.value)}
-            placeholder="例: ページ、問、第○単元"
-          />
+          >
+            {STUDY_SCOPE_UNIT_OPTIONS.map((opt) => (
+              <option key={opt.value || "none"} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="admin-field">
           <span className="admin-label">科目</span>

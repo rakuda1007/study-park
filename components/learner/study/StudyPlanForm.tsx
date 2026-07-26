@@ -6,10 +6,12 @@ import {
   isCustomSubjectId,
   type StudySubjectData,
 } from "@/lib/study/subject-options";
+import { validateScopeNoteText } from "@/lib/study/scope-note";
 import type { StudyItemDraft, StudyItemMasterDoc, StudyPlanInput } from "@/lib/study/types";
 import { todayStudyDate } from "@/lib/study/week";
 import { StudyItemAddPanel } from "./StudyItemAddPanel";
 import { StudyReadableText } from "./StudyReadableText";
+import { StudyScopeNoteInput } from "./StudyScopeNoteInput";
 
 type Props = {
   subjectData: StudySubjectData;
@@ -83,6 +85,15 @@ export function StudyPlanForm({
     if (items.some((item) => !item.label.trim())) {
       setErr("学習内容の名称を入力してください。");
       return;
+    }
+    for (const item of items) {
+      const scopeErr = validateScopeNoteText(item.scopeNote, {
+        required: item.source === "app",
+      });
+      if (scopeErr) {
+        setErr(scopeErr);
+        return;
+      }
     }
 
     setSaving(true);
@@ -190,19 +201,11 @@ export function StudyPlanForm({
                       <StudyReadableText text={item.label} />
                     </p>
                   )}
-                  <label className="admin-field study-plan-form__item-field">
-                    <span className="admin-label">対象範囲</span>
-                    <input
-                      className="admin-input"
-                      value={item.scopeNote}
-                      onChange={(e) => updateItem(index, { scopeNote: e.target.value })}
-                      placeholder={
-                        item.source === "app"
-                          ? "例: 全問、第1章"
-                          : "例: p.12-20、第3単元"
-                      }
-                    />
-                  </label>
+                  <StudyScopeNoteInput
+                    className="study-plan-form__item-field"
+                    value={item.scopeNote}
+                    onChange={(next) => updateItem(index, { scopeNote: next })}
+                  />
                 </div>
                 <button
                   type="button"

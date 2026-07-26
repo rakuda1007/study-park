@@ -10,9 +10,11 @@ import {
   type StudyAppContentOption,
 } from "@/lib/study/app-contents";
 import { filterMastersForSubject } from "@/lib/study/masters-firestore";
+import { formatFromUnit, validateScopeNoteText } from "@/lib/study/scope-note";
 import type { StudyContentRef, StudyItemDraft, StudyItemMasterDoc } from "@/lib/study/types";
 import type { StudyWorkspaceOption } from "@/lib/study/subject-options";
 import { StudyAppContentPicker } from "./StudyAppContentPicker";
+import { StudyScopeNoteInput } from "./StudyScopeNoteInput";
 
 type Props = {
   workspaces: StudyWorkspaceOption[];
@@ -35,17 +37,11 @@ function contentToRef(
   };
 }
 
-function scopePlaceholder(unit?: string): string {
-  if (unit === "ページ") return "例: p.12-20";
-  if (unit === "問") return "例: 問1-10";
-  if (unit) return `例: ${unit}を入力`;
-  return "例: p.12-20、第3単元";
-}
-
 export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Props) {
   const [externalLabel, setExternalLabel] = useState("");
   const [scopeNote, setScopeNote] = useState("");
   const [scopeHint, setScopeHint] = useState<string | undefined>();
+  const [scopeResetKey, setScopeResetKey] = useState(0);
   const [selectedAppKey, setSelectedAppKey] = useState("");
   const [inlineAppKey, setInlineAppKey] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -68,12 +64,15 @@ export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Pro
     selectedAppKey || inlineAppKey,
   );
 
+  const preferredFormat = selectedApp ? "free" : formatFromUnit(scopeHint);
+
   useEffect(() => {
     setSelectedAppKey("");
     setInlineAppKey("");
     setExternalLabel("");
     setScopeNote("");
     setScopeHint(undefined);
+    setScopeResetKey((k) => k + 1);
     setErr("");
   }, [subjectId]);
 
@@ -82,11 +81,17 @@ export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Pro
     setInlineAppKey("");
   }
 
+  function bumpScope(nextHint?: string) {
+    setScopeNote("");
+    setScopeHint(nextHint);
+    setScopeResetKey((k) => k + 1);
+  }
+
   function pickApp(option: StudyAppContentOption) {
     setSelectedAppKey(appContentOptionKey(option));
     setInlineAppKey("");
     setExternalLabel("");
-    setScopeHint(undefined);
+    bumpScope(undefined);
     setPickerOpen(false);
     setErr("");
   }
@@ -95,35 +100,46 @@ export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Pro
     setInlineAppKey(key);
     setSelectedAppKey("");
     setExternalLabel("");
-    setScopeHint(undefined);
+    bumpScope(undefined);
     setErr("");
   }
 
   function applyMaster(master: StudyItemMasterDoc) {
     setExternalLabel(master.name);
-    setScopeHint(master.defaultUnit);
     clearAppSelection();
+    bumpScope(master.defaultUnit);
     setErr("");
+  }
+
+  function handleClearApp() {
+    clearAppSelection();
+    bumpScope(undefined);
   }
 
   function resetRow() {
     setExternalLabel("");
     setScopeNote("");
     setScopeHint(undefined);
+    setScopeResetKey((k) => k + 1);
     clearAppSelection();
     setErr("");
   }
 
   function submit() {
+    const note = scopeNote.trim();
+    const scopeErr = validateScopeNoteText(note, {
+      required: Boolean(selectedApp),
+    });
+    if (scopeErr) {
+      setErr(scopeErr);
+      return;
+    }
+
     if (selectedApp) {
-      if (!scopeNote.trim()) {
-        setErr("対象範囲を入力してください。");
-        return;
-      }
       onAdd({
         source: "app",
         label: selectedApp.content.title,
-        scopeNote: scopeNote.trim(),
+        scopeNote: note,
         contentRef: contentToRef(selectedApp),
       });
       resetRow();
@@ -138,7 +154,7 @@ export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Pro
     onAdd({
       source: "external",
       label,
-      scopeNote: scopeNote.trim(),
+      scopeNote: note,
     });
     resetRow();
   }
@@ -157,7 +173,7 @@ export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Pro
           <button
             type="button"
             className="study-item-add-row__app-clear"
-            onClick={clearAppSelection}
+            onClick={handleClearApp}
             aria-label="選択を解除"
           >
             ×
@@ -253,19 +269,17 @@ export function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }: Pro
       )}
 
       <div className="study-item-add-row__bottom">
-        <label className="admin-field study-item-add-row__scope">
-          <span className="admin-label">対象範囲</span>
-          <input
-            className="admin-input"
-            value={scopeNote}
-            onChange={(e) => setScopeNote(e.target.value)}
-            placeholder={
-              selectedApp
-                ? "例: 全問、第1章、問1-10"
-                : scopePlaceholder(scopeHint)
-            }
-          />
-        </label>
+        <StudyScopeNoteInput
+          key={`scope-${subjectId}-${scopeResetKey}`}
+          className="study-item-add-row__scope"
+          value={scopeNote}
+          onChange={(next) => {
+            setScopeNote(next);
+            setErr("");
+          }}
+          preferredFormat={preferredFormat}
+          unitHint={selectedApp ? undefined : scopeHint}
+        />
         <button
           type="button"
           className="admin-btn admin-btn--primary study-item-add-row__submit"
