@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { PortalFeatureDetailLayout } from "@/components/portal/PortalFeatureDetailLayout";
 
 export const metadata: Metadata = {
-  title: "教材の作成とシェア | Study Park Portal",
+  title: "問題の作成と配信 | Study Park Portal",
   description:
-    "その場で問題を登録し、科目ごとに整理。招待コードや URL で友達・家庭・教室へ届けられます。",
+    "気になったところを問題にして繰り返し解く。学校や塾では作った問題を生徒に届けられます。",
   openGraph: {
-    title: "教材の作成とシェア | Study Park Portal",
+    title: "問題の作成と配信 | Study Park Portal",
     description:
-      "作る・解く・シェアがひとつにつながる。Study Park の教材作成と配信機能を詳しく紹介します。",
+      "定着のための問題づくりから、教室への配信まで。Study Park の作成・共有機能を紹介します。",
     url: "https://study.tennis-park-community.com/portal/create-and-share",
   },
 };
@@ -16,15 +16,15 @@ export const metadata: Metadata = {
 export default function PortalCreateAndSharePage() {
   return (
     <PortalFeatureDetailLayout
-      eyebrow="特徴 03 · 作成とシェア"
+      eyebrow="特徴 03 · 作成と配信"
       title={
         <>
-          その場で登録、すぐに届ける。
+          気になったところは問題にして繰り返し解く。
           <br />
-          作る・解く・シェアがひとつにつながる。
+          学校や塾では、生徒に届けることも。
         </>
       }
-      lead="Study Park は、問題を作って終わりではありません。その場で登録し、科目ごとに整理し、招待コードや URL で学習者に届ける——教材づくりから配信までを、ひとつの流れとして設計しています。"
+      lead="学習管理で計画を立てつつ、覚えたいポイントはその場で問題に登録できます。自分用の繰り返し練習にも、塾や教室から生徒への配信にも使えます。"
       image={{
         src: "/portal11.jpg",
         alt: "海辺でジャンプする仲間たち",
@@ -34,12 +34,12 @@ export default function PortalCreateAndSharePage() {
       features={[
         "教科書や参考書を見ながら、その場で問題をスピード登録",
         "科目・単元ごとに自動整理され、大量の問題もスッキリ管理",
-        "URL・リンク共有で、友達・家庭・教室へ手軽に届けられる",
+        "招待コードやリンクで、家庭・教室へ手軽に届けられる",
       ]}
       steps={[
         {
           title: "クリエイター登録",
-          body: "無料のお試しプラン（80問・100MB）でアカウントを作成し、教材の作成を始めます。",
+          body: "「問題を作って配る」から無料のお試しプラン（80問・100MB）でアカウントを作成します。",
         },
         {
           title: "問題・教材を登録",
@@ -51,13 +51,18 @@ export default function PortalCreateAndSharePage() {
         },
       ]}
       introActions={[
-        { href: "/signup/creator", label: "今すぐ教材をつくる（無料）", primary: true },
-        { href: "/signup/learner", label: "学習者として参加" },
+        { href: "/signup/creator", label: "問題を作って配る（無料）", primary: true },
+        { href: "/signup/learner", label: "学習管理をはじめる" },
       ]}
       closingTitle="作った学びを、届けるところまで。"
       closingBody="自分用の弱点ノートにも、教室の教材配信にも、同じ仕組みで使えます。"
       closingActions={[
-        { href: "/signup/creator", label: "クリエイター登録（無料）", primary: true, large: true },
+        {
+          href: "/signup/creator",
+          label: "問題を作って配る（無料）",
+          primary: true,
+          large: true,
+        },
         { href: "/creator", label: "クリエイター画面へ" },
         { href: "/portal", label: "ポータルに戻る" },
       ]}

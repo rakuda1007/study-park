@@ -35,8 +35,8 @@ export function getGuestShellMenu(): ShellMenuConfig {
   return {
     items: [
       { label: "ログイン", href: "/login" },
-      { label: "学習者登録", href: "/signup/learner" },
-      { label: "教材を作る", href: "/signup/creator" },
+      { label: "学習管理をはじめる", href: "/signup/learner" },
+      { label: "問題を作って配る", href: "/signup/creator" },
       PORTAL_MENU_ITEM,
       { ...MANUAL_MENU_ITEM, dividerBefore: true },
     ],
@@ -59,6 +59,11 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
       return {
         items: [
           { label: "クリエイター画面", href: "/creator" },
+          {
+            label: "学習管理",
+            href: "/learner",
+            hint: "自分やお子様の計画・進捗を管理できます",
+          },
           { label: "学習者招待", href: "/creator/learners" },
           { label: "ご利用プランと利用状況", href: "/creator/usage" },
           {

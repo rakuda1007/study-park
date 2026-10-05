@@ -46,11 +46,11 @@ export function HomeAuthNav() {
         <Link href="/login" className="home-footer__link">
           ログイン
         </Link>
-        <Link href="/signup/creator" className="home-footer__link">
-          教材を作る（クリエイター）
-        </Link>
         <Link href="/signup/learner" className="home-footer__link">
-          学習者登録
+          学習管理をはじめる
+        </Link>
+        <Link href="/signup/creator" className="home-footer__link">
+          問題を作って配る
         </Link>
       </div>
     </nav>

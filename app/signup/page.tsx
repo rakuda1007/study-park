@@ -17,29 +17,33 @@ export default function SignupHubPage() {
           <div className="auth-signup-hub__hero-overlay" aria-hidden />
           <div className="auth-signup-hub__hero-copy">
             <p className="auth-signup-hub__eyebrow">STUDY PARK</p>
-            <h1 className="auth-signup-hub__title">新規登録</h1>
-            <p className="auth-signup-hub__lead">あなたに合った登録方法を選んでください。</p>
+            <h1 className="auth-signup-hub__title">はじめる</h1>
+            <p className="auth-signup-hub__lead">
+              まずは学習管理から。必要になったら問題づくりや配信へ進めます。
+            </p>
           </div>
         </div>
 
         <div className="auth-signup-hub__body">
           <div className="auth-role-grid">
-            <Link href="/signup/creator" className="auth-role-card">
-              <strong>自分で教材を作る</strong>
+            <Link href="/signup/learner" className="auth-role-card auth-role-card--primary">
+              <strong>学習管理をはじめる</strong>
               <span>
-                自分専用の問題集を作る。作った問題を自分で解くだけでなく、友達と共有することや、お子様用の問題を作ることもできます。また、塾や教室で生徒さんにも課題を一斉配信することもできます。
+                自分やお子様の学習計画・進捗を、同じアカウントでかんたんに管理できます。先生や塾から招待コードをもらっている場合も、こちらから参加できます。
               </span>
             </Link>
-            <Link href="/signup/learner" className="auth-role-card">
-              <strong>招待コードで学習する</strong>
+            <Link href="/signup/creator" className="auth-role-card">
+              <strong>問題を作って配る</strong>
               <span>
-                Study Park に招待された場合はこちらを選択してください。招待コードとお名前、メールアドレス、パスワードの登録ですぐに学習を始めることができます。
+                気になったところを自分で問題にして繰り返し解けます。学校や塾では、作った問題を生徒に届けることもできます。
               </span>
             </Link>
           </div>
           <p className="auth-links">
             すでにアカウントがある方は <Link href="/login">ログイン</Link>
             <br />
+            <Link href="/#home-menu">まずは無料コンテンツを試す</Link>
+            {" · "}
             <Link href="/">トップへ戻る</Link>
           </p>
         </div>

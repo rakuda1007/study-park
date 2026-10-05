@@ -17,7 +17,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteOriginFromEnv()),
   title: "Study Park",
-  description: "学習用 Web アプリ（study-park）",
+  description:
+    "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
   applicationName: "Study Park",
   manifest: "/manifest.webmanifest",
   icons: {

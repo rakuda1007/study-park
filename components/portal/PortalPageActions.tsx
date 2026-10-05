@@ -10,8 +10,8 @@ export function PortalHeroCta() {
 
   if (!ready || !session) {
     return (
-      <Link href="/signup/creator" className="portal-btn portal-btn--primary portal-btn--large">
-        今すぐ教材をつくる（無料）
+      <Link href="/signup/learner" className="portal-btn portal-btn--primary portal-btn--large">
+        学習管理をはじめる（無料）
       </Link>
     );
   }
@@ -34,11 +34,10 @@ export function PortalHeroNote() {
 
   return (
     <p className="portal-hero__note">
-      学習者の方は
-      <Link href="/signup/learner"> こちらから参加</Link>
-      。九九・県庁所在地など公式コンテンツは
-      <Link href="/"> トップ</Link>
-      から登録なしで学べます。
+      九九・県庁所在地など公式コンテンツは
+      <Link href="/#home-menu"> トップ</Link>
+      から登録なしで試せます。問題を作って生徒に配りたい方は
+      <Link href="/signup/creator"> こちら</Link>。
     </p>
   );
 }
@@ -49,11 +48,14 @@ export function PortalClosingActions() {
   if (!ready || !session) {
     return (
       <div className="portal-closing__actions">
-        <Link href="/signup" className="portal-btn portal-btn--primary portal-btn--large">
-          今すぐ Study Park をはじめる（無料）
+        <Link href="/signup/learner" className="portal-btn portal-btn--primary portal-btn--large">
+          学習管理をはじめる（無料）
         </Link>
-        <Link href="/" className="portal-btn portal-btn--ghost">
-          学習メニューへ
+        <Link href="/#home-menu" className="portal-btn portal-btn--ghost">
+          まずは無料コンテンツを試す
+        </Link>
+        <Link href="/signup/creator" className="portal-btn portal-btn--ghost">
+          問題を作って配る
         </Link>
       </div>
     );
@@ -65,8 +67,8 @@ export function PortalClosingActions() {
     session === "learner"
       ? { href: "/learner/materials", label: "教材一覧へ" }
       : session === "creator"
-        ? { href: "/learner/materials", label: "教材を確認" }
-        : { href: "/", label: "学習メニューへ" };
+        ? { href: "/learner", label: "学習管理を開く" }
+        : { href: "/#home-menu", label: "無料コンテンツへ" };
 
   return (
     <div className="portal-closing__actions">

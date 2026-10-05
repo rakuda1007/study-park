@@ -28,15 +28,16 @@ function HomeHero() {
         <div className="home-hero__copy">
           <p className="home-eyebrow home-eyebrow--on-image">STUDY PARK</p>
           <h1 className="home-hero__title">
-            さあ、あなた専用の
+            自分やお子様の学習を、
             <br />
-            オリジナル問題集で学習を始めよう
+            かんたんに管理しよう
           </h1>
         </div>
       </div>
       <div className="home-hero__below">
         <p className="home-hero__lead">
-          好きなコンテンツを選んで、今日からスタート。九九や県庁所在地は登録なしで今すぐ学べます。
+          Study Park
+          は、自分やお子様の学習をかんたんに管理するアプリです。気になったところは自分で問題にして繰り返し解けます。学校や塾では、作った問題を生徒に届けることもできます。九九や県庁所在地は登録なしで今すぐ試せます。
         </p>
         <HomeGuestCtaLazy />
       </div>
@@ -53,7 +54,7 @@ export default function Home() {
       <main className="home">
         <HomeTopbarLazy />
         <HomeHero />
-        <div className="home-content">
+        <div className="home-content" id="home-menu">
           <HomeNavLazy manifest={manifest} />
         </div>
         <SiteFooter />

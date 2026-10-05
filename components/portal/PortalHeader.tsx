@@ -66,8 +66,8 @@ export function PortalHeader() {
               <Link href="/login" className="portal-header-link">
                 ログイン
               </Link>
-              <Link href="/signup" className="portal-header-btn">
-                新規登録
+              <Link href="/signup/learner" className="portal-header-btn">
+                学習管理をはじめる
               </Link>
             </>
           )}

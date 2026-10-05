@@ -1,7 +1,7 @@
 {
   "name": "Study Park",
   "short_name": "Study Park",
-  "description": "学習用 Web アプリ（九九・県庁所在地など）",
+  "description": "自分やお子様の学習をかんたんに管理するアプリ",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

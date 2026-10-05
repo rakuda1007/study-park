@@ -4,10 +4,11 @@ import "./portal.css";
 export const metadata: Metadata = {
   title: "Study Park Portal",
   description:
-    "覚えたい問題をその場でクイズに。あなた専用のデジタル問題集を、今すぐ作ろう。",
+    "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
   openGraph: {
     title: "Study Park Portal",
-    description: "覚えたい問題を、その場でクイズに。あなた専用のデジタル問題集を、今すぐ作ろう。",
+    description:
+      "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
     url: "https://study.tennis-park-community.com/portal",
   },
 };

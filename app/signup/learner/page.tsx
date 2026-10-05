@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { MultiFactorError } from "firebase/auth";
 import { AuthSignupPageShell } from "@/components/auth/AuthSignupPageShell";
@@ -29,7 +29,7 @@ export default function SignupLearnerPage() {
       return;
     }
     const path = await resolvePostLoginPath(uid);
-    router.replace(path);
+    router.replace(path === "/signup" ? "/learner" : path);
   }
 
   if (mfaError) {
@@ -52,24 +52,21 @@ export default function SignupLearnerPage() {
 
   return (
     <AuthSignupPageShell
-      title="招待コードで学習する　～学習者登録～"
-      lead="招待コードと姓名を入力し、メールで登録またはログインしてください。"
+      title="学習管理をはじめる"
+      lead="自分やお子様の学習計画・進捗を、同じアカウントで管理できます。先生や塾から招待コードをもらっている場合は、あわせて入力してください。"
     >
       <div className="auth-field">
-        <label htmlFor="invite">
-          招待コード
-          <span className="auth-required" aria-hidden>
-            必須
-          </span>
-        </label>
+        <label htmlFor="invite">招待コード（任意）</label>
         <InviteCodeInput
           id="invite"
           className="auth-input--code"
           value={inviteCode}
           onChange={setInviteCode}
-          placeholder="8文字のコード"
-          required
+          placeholder="もらっている場合のみ入力"
         />
+        <p className="auth-hint">
+          空欄のままでも学習管理を利用できます。招待コードがある場合は、教材への参加も同時に行えます。
+        </p>
       </div>
 
       {mode === "signup" ? (
@@ -114,22 +111,25 @@ export default function SignupLearnerPage() {
           onClick={() => setMode(mode === "signup" ? "login" : "signup")}
         >
           {mode === "signup"
-            ? "既にアカウントがある場合はログイン（クリエイターアカウント可）"
+            ? "既にアカウントがある場合はログイン"
             : "新規登録に切り替え"}
         </button>
       </p>
 
       <EmailAuthForm
         embedded
-        submitLabel={mode === "signup" ? "学習者として登録" : "ログインして参加"}
+        submitLabel={
+          mode === "signup"
+            ? "学習管理をはじめる"
+            : inviteCode.trim()
+              ? "ログインして参加"
+              : "ログイン"
+        }
         onMultiFactorRequired={mode === "login" ? setMfaError : undefined}
         onSubmit={async (email, password) => {
           if (mode === "signup") {
             if (!familyName.trim() || !givenName.trim()) {
               throw new Error("姓と名を入力してください。");
-            }
-            if (!inviteCode.trim()) {
-              throw new Error("招待コードを入力してください。");
             }
           }
           const user =
@@ -151,6 +151,8 @@ export default function SignupLearnerPage() {
             <br />
           </>
         ) : null}
+        問題を作って配りたい方は <Link href="/signup/creator">こちら</Link>
+        <br />
         <Link href="/signup">戻る</Link> · <Link href="/">トップへ</Link>
       </p>
     </AuthSignupPageShell>

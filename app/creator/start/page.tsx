@@ -66,9 +66,9 @@ export default function CreatorStartPage() {
 
   return (
     <div className="admin-login" style={{ maxWidth: 520, margin: "2rem auto", padding: "0 1rem" }}>
-      <h1 className="admin-title">クリエイター機能を始める</h1>
+      <h1 className="admin-title">問題を作って配る</h1>
       <p style={{ color: "var(--admin-muted)", fontSize: "0.9rem", lineHeight: 1.6 }}>
-        学習者アカウントにクリエイター機能を追加します。お試しプラン（80問・100MB）ですぐに教材づくりを始められます。お試し終了後や上限到達時は、
+        学習管理に、問題づくり・配信の機能を追加します。お試しプラン（80問・100MB）ですぐに始められます。お試し終了後や上限到達時は、
         <Link href="/creator/usage">利用状況</Link> からスターター（¥980）を購入できます。
       </p>
       <form className="admin-card" onSubmit={(e) => void onSubmit(e)} style={{ marginTop: "1rem" }}>
@@ -87,7 +87,7 @@ export default function CreatorStartPage() {
           </p>
         </div>
         <button type="submit" className="admin-btn admin-btn--primary" disabled={busy}>
-          {busy ? "準備中…" : "クリエイター機能を開始する"}
+          {busy ? "準備中…" : "問題づくりをはじめる"}
         </button>
       </form>
       <p style={{ marginTop: "1rem", fontSize: "0.88rem" }}>

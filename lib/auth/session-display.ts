@@ -34,11 +34,11 @@ export const SESSION_MODE: Record<AuthSessionKind, SessionModeMeta> = {
   learner: {
     badge: "学習モード",
     shortLabel: "学習者",
-    homeStatus: "学習中",
-    shellHint: "学習計画と進捗を管理し、メニューから教材を選んで学べます",
+    homeStatus: "学習管理を利用中",
+    shellHint: "自分やお子様の学習計画と進捗を管理し、教材を選んで学べます",
     dashboardLinkLabel: "学習管理",
     dashboardBackLinkLabel: "学習管理に戻る",
-    portalHeroPrimaryLabel: "学習を続ける",
+    portalHeroPrimaryLabel: "学習管理を開く",
   },
 };
 

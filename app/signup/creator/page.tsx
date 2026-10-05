@@ -33,12 +33,12 @@ export default function SignupCreatorPage() {
 
   return (
     <AuthSignupPageShell
-      title="自分で教材を作る　～クリエイター登録～"
-      lead="メールでアカウントを作成します。お試し（80問・100MB・最長2年）ですぐに教材づくりを始められます。"
+      title="問題を作って配る　～クリエイター登録～"
+      lead="気になったところを問題にして繰り返し解けます。学校や塾では生徒への配信もできます。お試し（80問・100MB・最長2年）ですぐに始められます。"
     >
       <EmailAuthForm
         embedded
-        submitLabel="アカウントを作成"
+        submitLabel="問題づくりをはじめる"
         onSubmit={async (email, password) => {
           const extra = validateExtra();
           if (!extra) throw new Error(extraError || "入力を確認してください。");
@@ -109,6 +109,8 @@ export default function SignupCreatorPage() {
         </div>
       </EmailAuthForm>
       <p className="auth-links auth-links--center">
+        学習管理だけはじめたい方は <Link href="/signup/learner">こちら</Link>
+        <br />
         <Link href="/signup">戻る</Link> · <Link href="/login">ログイン</Link>
       </p>
     </AuthSignupPageShell>

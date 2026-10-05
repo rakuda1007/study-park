@@ -121,7 +121,7 @@ function LearnerHomeInner() {
       ) : null}
 
       <p className="admin-msg learner-welcome-msg">
-        いつまでに何をやるか、どこまで進んだかを週単位で確認できます。
+        自分やお子様の学習を、週単位でかんたんに管理できます。いつまでに何をやるか、どこまで進んだかを確認しましょう。
         {userId ? (
           <span className="study-active-count-label">
             {" "}
