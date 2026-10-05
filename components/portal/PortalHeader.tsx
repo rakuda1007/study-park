@@ -46,6 +46,9 @@ export function PortalHeader() {
             </span>
           ) : session ? (
             <>
+              <Link href="/?park=1" className="portal-header-link" title="登録なしで試せる公式コンテンツへ">
+                無料で試す
+              </Link>
               {session === "creator" ? (
                 <Link
                   href={homePathForSession(session)}
@@ -63,6 +66,9 @@ export function PortalHeader() {
             </>
           ) : (
             <>
+              <Link href="/?park=1" className="portal-header-link" title="登録なしで試せる公式コンテンツへ">
+                無料で試す
+              </Link>
               <Link href="/login" className="portal-header-link">
                 ログイン
               </Link>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   HomeGuestCtaLazy,
   HomeNavLazy,
@@ -40,6 +41,11 @@ function HomeHero() {
           は、自分やお子様の学習をかんたんに管理するアプリです。気になったところは自分で問題にして繰り返し解けます。学校や塾では、作った問題を生徒に届けることもできます。九九や県庁所在地は登録なしで今すぐ試せます。
         </p>
         <HomeGuestCtaLazy />
+        <p className="home-hero__portal-link">
+          <Link href="/portal" className="home-hero__cta-link">
+            機能をもっと見る →
+          </Link>
+        </p>
       </div>
     </section>
   );

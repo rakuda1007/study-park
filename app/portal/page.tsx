@@ -99,20 +99,17 @@ export default function PortalPage() {
           />
           <div className="portal-hero__overlay" aria-hidden />
           <div className="portal-hero__copy-on-image">
-            <p className="portal-eyebrow portal-eyebrow--on-image">STUDY PARK PORTAL</p>
+            <p className="portal-eyebrow portal-eyebrow--on-image">STUDY PARK 機能紹介</p>
             <h1 className="portal-hero__title portal-hero__title--on-image">
-              自分やお子様の学習を、
-              <br />
-              かんたんに管理しよう。
+              学習管理・出題・問題づくり
             </h1>
             <PortalHeroCta />
           </div>
         </div>
         <div className="portal-hero__below">
           <p className="portal-hero__lead">
-            Study Park は、自分やお子様の学習をかんたんに管理するアプリです。
-            気になったところは自分で問題にして繰り返し解けます。
-            学校や塾では、作った問題を生徒に届けることもできます。
+            Study Park でできることを紹介します。自分やお子様の学習管理、繰り返し解ける出題、
+            学校や塾での問題配信まで。まずはトップの無料コンテンツから試せます。
           </p>
           <PortalHeroNote />
         </div>
@@ -179,6 +176,8 @@ export default function PortalPage() {
           </a>
           {" · "}
           <Link href="/">Study Park トップ</Link>
+          {" · "}
+          <Link href="/?park=1">無料で今すぐ試す</Link>
           {" · "}
           <Link href="/login">ログイン</Link>
         </p>

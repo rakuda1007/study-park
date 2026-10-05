@@ -7,7 +7,7 @@ export const PARK_MENU_ITEM: ShellMenuItem = {
   title: "登録なしで試せる公式コンテンツへ",
 };
 
-/** 三線メニュー共通 — Study Park ポータル（サービス紹介） */
+/** 三線メニュー共通 — 機能紹介（/portal。入口・公園は / ） */
 export const PORTAL_MENU_ITEM: ShellMenuItem = {
   label: "機能紹介",
   href: "/portal",

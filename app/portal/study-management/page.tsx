@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { PortalFeatureDetailLayout } from "@/components/portal/PortalFeatureDetailLayout";
 
 export const metadata: Metadata = {
-  title: "学習管理 | Study Park Portal",
+  title: "学習管理 | 機能紹介 | Study Park",
   description:
     "自分やお子様の学習計画、週単位の一覧、進捗記録、期限アラート。Study Park の学習管理機能を詳しく紹介します。",
+  alternates: { canonical: "/portal/study-management" },
   openGraph: {
-    title: "学習管理 | Study Park Portal",
+    title: "学習管理 | 機能紹介 | Study Park",
     description:
       "いつまでに何をやるか、どこまで進んだか。自分やお子様の学習をひとつの画面で管理できます。",
-    url: "https://study.tennis-park-community.com/portal/study-management",
+    url: "/portal/study-management",
   },
 };
 
@@ -64,7 +65,7 @@ export default function PortalStudyManagementPage() {
           large: true,
         },
         { href: "/learner", label: "学習管理を開く" },
-        { href: "/portal", label: "ポータルに戻る" },
+        { href: "/portal", label: "機能紹介に戻る" },
       ]}
     />
   );

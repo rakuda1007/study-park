@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { PortalFeatureDetailLayout } from "@/components/portal/PortalFeatureDetailLayout";
 
 export const metadata: Metadata = {
-  title: "問題の作成と配信 | Study Park Portal",
+  title: "問題の作成と配信 | 機能紹介 | Study Park",
   description:
     "気になったところを問題にして繰り返し解く。学校や塾では作った問題を生徒に届けられます。",
+  alternates: { canonical: "/portal/create-and-share" },
   openGraph: {
-    title: "問題の作成と配信 | Study Park Portal",
+    title: "問題の作成と配信 | 機能紹介 | Study Park",
     description:
       "定着のための問題づくりから、教室への配信まで。Study Park の作成・共有機能を紹介します。",
-    url: "https://study.tennis-park-community.com/portal/create-and-share",
+    url: "/portal/create-and-share",
   },
 };
 
@@ -64,7 +65,7 @@ export default function PortalCreateAndSharePage() {
           large: true,
         },
         { href: "/creator", label: "クリエイター画面へ" },
-        { href: "/portal", label: "ポータルに戻る" },
+        { href: "/portal", label: "機能紹介に戻る" },
       ]}
     />
   );

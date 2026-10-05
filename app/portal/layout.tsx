@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import "./portal.css";
 
 export const metadata: Metadata = {
-  title: "Study Park Portal",
+  title: "機能紹介 | Study Park",
   description:
-    "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
+    "学習管理、出題モード、問題の作成と配信など、Study Park の主な機能を紹介します。まずはトップの無料コンテンツから試せます。",
+  alternates: {
+    canonical: "/portal",
+  },
   openGraph: {
-    title: "Study Park Portal",
+    title: "機能紹介 | Study Park",
     description:
-      "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
-    url: "https://study.tennis-park-community.com/portal",
+      "学習管理、出題モード、問題の作成と配信など、Study Park の主な機能を紹介します。",
+    url: "/portal",
+    siteName: "Study Park",
+    type: "website",
   },
 };
 

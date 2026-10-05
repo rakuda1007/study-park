@@ -431,6 +431,10 @@ body {
   gap: 0.85rem;
 }
 
+.home-hero__portal-link {
+  margin: 0.85rem 0 0;
+}
+
 .home-hero__cta {
   display: inline-block;
   padding: 0.85rem 1.85rem;

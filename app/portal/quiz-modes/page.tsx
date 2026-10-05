@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { PortalFeatureDetailLayout } from "@/components/portal/PortalFeatureDetailLayout";
 
 export const metadata: Metadata = {
-  title: "多彩な出題モード | Study Park Portal",
+  title: "多彩な出題モード | 機能紹介 | Study Park",
   description:
     "順番出題・ランダム・苦手問題・まとめて確認。Study Park のクイズ出題モードを詳しく紹介します。",
+  alternates: { canonical: "/portal/quiz-modes" },
   openGraph: {
-    title: "多彩な出題モード | Study Park Portal",
+    title: "多彩な出題モード | 機能紹介 | Study Park",
     description:
       "まずは暗記、仕上げはランダム。学習フェーズに合わせた出題で定着率を高めます。",
-    url: "https://study.tennis-park-community.com/portal/quiz-modes",
+    url: "/portal/quiz-modes",
   },
 };
 
@@ -51,15 +52,15 @@ export default function PortalQuizModesPage() {
         },
       ]}
       introActions={[
-        { href: "/#home-menu", label: "まずは無料コンテンツを試す", primary: true },
+        { href: "/?park=1", label: "無料で今すぐ試す", primary: true },
         { href: "/signup/learner", label: "学習管理をはじめる" },
       ]}
       closingTitle="覚える → 試す → 克服。"
       closingBody="九九・県庁所在地は登録なしで試せます。自分で問題を作れば、同じ出題モードで繰り返し練習できます。"
       closingActions={[
-        { href: "/#home-menu", label: "まずは無料コンテンツを試す", primary: true, large: true },
+        { href: "/?park=1", label: "無料で今すぐ試す", primary: true, large: true },
         { href: "/signup/creator", label: "問題を作って配る（無料）" },
-        { href: "/portal", label: "ポータルに戻る" },
+        { href: "/portal", label: "機能紹介に戻る" },
       ]}
     />
   );

@@ -5,6 +5,8 @@ import { sessionModeMeta } from "@/lib/auth/session-display";
 import { homePathForSession } from "@/lib/firebase/auth-client";
 import { useShellSession } from "@/components/shell/useShellSession";
 
+const PARK_HREF = "/?park=1";
+
 export function PortalHeroCta() {
   const { ready, session } = useShellSession();
 
@@ -30,14 +32,17 @@ export function PortalHeroCta() {
 export function PortalHeroNote() {
   const { ready, session } = useShellSession();
 
-  if (!ready || session) return null;
-
   return (
     <p className="portal-hero__note">
-      九九・県庁所在地など公式コンテンツは
-      <Link href="/#home-menu"> トップ</Link>
-      から登録なしで試せます。問題を作って生徒に配りたい方は
-      <Link href="/signup/creator"> こちら</Link>。
+      <Link href={PARK_HREF}>無料で今すぐ試す →</Link>
+      {" （九九・県庁所在地など、登録なし）"}
+      {ready && !session ? (
+        <>
+          {" · "}
+          問題を作って生徒に配りたい方は
+          <Link href="/signup/creator"> こちら</Link>。
+        </>
+      ) : null}
     </p>
   );
 }
@@ -51,8 +56,8 @@ export function PortalClosingActions() {
         <Link href="/signup/learner" className="portal-btn portal-btn--primary portal-btn--large">
           学習管理をはじめる（無料）
         </Link>
-        <Link href="/#home-menu" className="portal-btn portal-btn--ghost">
-          まずは無料コンテンツを試す
+        <Link href={PARK_HREF} className="portal-btn portal-btn--ghost">
+          無料で今すぐ試す
         </Link>
         <Link href="/signup/creator" className="portal-btn portal-btn--ghost">
           問題を作って配る
@@ -68,15 +73,20 @@ export function PortalClosingActions() {
       ? { href: "/learner/materials", label: "教材一覧へ" }
       : session === "creator"
         ? { href: "/learner", label: "学習管理を開く" }
-        : { href: "/#home-menu", label: "無料コンテンツへ" };
+        : null;
 
   return (
     <div className="portal-closing__actions">
       <Link href={homeHref} className="portal-btn portal-btn--primary portal-btn--large">
         {meta.portalHeroPrimaryLabel}
       </Link>
-      <Link href={secondary.href} className="portal-btn portal-btn--ghost">
-        {secondary.label}
+      {secondary ? (
+        <Link href={secondary.href} className="portal-btn portal-btn--ghost">
+          {secondary.label}
+        </Link>
+      ) : null}
+      <Link href={PARK_HREF} className="portal-btn portal-btn--ghost">
+        無料で今すぐ試す
       </Link>
     </div>
   );

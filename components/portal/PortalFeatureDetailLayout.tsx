@@ -49,7 +49,7 @@ export function PortalFeatureDetailLayout({
           <div className="portal-detail__header-inner">
             <p className="portal-detail__back-wrap">
               <Link href="/portal" className="portal-detail__back">
-                ← ポータルに戻る
+                ← 機能紹介に戻る
               </Link>
             </p>
             <p className="portal-eyebrow portal-detail__eyebrow">{eyebrow}</p>
@@ -151,6 +151,8 @@ export function PortalFeatureDetailLayout({
           </a>
           {" · "}
           <Link href="/">Study Park トップ</Link>
+          {" · "}
+          <Link href="/?park=1">無料で今すぐ試す</Link>
           {" · "}
           <Link href="/login">ログイン</Link>
         </p>

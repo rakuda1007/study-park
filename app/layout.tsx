@@ -18,8 +18,19 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteOriginFromEnv()),
   title: "Study Park",
   description:
-    "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
+    "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。九九などは登録なしで今すぐ試せます。",
   applicationName: "Study Park",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Study Park",
+    description:
+      "自分やお子様の学習をかんたんに管理。気になったところは問題にして繰り返し解けます。学校や塾では生徒への配信も。",
+    url: "/",
+    siteName: "Study Park",
+    type: "website",
+  },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
