@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { StudyPlanCard } from "@/components/learner/study/StudyPlanCard";
 import { StudyProgressBar } from "@/components/learner/study/StudyProgressBar";
 import { StudyWeekNav } from "@/components/learner/study/StudyWeekNav";
@@ -33,13 +34,23 @@ function groupPlansBySubject(plans: StudyPlanWithItems[]): Map<string, StudyPlan
   return map;
 }
 
-export default function LearnerHomePage() {
+function LearnerHomeInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [userId, setUserId] = useState("");
   const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const [createdNotice, setCreatedNotice] = useState<string | null>(null);
   const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
+
+  useEffect(() => {
+    const created = searchParams.get("created");
+    if (!created) return;
+    setCreatedNotice(created);
+    router.replace("/learner", { scroll: false });
+  }, [searchParams, router]);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -103,6 +114,12 @@ export default function LearnerHomePage() {
 
   return (
     <LearnerShell title="学習管理">
+      {createdNotice ? (
+        <p className="admin-msg admin-msg--ok" role="status">
+          「{createdNotice}」の学習計画を追加しました。進捗の記録は各計画の「記録する」からできます。
+        </p>
+      ) : null}
+
       <p className="admin-msg learner-welcome-msg">
         いつまでに何をやるか、どこまで進んだかを週単位で確認できます。
         {userId ? (
@@ -234,5 +251,19 @@ export default function LearnerHomePage() {
         </Link>
       </div>
     </LearnerShell>
+  );
+}
+
+export default function LearnerHomePage() {
+  return (
+    <Suspense
+      fallback={
+        <LearnerShell title="学習管理">
+          <p className="admin-loading">読み込み中…</p>
+        </LearnerShell>
+      }
+    >
+      <LearnerHomeInner />
+    </Suspense>
   );
 }

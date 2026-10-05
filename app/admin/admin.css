@@ -2383,6 +2383,28 @@
   font-size: 1rem;
 }
 
+.study-plan-form__section-lead {
+  margin: -0.35rem 0 0.85rem;
+  color: var(--admin-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.study-plan-form__empty {
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--admin-accent, #5058b8) 8%, transparent);
+  color: var(--admin-muted);
+  font-size: 0.88rem;
+}
+
+.study-plan-form__submit-hint {
+  margin: 0 0 0.5rem;
+  color: var(--admin-muted);
+  font-size: 0.88rem;
+}
+
 .study-plan-form__dates {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2464,6 +2486,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+}
+
+.study-item-add-row__hint {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
 }
 
 .study-item-add-row__field {

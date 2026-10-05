@@ -18,7 +18,7 @@ import {
   templateToPlanInput,
 } from "@/lib/study/templates-firestore";
 import type { StudyPlanInput, StudyTemplateDoc } from "@/lib/study/types";
-import { studyPlanHref } from "@/lib/study/urls";
+import { learnerHomeHref } from "@/lib/study/urls";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 import contentManifest from "@/public/content-manifest.json";
@@ -108,14 +108,14 @@ function LearnerStudyNewInner() {
             initial={formInitial}
             submitLabel="保存する"
             onSubmit={async (input) => {
-              const planId = await createStudyPlan(userId, {
+              await createStudyPlan(userId, {
                 ...input,
                 subjectId: isCustomSubjectId(input.subjectId)
                   ? `custom:${input.subjectName}`
                   : input.subjectId,
               });
               invalidateStudyPlansCache(userId);
-              router.push(studyPlanHref(planId));
+              router.push(learnerHomeHref({ createdSubject: input.subjectName }));
             }}
           />
         </>

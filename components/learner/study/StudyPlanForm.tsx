@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import {
   defaultStudySubjectOption,
   isCustomSubjectId,
@@ -9,7 +9,10 @@ import {
 import { validateScopeNoteText } from "@/lib/study/scope-note";
 import type { StudyItemDraft, StudyItemMasterDoc, StudyPlanInput } from "@/lib/study/types";
 import { todayStudyDate } from "@/lib/study/week";
-import { StudyItemAddPanel } from "./StudyItemAddPanel";
+import {
+  StudyItemAddPanel,
+  type StudyItemAddPanelHandle,
+} from "./StudyItemAddPanel";
 import { StudyReadableText } from "./StudyReadableText";
 import { StudyScopeNoteInput } from "./StudyScopeNoteInput";
 
@@ -29,6 +32,7 @@ export function StudyPlanForm({
   onSubmit,
 }: Props) {
   const defaultSubject = defaultStudySubjectOption(subjectData.subjects);
+  const addPanelRef = useRef<StudyItemAddPanelHandle>(null);
   const [subjectId, setSubjectId] = useState(initial?.subjectId ?? defaultSubject.id);
   const [customSubjectName, setCustomSubjectName] = useState(
     initial && isCustomSubjectId(initial.subjectId) ? initial.subjectName : "",
@@ -78,15 +82,27 @@ export function StudyPlanForm({
       setErr("期限は開始日以降にしてください。");
       return;
     }
-    if (items.length === 0) {
-      setErr("学習内容を1つ以上追加してください。");
+
+    const pending = addPanelRef.current?.consumePending() ?? { item: null };
+    if (pending.error) {
+      setErr(pending.error);
       return;
     }
-    if (items.some((item) => !item.label.trim())) {
+
+    const nextItems = pending.item ? [...items, pending.item] : items;
+    if (pending.item) {
+      setItems(nextItems);
+    }
+
+    if (nextItems.length === 0) {
+      setErr("学習内容を1つ以上、リストに追加するか入力してから保存してください。");
+      return;
+    }
+    if (nextItems.some((item) => !item.label.trim())) {
       setErr("学習内容の名称を入力してください。");
       return;
     }
-    for (const item of items) {
+    for (const item of nextItems) {
       const scopeErr = validateScopeNoteText(item.scopeNote, {
         required: item.source === "app",
       });
@@ -104,7 +120,7 @@ export function StudyPlanForm({
         startDate,
         dueDate,
         memo: memo.trim() || undefined,
-        items,
+        items: nextItems,
       });
     } catch (error) {
       setErr(error instanceof Error ? error.message : "保存に失敗しました。");
@@ -116,7 +132,7 @@ export function StudyPlanForm({
   return (
     <form className="study-plan-form" onSubmit={(e) => void handleSubmit(e)}>
       <section className="admin-card study-plan-form__section">
-        <h2 className="study-plan-form__heading">基本情報</h2>
+        <h2 className="study-plan-form__heading">1. 基本情報</h2>
         <label className="admin-field">
           <span className="admin-label">科目</span>
           <select
@@ -174,7 +190,10 @@ export function StudyPlanForm({
       </section>
 
       <section className="admin-card study-plan-form__section">
-        <h2 className="study-plan-form__heading">学習内容</h2>
+        <h2 className="study-plan-form__heading">2. 学習内容</h2>
+        <p className="study-plan-form__section-lead">
+          ここに載せた内容が計画に含まれます。複数あるときは「リストに追加」を繰り返してください。
+        </p>
         {items.length > 0 ? (
           <ul className="study-plan-form__item-list">
             {items.map((item, index) => (
@@ -217,9 +236,14 @@ export function StudyPlanForm({
               </li>
             ))}
           </ul>
-        ) : null}
+        ) : (
+          <p className="study-plan-form__empty" role="status">
+            まだリストに学習内容がありません。下で入力してください。
+          </p>
+        )}
 
         <StudyItemAddPanel
+          ref={addPanelRef}
           workspaces={subjectData.workspaces}
           masters={masters}
           subjectId={resolvedSubjectId}
@@ -230,6 +254,9 @@ export function StudyPlanForm({
       {err ? <p className="admin-err">{err}</p> : null}
 
       <div className="study-plan-form__submit">
+        <p className="study-plan-form__submit-hint">
+          3. 内容がそろったら計画を登録します
+        </p>
         <button type="submit" className="admin-btn admin-btn--primary" disabled={saving}>
           {saving ? "保存中…" : submitLabel}
         </button>
