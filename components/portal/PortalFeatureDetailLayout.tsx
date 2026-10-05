@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PortalHeader } from "@/components/portal/PortalHeader";
+import { PortalOptimizedImage } from "@/components/portal/PortalOptimizedImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
 export type PortalFeatureStep = {
@@ -83,14 +84,14 @@ export function PortalFeatureDetailLayout({
                 </ul>
               </div>
               <div className="portal-detail-split__visual">
-                <img
+                <PortalOptimizedImage
                   src={image.src}
                   alt={image.alt}
                   width={image.width}
                   height={image.height}
                   className="portal-detail__photo"
                   loading="eager"
-                  decoding="async"
+                  fetchPriority="high"
                 />
               </div>
             </div>

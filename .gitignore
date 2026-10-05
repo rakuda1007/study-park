@@ -43,6 +43,12 @@ yarn-error.log*
 # firebase (ローカルキャッシュ)
 .firebase/
 
+# build 時に .env.local から生成（コミットしない）
+public/firebase-web-config.js
+
+# 作業用の失敗スクショ等
+public/*失敗*
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

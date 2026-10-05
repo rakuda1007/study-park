@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PortalHeader } from "@/components/portal/PortalHeader";
+import { PortalOptimizedImage } from "@/components/portal/PortalOptimizedImage";
 import {
   PortalClosingActions,
   PortalHeroCta,
@@ -85,17 +86,19 @@ const FEATURES = [
 export default function PortalPage() {
   return (
     <div className="portal">
+      <link rel="preload" as="image" href="/portal18.webp" type="image/webp" />
       <PortalHeader />
 
       <section className="portal-hero">
         <div className="portal-hero__banner">
-          <img
+          <PortalOptimizedImage
             src="/portal18.jpg"
             alt=""
             className="portal-hero__photo"
             width={640}
             height={480}
-            decoding="async"
+            loading="eager"
+            fetchPriority="high"
           />
           <div className="portal-hero__overlay" aria-hidden />
           <div className="portal-hero__copy-on-image">
@@ -122,14 +125,13 @@ export default function PortalPage() {
         >
           <div className="portal-feature__inner">
             <div className="portal-feature__visual">
-              <img
+              <PortalOptimizedImage
                 src={feature.image.src}
                 alt={feature.image.alt}
                 width={feature.image.width}
                 height={feature.image.height}
                 className="portal-feature__photo"
                 loading="lazy"
-                decoding="async"
               />
             </div>
             <div className="portal-feature__copy">

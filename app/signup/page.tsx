@@ -1,18 +1,21 @@
 import Link from "next/link";
+import { PortalOptimizedImage } from "@/components/portal/PortalOptimizedImage";
 import "../auth/auth.css";
 
 export default function SignupHubPage() {
   return (
     <div className="auth-root auth-signup-hub">
+      <link rel="preload" as="image" href="/portal16.webp" type="image/webp" />
       <div className="auth-signup-hub__wrap">
         <div className="auth-signup-hub__hero">
-          <img
+          <PortalOptimizedImage
             src="/portal16.jpg"
             alt=""
             className="auth-signup-hub__hero-photo"
             width={960}
             height={480}
-            decoding="async"
+            loading="eager"
+            fetchPriority="high"
           />
           <div className="auth-signup-hub__hero-overlay" aria-hidden />
           <div className="auth-signup-hub__hero-copy">

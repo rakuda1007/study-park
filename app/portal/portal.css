@@ -503,6 +503,11 @@
   min-width: 0;
 }
 
+.portal-feature__visual > picture,
+.portal-detail-split__visual > picture {
+  display: contents;
+}
+
 .portal-feature__photo {
   display: block;
   width: 100%;
