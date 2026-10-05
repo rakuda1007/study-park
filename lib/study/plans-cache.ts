@@ -41,7 +41,19 @@ export function patchCachedStudyPlan(
   plan: StudyPlanWithItems,
 ): void {
   if (!cache || cache.userId !== userId) return;
-  cache.entry.plans = cache.entry.plans.map((p) =>
-    p.id === plan.id ? plan : p,
-  );
+  const idx = cache.entry.plans.findIndex((p) => p.id === plan.id);
+  if (idx >= 0) {
+    const next = cache.entry.plans.slice();
+    next[idx] = plan;
+    cache.entry.plans = next;
+    return;
+  }
+  cache.entry.plans = [...cache.entry.plans, plan];
+}
+
+export function getCachedStudyPlan(
+  userId: string,
+  planId: string,
+): StudyPlanWithItems | null {
+  return getCachedStudyPlans(userId)?.find((p) => p.id === planId) ?? null;
 }

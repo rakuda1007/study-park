@@ -1,98 +1,174 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { StudyItemProgressEditor } from "@/components/learner/study/StudyItemProgressEditor";
-import { StudyPlanForm } from "@/components/learner/study/StudyPlanForm";
 import { StudyProgressGauge } from "@/components/learner/study/StudyProgressGauge";
-import { StudySaveTemplateForm } from "@/components/learner/study/StudySaveTemplateForm";
 import { LearnerShell } from "@/components/learner/LearnerShell";
-import {
-  customSubjectOption,
-  isCustomSubjectId,
-  loadStudySubjectData,
-  type StudySubjectData,
-} from "@/lib/study/subject-options";
+import { useShellSession } from "@/components/shell/useShellSession";
+import { getFirebaseAuth } from "@/lib/firebase/auth-client";
 import {
   deleteStudyPlan,
   getStudyPlanWithItems,
   replaceStudyItems,
   updateStudyPlanMeta,
 } from "@/lib/study/firestore";
-import { listStudyItemMasters } from "@/lib/study/masters-firestore";
-import { invalidateStudyPlansCache } from "@/lib/study/plans-loader";
 import {
-  averageProgress,
-  delayStatus,
-} from "@/lib/study/progress";
-import type { StudyPlanInput, StudyPlanWithItems, StudyItemMasterDoc } from "@/lib/study/types";
+  getCachedStudyPlan,
+  invalidateStudyPlansCache,
+  patchCachedStudyPlan,
+} from "@/lib/study/plans-loader";
+import { averageProgress, delayStatus } from "@/lib/study/progress";
+import type {
+  StudyItemMasterDoc,
+  StudyPlanInput,
+  StudyPlanWithItems,
+} from "@/lib/study/types";
+import type { StudySubjectData } from "@/lib/study/subject-options";
 import { formatDaysRemaining } from "@/lib/study/week";
 import { studyPlanHref } from "@/lib/study/urls";
-import { subscribeAuth } from "@/lib/firebase/auth-client";
-import contentManifest from "@/public/content-manifest.json";
-import type { ContentManifest } from "@/lib/content/types";
+
+const StudyPlanForm = dynamic(
+  () =>
+    import("@/components/learner/study/StudyPlanForm").then((m) => m.StudyPlanForm),
+  {
+    loading: () => <p className="admin-loading">編集フォームを読み込み中…</p>,
+  },
+);
+
+const StudySaveTemplateForm = dynamic(
+  () =>
+    import("@/components/learner/study/StudySaveTemplateForm").then(
+      (m) => m.StudySaveTemplateForm,
+    ),
+);
+
+function peekAuthUid(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return getFirebaseAuth().currentUser?.uid ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function peekCachedPlan(planId: string): StudyPlanWithItems | null {
+  const uid = peekAuthUid();
+  if (!uid || !planId) return null;
+  return getCachedStudyPlan(uid, planId);
+}
+
+function StudyPlanDetailSkeleton() {
+  return (
+    <>
+      <p className="study-back-link-wrap">
+        <Link href="/learner" className="study-back-link">
+          ← 学習管理に戻る
+        </Link>
+      </p>
+      <header className="study-detail-header study-detail-header--pending" aria-busy="true">
+        <div>
+          <h2 className="study-detail-header__title">学習計画</h2>
+          <p className="study-detail-header__meta">読み込み中…</p>
+        </div>
+      </header>
+      <section className="admin-card study-detail-progress">
+        <p className="admin-loading" role="status">
+          進捗データを読み込み中…
+        </p>
+      </section>
+    </>
+  );
+}
+
+/** フォーム選択肢用のカスタム科目 ID（subject-options と同値） */
+const CUSTOM_SUBJECT_FORM_ID = "__custom__";
 
 function LearnerStudyPlanInner() {
   const searchParams = useSearchParams();
   const planId = searchParams.get("planId") ?? "";
   const wantsEdit = searchParams.get("edit") === "1";
   const router = useRouter();
-  const manifest = contentManifest as ContentManifest;
+  const { uid: sessionUid } = useShellSession();
 
-  const [userId, setUserId] = useState("");
-  const [plan, setPlan] = useState<StudyPlanWithItems | null>(null);
+  const [userId, setUserId] = useState(() => peekAuthUid());
+  const [plan, setPlan] = useState<StudyPlanWithItems | null>(() =>
+    peekCachedPlan(planId),
+  );
   const [subjectData, setSubjectData] = useState<StudySubjectData | null>(null);
   const [masters, setMasters] = useState<StudyItemMasterDoc[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !peekCachedPlan(planId));
   const [editing, setEditing] = useState(false);
   const [editingDataLoading, setEditingDataLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionErr, setActionErr] = useState("");
 
+  const applyPlan = useCallback((uid: string, data: StudyPlanWithItems | null) => {
+    setPlan(data);
+    if (data) {
+      patchCachedStudyPlan(uid, data);
+    }
+  }, []);
+
   const refreshPlan = useCallback(
     async (uid: string) => {
       if (!planId) {
         setPlan(null);
-        return;
+        return null;
       }
       const data = await getStudyPlanWithItems(uid, planId);
-      setPlan(data);
+      applyPlan(uid, data);
+      return data;
     },
-    [planId],
+    [planId, applyPlan],
   );
 
-  const loadEditingData = useCallback(
-    async (uid: string) => {
-      setEditingDataLoading(true);
-      try {
-        const [subjects, masterList] = await Promise.all([
-          loadStudySubjectData(uid, manifest),
-          listStudyItemMasters(uid),
+  const loadEditingData = useCallback(async (uid: string) => {
+    setEditingDataLoading(true);
+    try {
+      const [{ default: contentManifest }, { loadStudySubjectData }, { listStudyItemMasters }] =
+        await Promise.all([
+          import("@/public/content-manifest.json"),
+          import("@/lib/study/subject-options"),
+          import("@/lib/study/masters-firestore"),
         ]);
-        setSubjectData(subjects);
-        setMasters(masterList);
-      } finally {
-        setEditingDataLoading(false);
-      }
-    },
-    [manifest],
-  );
+      const [subjects, masterList] = await Promise.all([
+        loadStudySubjectData(uid, contentManifest),
+        listStudyItemMasters(uid),
+      ]);
+      setSubjectData(subjects);
+      setMasters(masterList);
+    } finally {
+      setEditingDataLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const unsub = subscribeAuth((user) => {
-      void (async () => {
-        if (!user) return;
-        setUserId(user.uid);
-        try {
-          await refreshPlan(user.uid);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    });
-    return unsub;
-  }, [refreshPlan]);
+    const uid = sessionUid || peekAuthUid();
+    if (!uid || !planId) return;
+
+    setUserId(uid);
+    const cached = getCachedStudyPlan(uid, planId);
+    if (cached) {
+      setPlan(cached);
+      setLoading(false);
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        await refreshPlan(uid);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionUid, planId, refreshPlan]);
 
   useEffect(() => {
     if (!editing || !userId || subjectData) return;
@@ -118,7 +194,7 @@ function LearnerStudyPlanInner() {
   const initialInput = useMemo((): StudyPlanInput | undefined => {
     if (!plan) return undefined;
     const subjectId = plan.subjectId.startsWith("custom:")
-      ? customSubjectOption().id
+      ? CUSTOM_SUBJECT_FORM_ID
       : plan.subjectId;
     return {
       subjectId,
@@ -136,6 +212,15 @@ function LearnerStudyPlanInner() {
     };
   }, [plan]);
 
+  function updateLocalPlan(updater: (prev: StudyPlanWithItems) => StudyPlanWithItems) {
+    setPlan((prev) => {
+      if (!prev || !userId) return prev;
+      const next = updater(prev);
+      patchCachedStudyPlan(userId, next);
+      return next;
+    });
+  }
+
   async function handleDelete() {
     if (!userId || !plan) return;
     if (!window.confirm("この学習計画を削除しますか？")) return;
@@ -152,8 +237,7 @@ function LearnerStudyPlanInner() {
   async function markCompleted() {
     if (!userId || !plan) return;
     await updateStudyPlanMeta(userId, plan.id, { status: "completed" });
-    setPlan((prev) => (prev ? { ...prev, status: "completed" } : prev));
-    invalidateStudyPlansCache(userId);
+    updateLocalPlan((prev) => ({ ...prev, status: "completed" }));
   }
 
   async function markActive() {
@@ -161,8 +245,11 @@ function LearnerStudyPlanInner() {
     setActionErr("");
     try {
       await updateStudyPlanMeta(userId, plan.id, { status: "active" });
-      setPlan((prev) => (prev ? { ...prev, status: "active", completedAt: undefined } : prev));
-      invalidateStudyPlansCache(userId);
+      updateLocalPlan((prev) => ({
+        ...prev,
+        status: "active",
+        completedAt: undefined,
+      }));
     } catch (e) {
       setActionErr(e instanceof Error ? e.message : "再開に失敗しました。");
     }
@@ -181,15 +268,15 @@ function LearnerStudyPlanInner() {
     );
   }
 
-  if (loading) {
+  if (!plan && loading) {
     return (
       <LearnerShell title="学習管理">
-        <p className="admin-loading">読み込み中…</p>
+        <StudyPlanDetailSkeleton />
       </LearnerShell>
     );
   }
 
-  if (!plan) {
+  if (!plan && !loading) {
     return (
       <LearnerShell title="学習管理">
         <section className="admin-card">
@@ -200,6 +287,10 @@ function LearnerStudyPlanInner() {
         </section>
       </LearnerShell>
     );
+  }
+
+  if (!plan) {
+    return null;
   }
 
   return (
@@ -250,6 +341,11 @@ function LearnerStudyPlanInner() {
       </header>
 
       {actionErr ? <p className="admin-err">{actionErr}</p> : null}
+      {loading ? (
+        <p className="admin-loading study-detail-refreshing" role="status">
+          最新情報を更新中…
+        </p>
+      ) : null}
 
       {!editing ? (
         <div className="study-detail-template-save">
@@ -268,6 +364,7 @@ function LearnerStudyPlanInner() {
           initial={initialInput}
           submitLabel="変更を保存"
           onSubmit={async (input) => {
+            const { isCustomSubjectId } = await import("@/lib/study/subject-options");
             await updateStudyPlanMeta(userId, plan.id, {
               subjectId: isCustomSubjectId(input.subjectId)
                 ? `custom:${input.subjectName}`
@@ -303,15 +400,12 @@ function LearnerStudyPlanInner() {
                   planId={plan.id}
                   item={item}
                   onUpdated={(itemId, progressPercent) => {
-                    setPlan((prev) => {
-                      if (!prev) return prev;
-                      return {
-                        ...prev,
-                        items: prev.items.map((i) =>
-                          i.id === itemId ? { ...i, progressPercent } : i,
-                        ),
-                      };
-                    });
+                    updateLocalPlan((prev) => ({
+                      ...prev,
+                      items: prev.items.map((i) =>
+                        i.id === itemId ? { ...i, progressPercent } : i,
+                      ),
+                    }));
                   }}
                 />
               ))}
@@ -325,7 +419,13 @@ function LearnerStudyPlanInner() {
 
 export default function LearnerStudyPlanPage() {
   return (
-    <Suspense fallback={<p className="admin-loading">読み込み中…</p>}>
+    <Suspense
+      fallback={
+        <LearnerShell title="学習管理">
+          <StudyPlanDetailSkeleton />
+        </LearnerShell>
+      }
+    >
       <LearnerStudyPlanInner />
     </Suspense>
   );

@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  getCachedStudyPlan,
   getCachedStudyPlans,
   invalidateStudyPlansCache,
+  patchCachedStudyPlan,
   setCachedStudyPlans,
 } from "./plans-cache";
 import {
@@ -54,4 +56,9 @@ export async function fetchWeekStudyPlansCached(
   return weekPlans;
 }
 
-export { invalidateStudyPlansCache };
+export {
+  getCachedStudyPlan,
+  getCachedStudyPlans,
+  invalidateStudyPlansCache,
+  patchCachedStudyPlan,
+};

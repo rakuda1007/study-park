@@ -2750,6 +2750,15 @@
   margin-bottom: 1rem;
 }
 
+.study-detail-header--pending {
+  opacity: 0.72;
+}
+
+.study-detail-refreshing {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+
 .study-detail-header__title {
   margin: 0;
   font-size: 1.35rem;

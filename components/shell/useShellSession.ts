@@ -20,12 +20,14 @@ import type { User } from "firebase/auth";
 
 type Snapshot = {
   ready: boolean;
+  uid: string | null;
   session: AuthSessionKind | null;
   canSwitchMode: boolean;
 };
 
 const serverSnapshot: Snapshot = {
   ready: false,
+  uid: null,
   session: null,
   canSwitchMode: false,
 };
@@ -43,16 +45,22 @@ function emit() {
 async function refresh(user: User | null, pathname: string) {
   const seq = ++refreshSeq;
   if (!user) {
-    snapshot = { ready: true, session: null, canSwitchMode: false };
+    snapshot = { ready: true, uid: null, session: null, canSwitchMode: false };
     emit();
     return;
+  }
+
+  // uid だけ先に公開（session 解決待ちでも plan キャッシュ表示に使う）
+  if (snapshot.uid !== user.uid) {
+    snapshot = { ...snapshot, uid: user.uid };
+    emit();
   }
 
   syncActiveModeWithPath(pathname);
   const { kind, canSwitchMode } = await resolveAuthSessionState(user);
   if (seq !== refreshSeq) return;
 
-  snapshot = { ready: true, session: kind, canSwitchMode };
+  snapshot = { ready: true, uid: user.uid, session: kind, canSwitchMode };
   emit();
 }
 
@@ -90,7 +98,7 @@ function getServerSnapshot() {
 export function useShellSession() {
   const pathname = usePathname();
   const router = useRouter();
-  const { ready, session, canSwitchMode } = useSyncExternalStore(
+  const { ready, uid, session, canSwitchMode } = useSyncExternalStore(
     subscribe,
     getSnapshot,
     getServerSnapshot,
@@ -111,5 +119,5 @@ export function useShellSession() {
     router.refresh();
   }, [canSwitchMode, router, session]);
 
-  return { ready, session, canSwitchMode, switchMode };
+  return { ready, uid, session, canSwitchMode, switchMode };
 }

@@ -151,11 +151,13 @@ export async function getStudyPlanWithItems(
   userId: string,
   planId: string,
 ): Promise<StudyPlanWithItems | null> {
-  const planSnap = await getDoc(doc(getFirestoreClient(), "users", userId, "studyPlans", planId));
+  const planRef = doc(getFirestoreClient(), "users", userId, "studyPlans", planId);
+  const [planSnap, items] = await Promise.all([
+    getDoc(planRef),
+    listStudyItems(userId, planId),
+  ]);
   if (!planSnap.exists()) return null;
-  const plan = mapPlan(planSnap.id, planSnap.data());
-  const items = await listStudyItems(userId, planId);
-  return { ...plan, items };
+  return { ...mapPlan(planSnap.id, planSnap.data()), items };
 }
 
 export async function listStudyPlansWithItems(userId: string): Promise<StudyPlanWithItems[]> {
