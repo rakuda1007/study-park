@@ -26,9 +26,9 @@ export default function LearnerStudyTemplatesPage() {
         </Link>
       </p>
 
-      <h2 className="shell-page-heading">テンプレート</h2>
+      <h2 className="shell-page-heading">計画テンプレ</h2>
       <p className="admin-msg">
-        よく使う学習計画の構成を保存しておけます。計画詳細画面から「テンプレートとして保存」できます。
+        よく使う学習計画の構成を残しておけます。計画の「記録する」画面から「計画テンプレに残す」ができます。
       </p>
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}

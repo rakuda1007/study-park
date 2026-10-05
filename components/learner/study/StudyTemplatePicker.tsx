@@ -14,9 +14,9 @@ export function StudyTemplatePicker({ templates, selectedId, onSelect }: Props) 
     return (
       <section className="admin-card study-template-picker study-template-picker--empty">
         <p className="admin-msg">
-          テンプレートはまだありません。計画を作ったあと、詳細画面から保存できます。{" "}
+          計画テンプレはまだありません。計画を作ったあと、「記録する」画面から残せます。{" "}
           <Link href="/learner/study/templates" className="study-back-link">
-            テンプレート一覧
+            計画テンプレ一覧
           </Link>
         </p>
       </section>
@@ -25,10 +25,10 @@ export function StudyTemplatePicker({ templates, selectedId, onSelect }: Props) 
 
   return (
     <section className="admin-card study-template-picker">
-      <h2 className="study-plan-form__heading">テンプレートから作成（任意）</h2>
-      <p className="admin-msg">保存済みのテンプレートを選ぶと、科目と学習内容が自動入力されます。</p>
+      <h2 className="study-plan-form__heading">計画テンプレから作成（任意）</h2>
+      <p className="admin-msg">保存済みの計画テンプレを選ぶと、科目と学習内容が自動入力されます。</p>
       <label className="admin-field">
-        <span className="admin-label">テンプレート</span>
+        <span className="admin-label">計画テンプレ</span>
         <select
           className="admin-input"
           value={selectedId}
@@ -44,7 +44,7 @@ export function StudyTemplatePicker({ templates, selectedId, onSelect }: Props) 
       </label>
       <p className="study-template-picker__link">
         <Link href="/learner/study/templates" className="study-back-link">
-          テンプレートの管理 →
+          計画テンプレの管理 →
         </Link>
       </p>
     </section>

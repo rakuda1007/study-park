@@ -43,7 +43,7 @@ export default function PortalStudyManagementPage() {
         },
         {
           title: "学習計画を作成",
-          body: "科目・開始日・期限を設定し、Study Park の教材またはその他の教材（問題集・プリントなど）を登録して計画を立てます。",
+          body: "科目・開始日・期限を設定し、アプリの教材またはアプリ外の勉強（問題集・プリントなど）を登録して計画を立てます。",
         },
         {
           title: "週ビューで確認し、進捗を記録",

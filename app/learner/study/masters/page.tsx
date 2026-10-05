@@ -39,7 +39,7 @@ export default function LearnerStudyMastersPage() {
         </Link>
       </p>
 
-      <h2 className="shell-page-heading">よく使う項目</h2>
+      <h2 className="shell-page-heading">よく使う教材名</h2>
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 

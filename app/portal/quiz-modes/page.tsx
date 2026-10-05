@@ -19,9 +19,9 @@ export default function PortalQuizModesPage() {
       eyebrow="特徴 02 · 出題モード"
       title={
         <>
-          まずは暗記、仕上げはランダム。
+          気になったところは、
           <br />
-          定着率を高める多彩な出題モード。
+          繰り返し解いて定着させる。
         </>
       }
       lead="Study Park のクイズは、覚える段階・試す段階・弱点克服の段階に合わせて、出題の仕方を変えられます。プルダウンひとつで切り替えられる4つのモードで、同じ教材を何度も効率よく使い回せます。"
@@ -39,7 +39,7 @@ export default function PortalQuizModesPage() {
       steps={[
         {
           title: "教材を開いて出題形式を選ぶ",
-          body: "トップページの九九・県庁所在地、または参加中のワークスペース教材から学びたいクイズを選びます。画面上部のプルダウンで「順番に出題」「ランダムに出題」「苦手問題を出題」「まとめて確認」のいずれかを選びます。",
+          body: "トップの無料コンテンツ（九九・県庁所在地）や、参加中の教材から学びたいクイズを選びます。画面上部のプルダウンで「順番に出題」「ランダムに出題」「苦手問題を出題」「まとめて確認」のいずれかを選びます。",
         },
         {
           title: "学習フェーズに合わせて切り替える",
@@ -51,14 +51,14 @@ export default function PortalQuizModesPage() {
         },
       ]}
       introActions={[
-        { href: "/", label: "無料コンテンツを試す", primary: true },
-        { href: "/signup/creator", label: "教材を作る" },
+        { href: "/#home-menu", label: "まずは無料コンテンツを試す", primary: true },
+        { href: "/signup/learner", label: "学習管理をはじめる" },
       ]}
       closingTitle="覚える → 試す → 克服。"
-      closingBody="九九・県庁所在地は登録なしで試せます。自分用の問題集を作れば、同じ出題モードでオリジナル教材にも使えます。"
+      closingBody="九九・県庁所在地は登録なしで試せます。自分で問題を作れば、同じ出題モードで繰り返し練習できます。"
       closingActions={[
-        { href: "/", label: "学習メニューへ", primary: true, large: true },
-        { href: "/signup/creator", label: "教材を作る（無料）" },
+        { href: "/#home-menu", label: "まずは無料コンテンツを試す", primary: true, large: true },
+        { href: "/signup/creator", label: "問題を作って配る（無料）" },
         { href: "/portal", label: "ポータルに戻る" },
       ]}
     />

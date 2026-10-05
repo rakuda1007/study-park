@@ -59,7 +59,7 @@ export function StudyAppContentPicker({ options, onSelect, onClose }: Props) {
       >
         <div className="study-app-picker__head">
           <h3 id="study-app-picker-title" className="study-app-picker__title">
-            Study Park の教材を選ぶ
+            アプリの教材を選ぶ
           </h3>
           <button
             type="button"

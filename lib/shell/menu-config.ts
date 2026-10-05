@@ -1,6 +1,6 @@
 import type { ShellMenuItem } from "@/components/shell/ShellHamburgerMenu";
 import { MANUAL_MENU_ITEM } from "@/components/shell/manual-menu-item";
-import { PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
+import { PARK_MENU_ITEM, PORTAL_MENU_ITEM } from "@/components/shell/portal-menu-item";
 import type { AuthSessionKind } from "@/lib/firebase/auth-client";
 
 export type ShellMenuConfig = {
@@ -37,6 +37,7 @@ export function getGuestShellMenu(): ShellMenuConfig {
       { label: "ログイン", href: "/login" },
       { label: "学習管理をはじめる", href: "/signup/learner" },
       { label: "問題を作って配る", href: "/signup/creator" },
+      PARK_MENU_ITEM,
       PORTAL_MENU_ITEM,
       { ...MANUAL_MENU_ITEM, dividerBefore: true },
     ],
@@ -51,6 +52,8 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
         items: [
           { label: "学習管理", href: "/learner" },
           { label: "教材", href: "/learner/materials" },
+          { ...PARK_MENU_ITEM, dividerBefore: true },
+          PORTAL_MENU_ITEM,
           { ...MANUAL_MENU_ITEM, dividerBefore: true },
         ],
         bottomItems: loggedInBottom(session),
@@ -76,6 +79,8 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
             href: "/creator/subjects",
             dividerBefore: true,
           },
+          PARK_MENU_ITEM,
+          PORTAL_MENU_ITEM,
           MANUAL_MENU_ITEM,
         ],
         bottomItems: loggedInBottom(session),
@@ -88,6 +93,8 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
           { label: "利用者一覧", href: "/admin/users" },
           { label: "学習管理の運用", href: "/admin/study-ops" },
           { label: "教材", href: "/learner/materials" },
+          { ...PARK_MENU_ITEM, dividerBefore: true },
+          PORTAL_MENU_ITEM,
           { ...MANUAL_MENU_ITEM, dividerBefore: true },
         ],
         bottomItems: loggedInBottom(session),

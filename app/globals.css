@@ -506,6 +506,26 @@ body {
   gap: 1.25rem;
 }
 
+.home-free-zone {
+  margin-top: 0.5rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--home-ink, #1a1f2e) 10%, transparent);
+}
+
+.home-free-zone__title {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--home-ink, #1a1f2e);
+}
+
+.home-free-zone__lead {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--home-muted);
+}
+
 .home-nav {
   margin: 0;
 }

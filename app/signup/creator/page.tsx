@@ -24,7 +24,7 @@ export default function SignupCreatorPage() {
     }
     const name = workspaceName.trim();
     if (!name) {
-      setExtraError("ワークスペース名を入力してください。");
+      setExtraError("教室・教材庫の名前を入力してください。");
       return null;
     }
     setExtraError("");
@@ -89,7 +89,7 @@ export default function SignupCreatorPage() {
         </p>
         <div className="auth-field">
           <label htmlFor="wsName">
-            ワークスペース名
+            教室・教材庫の名前
             <span className="auth-required" aria-hidden>
               必須
             </span>
@@ -99,12 +99,12 @@ export default function SignupCreatorPage() {
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             aria-describedby="wsName-hint"
-            placeholder="例：山田クラス"
+            placeholder="例：山田クラス、家庭学習"
             required
           />
           <p id="wsName-hint" className="auth-hint">
-            教材のまとまりの名前です。学習者の画面ではこの名前で表示されます。教材リンク用の URL ID
-            は、登録時にここから自動で作成されます。
+            教材のまとまりの名前です（あとで変更できます）。学習者の画面ではこの名前で表示されます。URL
+            用の ID は登録時にここから自動作成されます。
           </p>
         </div>
       </EmailAuthForm>

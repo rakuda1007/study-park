@@ -74,16 +74,16 @@ export default function CreatorStartPage() {
       <form className="admin-card" onSubmit={(e) => void onSubmit(e)} style={{ marginTop: "1rem" }}>
         {error ? <p className="admin-msg admin-msg--error">{error}</p> : null}
         <div className="admin-field">
-          <label htmlFor="start-ws-name">ワークスペース名</label>
+          <label htmlFor="start-ws-name">教室・教材庫の名前</label>
           <input
             id="start-ws-name"
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
-            placeholder="例：山田クラス"
+            placeholder="例：山田クラス、家庭学習"
             required
           />
           <p className="auth-hint" style={{ marginTop: "0.35rem" }}>
-            教材のまとまりの名前です。学習者の画面に表示されます。
+            教材のまとまりの名前です（あとで変更できます）。学習者の画面に表示されます。
           </p>
         </div>
         <button type="submit" className="admin-btn admin-btn--primary" disabled={busy}>

@@ -84,7 +84,7 @@ export function StudyItemMasterManager({ userId, subjects }: Props) {
   return (
     <div className="study-master-manager">
       <p className="admin-msg">
-        よく使う外部教材（問題集・プリントなど）を登録しておくと、学習計画の追加が速くなります。
+        よく使う教材名（問題集・プリントなど）を登録しておくと、学習計画の追加が速くなります。
       </p>
 
       <form className="admin-card study-master-manager__form" onSubmit={(e) => void handleAdd(e)}>

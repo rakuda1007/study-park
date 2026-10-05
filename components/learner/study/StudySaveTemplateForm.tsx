@@ -21,7 +21,7 @@ export function StudySaveTemplateForm({ userId, plan, onSaved }: Props) {
     e.preventDefault();
     setErr("");
     if (!name.trim()) {
-      setErr("テンプレート名を入力してください。");
+      setErr("テンプレ名を入力してください。");
       return;
     }
     setSaving(true);
@@ -38,25 +38,25 @@ export function StudySaveTemplateForm({ userId, plan, onSaved }: Props) {
   }
 
   if (saved) {
-    return <p className="admin-msg admin-msg--ok">テンプレートを保存しました。</p>;
+    return <p className="admin-msg admin-msg--ok">計画テンプレを残しました。</p>;
   }
 
   if (!open) {
     return (
       <button type="button" className="admin-btn" onClick={() => setOpen(true)}>
-        テンプレートとして保存
+        計画テンプレに残す
       </button>
     );
   }
 
   return (
     <form className="study-save-template admin-card" onSubmit={(e) => void handleSubmit(e)}>
-      <h3 className="study-save-template__title">テンプレートとして保存</h3>
+      <h3 className="study-save-template__title">計画テンプレに残す</h3>
       <p className="admin-msg">
-        科目・学習内容・期間の長さを保存します。次回から同じ構成で計画を素早く作れます。
+        科目・学習内容・期間の長さをテンプレとして残します。次回から同じ構成で計画を素早く作れます。
       </p>
       <label className="admin-field">
-        <span className="admin-label">テンプレート名</span>
+        <span className="admin-label">テンプレ名</span>
         <input
           className="admin-input"
           value={name}
@@ -70,7 +70,7 @@ export function StudySaveTemplateForm({ userId, plan, onSaved }: Props) {
           キャンセル
         </button>
         <button type="submit" className="admin-btn admin-btn--primary" disabled={saving}>
-          {saving ? "保存中…" : "保存する"}
+          {saving ? "保存中…" : "この名前で残す"}
         </button>
       </div>
     </form>

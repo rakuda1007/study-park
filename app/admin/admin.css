@@ -2105,7 +2105,29 @@
 }
 
 .study-plan-card__app-badge {
-  margin-right: 0.25rem;
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: 0.05em;
+  color: var(--admin-accent, #1a5f4a);
+  background: color-mix(in srgb, var(--admin-accent, #1a5f4a) 12%, transparent);
+}
+
+.study-template-list__source-badge {
+  display: inline-block;
+  margin-right: 0.2rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: 0.05em;
+  color: var(--admin-muted);
+  background: color-mix(in srgb, var(--admin-muted) 14%, transparent);
 }
 
 .study-plan-card__play-link {
@@ -2327,8 +2349,41 @@
 .study-page-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
   margin: 1rem 0 2rem;
+}
+
+.study-page-actions__more {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.study-page-actions__more-summary {
+  cursor: pointer;
+  color: var(--admin-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.study-page-actions__more-summary::-webkit-details-marker {
+  display: none;
+}
+
+.study-page-actions__more-summary::before {
+  content: "▸ ";
+}
+
+.study-page-actions__more[open] .study-page-actions__more-summary::before {
+  content: "▾ ";
+}
+
+.study-page-actions__more-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .admin-btn--disabled {

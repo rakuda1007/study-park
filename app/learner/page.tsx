@@ -243,12 +243,17 @@ function LearnerHomeInner() {
             すべての計画を見る
           </Link>
         ) : null}
-        <Link href="/learner/study/templates" className="admin-btn">
-          テンプレート
-        </Link>
-        <Link href="/learner/study/masters" className="admin-btn">
-          よく使う項目
-        </Link>
+        <details className="study-page-actions__more">
+          <summary className="study-page-actions__more-summary">計画の便利機能</summary>
+          <div className="study-page-actions__more-body">
+            <Link href="/learner/study/templates" className="admin-btn">
+              計画テンプレ
+            </Link>
+            <Link href="/learner/study/masters" className="admin-btn">
+              よく使う教材名
+            </Link>
+          </div>
+        </details>
       </div>
     </LearnerShell>
   );

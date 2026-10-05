@@ -203,7 +203,7 @@ export function StudyPlanForm({
               >
                 <div className="study-plan-form__item-fields">
                   <span className="study-plan-form__item-badge">
-                    {item.source === "app" ? "📱 アプリ教材" : "📚 その他"}
+                    {item.source === "app" ? "アプリの教材" : "アプリ外の勉強"}
                   </span>
                   {item.source === "external" ? (
                     <label className="admin-field study-plan-form__item-field">

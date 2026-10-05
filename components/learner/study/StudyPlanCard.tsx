@@ -84,8 +84,11 @@ export function StudyPlanCard({
           <Link href={studyPlanEditHref(plan.id)} className="study-plan-card__link">
             編集する
           </Link>
-          <Link href={studyPlanHref(plan.id)} className="study-plan-card__link">
-            詳細
+          <Link
+            href={studyPlanHref(plan.id)}
+            className="study-plan-card__link study-plan-card__link--action"
+          >
+            記録する
           </Link>
         </div>
       )}
@@ -107,8 +110,8 @@ export function StudyPlanCard({
               <div className="study-plan-card__item-head">
                 <span className="study-plan-card__item-label">
                   {item.source === "app" ? (
-                    <span className="study-plan-card__app-badge" title="Study Park 教材">
-                      📱
+                    <span className="study-plan-card__app-badge" title="アプリの教材">
+                      アプリ
                     </span>
                   ) : null}
                   <StudyReadableText text={item.label} />

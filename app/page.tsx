@@ -55,7 +55,15 @@ export default function Home() {
         <HomeTopbarLazy />
         <HomeHero />
         <div className="home-content" id="home-menu">
-          <HomeNavLazy manifest={manifest} />
+          <section className="home-free-zone" aria-labelledby="home-free-zone-heading">
+            <h2 id="home-free-zone-heading" className="home-free-zone__title">
+              無料で今すぐ試す
+            </h2>
+            <p className="home-free-zone__lead">
+              登録なしで学べる公式コンテンツです。学習管理や問題づくりは、上のボタンから始められます。
+            </p>
+            <HomeNavLazy manifest={manifest} />
+          </section>
         </div>
         <SiteFooter />
       </main>

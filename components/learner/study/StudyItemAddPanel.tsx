@@ -171,7 +171,7 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
       if (!label) {
         return {
           item: null,
-          error: "教材名を入力するか、Study Park の教材を選んでください。",
+          error: "教材名を入力するか、アプリの教材を選んでください。",
         };
       }
 
@@ -201,7 +201,7 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
         return;
       }
       if (!result.item) {
-        setErr("教材名を入力するか、Study Park の教材を選んでください。");
+        setErr("教材名を入力するか、アプリの教材を選んでください。");
         return;
       }
       onAdd(result.item);
@@ -218,7 +218,7 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
 
         {selectedApp ? (
           <div className="study-item-add-row__app-picked">
-            <span className="study-item-add-row__app-badge">📱 Study Park</span>
+            <span className="study-item-add-row__app-badge">アプリの教材</span>
             <span className="study-item-add-row__app-title">{selectedApp.content.title}</span>
             <span className="study-item-add-row__app-meta">
               {selectedApp.workspaceName}
@@ -276,7 +276,7 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
             ) : (
               <p className="study-item-add-row__masters-hint">
                 <Link href="/learner/study/masters" className="study-back-link">
-                  よく使う項目を登録すると次回から選べます →
+                  よく使う教材名を登録すると次回から選べます →
                 </Link>
               </p>
             )}
@@ -285,7 +285,7 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
               <div className="study-item-add-row__app-pick">
                 {useInlineAppPicker ? (
                   <label className="admin-field study-item-add-row__field">
-                    <span className="admin-label">Study Park の教材</span>
+                    <span className="admin-label">アプリの教材</span>
                     <select
                       className="admin-input"
                       value={inlineAppKey}
@@ -313,7 +313,7 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
                     className="admin-btn study-item-add-row__app-open"
                     onClick={() => setPickerOpen(true)}
                   >
-                    📱 Study Park の教材を選ぶ（{appOptions.length}件）
+                    アプリの教材を選ぶ（{appOptions.length}件）
                   </button>
                 )}
               </div>

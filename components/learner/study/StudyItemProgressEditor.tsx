@@ -42,7 +42,7 @@ export function StudyItemProgressEditor({ userId, planId, item, onUpdated }: Pro
       <div className="study-item-editor__head">
         <div>
           <span className="study-item-editor__badge">
-            {item.source === "app" ? "📱 Study Park" : "📚 その他"}
+            {item.source === "app" ? "アプリの教材" : "アプリ外の勉強"}
           </span>
           <h3 className="study-item-editor__title">
             <StudyReadableText text={item.label} />

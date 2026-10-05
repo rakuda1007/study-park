@@ -35,7 +35,7 @@ export function StudyTemplateList({ userId, onApply, showApply = false }: Props)
   }, [refresh]);
 
   async function handleDelete(template: StudyTemplateDoc) {
-    if (!window.confirm(`テンプレート「${template.name}」を削除しますか？`)) return;
+    if (!window.confirm(`計画テンプレ「${template.name}」を削除しますか？`)) return;
     await deleteStudyTemplate(userId, template.id);
     await refresh();
   }
@@ -46,7 +46,7 @@ export function StudyTemplateList({ userId, onApply, showApply = false }: Props)
     return (
       <section className="admin-card">
         <p>
-          テンプレートはまだありません。学習計画の詳細画面から「テンプレートとして保存」できます。
+          計画テンプレはまだありません。計画の「記録する」画面から「計画テンプレに残す」ができます。
         </p>
       </section>
     );
@@ -68,7 +68,16 @@ export function StudyTemplateList({ userId, onApply, showApply = false }: Props)
             <ul className="study-template-list__items">
               {template.items.map((item, index) => (
                 <li key={`${template.id}-${index}`}>
-                  {item.source === "app" ? "📱 " : "📚 "}
+                  <span
+                    className={
+                      item.source === "app"
+                        ? "study-plan-card__app-badge"
+                        : "study-template-list__source-badge"
+                    }
+                    title={item.source === "app" ? "アプリの教材" : "アプリ外の勉強"}
+                  >
+                    {item.source === "app" ? "アプリ" : "アプリ外"}
+                  </span>{" "}
                   <StudyReadableText text={item.label} />
                   {item.scopeNote ? (
                     <>
@@ -86,7 +95,7 @@ export function StudyTemplateList({ userId, onApply, showApply = false }: Props)
                 className="admin-btn admin-btn--primary"
                 onClick={() => onApply(template)}
               >
-                このテンプレートを使う
+                この計画テンプレを使う
               </button>
             ) : (
               <Link
