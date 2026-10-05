@@ -4,10 +4,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { HomeSubjectMenu } from "@/lib/content/manifest-home";
 import { mergeHomeMenus } from "@/lib/content/merge-menus";
-import {
-  listPublicSubjects,
-  listPublishedLegacyContents,
-} from "@/lib/content/public-firestore";
 import type { ContentManifest } from "@/lib/content/types";
 
 type MenuItem = {
@@ -115,15 +111,23 @@ function SubjectSection({ group }: { group: HomeSubjectMenu }) {
   );
 }
 
+function initialMenus(manifest: ContentManifest): HomeSubjectMenu[] {
+  // Firestore 取得前は manifest の公開項目を即表示
+  return mergeHomeMenus(manifest, [], [], null);
+}
+
 export function HomeNav({ manifest }: { manifest: ContentManifest }) {
-  const [menus, setMenus] = useState<HomeSubjectMenu[]>([]);
-  const [loadState, setLoadState] = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [menus, setMenus] = useState<HomeSubjectMenu[]>(() => initialMenus(manifest));
+  const [loadState, setLoadState] = useState<"loading" | "ok" | "error">("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoadState("loading");
     setLoadError(null);
     try {
+      const { listPublicSubjects, listPublishedLegacyContents } = await import(
+        "@/lib/content/public-firestore"
+      );
       const [subjects, legacy] = await Promise.all([
         listPublicSubjects(),
         // 未ログインは ready==true のみ読める（全件 get は権限エラーになる）
@@ -164,11 +168,6 @@ export function HomeNav({ manifest }: { manifest: ContentManifest }) {
           {isRefreshing ? "更新中…" : "更新"}
         </button>
       </div>
-      {loadState === "loading" ? (
-        <p className="home-menu-notice" role="status">
-          メニューを読み込み中…
-        </p>
-      ) : null}
       {loadState === "error" && loadError ? (
         <p className="home-menu-notice home-menu-notice--error" role="status">
           {loadError}

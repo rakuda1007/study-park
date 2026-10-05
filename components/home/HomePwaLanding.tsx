@@ -2,46 +2,45 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  homePathForSession,
-  resolveAuthSession,
-  subscribeAuth,
-  waitForAuthReady,
-} from "@/lib/firebase/auth-client";
 import { isForcePublicHome, isStandaloneDisplayMode } from "@/lib/pwa/standalone";
 
-type Gate = "checking" | "show";
+type Gate = "show" | "checking";
 
 /**
  * PWA 起動時: ログイン済みならロール別ホームへ（学習者は /learner）。
- * ブラウザで / を開いたときは従来どおり公園トップを表示。
+ * ブラウザで / を開いたときは初期から公園トップを表示（Auth SDK は読み込まない）。
  */
 export function HomePwaLanding({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [gate, setGate] = useState<Gate>("checking");
+  const [gate, setGate] = useState<Gate>("show");
 
   useEffect(() => {
     if (isForcePublicHome() || !isStandaloneDisplayMode()) {
-      setGate("show");
       return;
     }
 
+    setGate("checking");
     let cancelled = false;
     let unsub: (() => void) | undefined;
 
-    void waitForAuthReady().then(() => {
-      if (cancelled) return;
-      unsub = subscribeAuth((user) => {
-        void resolveAuthSession(user).then((kind) => {
+    void import("@/lib/firebase/auth-client").then(
+      ({ waitForAuthReady, subscribeAuth, resolveAuthSession, homePathForSession }) => {
+        if (cancelled) return;
+        void waitForAuthReady().then(() => {
           if (cancelled) return;
-          if (kind) {
-            router.replace(homePathForSession(kind));
-            return;
-          }
-          setGate("show");
+          unsub = subscribeAuth((user) => {
+            void resolveAuthSession(user).then((kind) => {
+              if (cancelled) return;
+              if (kind) {
+                router.replace(homePathForSession(kind));
+                return;
+              }
+              setGate("show");
+            });
+          });
         });
-      });
-    });
+      },
+    );
 
     return () => {
       cancelled = true;

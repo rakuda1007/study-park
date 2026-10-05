@@ -1,42 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { SessionModeBadge } from "@/components/auth/SessionModeBadge";
+import { useShellSession } from "@/components/shell/useShellSession";
 import { sessionModeMeta } from "@/lib/auth/session-display";
-import {
-  homePathForSession,
-  resolveAuthSession,
-  subscribeAuth,
-  waitForAuthReady,
-  type AuthSessionKind,
-} from "@/lib/firebase/auth-client";
+import { homePathForSession } from "@/lib/firebase/auth-client";
 
 export function HomeAuthNav() {
-  const [ready, setReady] = useState(false);
-  const [session, setSession] = useState<AuthSessionKind | null>(null);
-
-  useEffect(() => {
-    let unsub: (() => void) | undefined;
-    let cancelled = false;
-
-    void waitForAuthReady().then(() => {
-      if (cancelled) return;
-      unsub = subscribeAuth((user) => {
-        void resolveAuthSession(user).then((kind) => {
-          if (!cancelled) {
-            setSession(kind);
-            setReady(true);
-          }
-        });
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      unsub?.();
-    };
-  }, []);
+  const { ready, session } = useShellSession();
 
   if (!ready) {
     return (

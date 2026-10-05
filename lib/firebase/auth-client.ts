@@ -209,15 +209,35 @@ export async function isDualRoleUser(user: User | null): Promise<boolean> {
   return profile?.role === "creator";
 }
 
-export async function resolveAuthSession(user: User | null): Promise<AuthSessionKind | null> {
-  if (!user) return null;
-  const admin = await isAdminUser(user);
-  const profile = await getUserProfile(user.uid);
+export type AuthSessionState = {
+  kind: AuthSessionKind | null;
+  canSwitchMode: boolean;
+};
+
+/** admins / users を並列取得し、セッション種別とモード切替可否を一度に返す */
+export async function resolveAuthSessionState(
+  user: User | null,
+): Promise<AuthSessionState> {
+  if (!user) return { kind: null, canSwitchMode: false };
+
+  const [admin, profile] = await Promise.all([isAdminUser(user), getUserProfile(user.uid)]);
+  const isCreatorProfile = profile?.role === "creator";
+
   if (admin) {
-    return resolveDualRoleSession(profile?.role === "creator");
+    return {
+      kind: resolveDualRoleSession(isCreatorProfile),
+      canSwitchMode: isCreatorProfile,
+    };
   }
-  if (!profile) return null;
-  return profile.role === "learner" ? "learner" : "creator";
+  if (!profile) return { kind: null, canSwitchMode: false };
+  return {
+    kind: profile.role === "learner" ? "learner" : "creator",
+    canSwitchMode: false,
+  };
+}
+
+export async function resolveAuthSession(user: User | null): Promise<AuthSessionKind | null> {
+  return (await resolveAuthSessionState(user)).kind;
 }
 
 export async function resolvePostLoginPath(uid: string): Promise<string> {

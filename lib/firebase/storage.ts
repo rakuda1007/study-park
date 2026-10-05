@@ -3,7 +3,7 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { incrementWorkspaceStorageBytes } from "@/lib/workspaces/firestore";
 import { getFirebaseAuth } from "./auth-client";
-import { getStorageClient } from "./client";
+import { getStorageClient } from "./storage-client";
 import { prepareImageForUpload } from "./prepare-image-upload";
 
 const UPLOAD_TIMEOUT_MS = 180_000;

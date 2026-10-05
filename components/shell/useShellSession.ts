@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import {
   setStoredActiveMode,
   subscribeActiveMode,
@@ -11,67 +11,97 @@ import {
 import {
   getFirebaseAuth,
   homePathForSession,
-  isAdminUser,
-  resolveAuthSession,
+  resolveAuthSessionState,
   subscribeAuth,
   waitForAuthReady,
   type AuthSessionKind,
 } from "@/lib/firebase/auth-client";
-import { getUserProfile } from "@/lib/users/firestore";
 import type { User } from "firebase/auth";
+
+type Snapshot = {
+  ready: boolean;
+  session: AuthSessionKind | null;
+  canSwitchMode: boolean;
+};
+
+const serverSnapshot: Snapshot = {
+  ready: false,
+  session: null,
+  canSwitchMode: false,
+};
+
+let snapshot: Snapshot = serverSnapshot;
+const listeners = new Set<() => void>();
+let bootstrapped = false;
+let refreshSeq = 0;
+let latestPathname = "/";
+
+function emit() {
+  for (const listener of listeners) listener();
+}
+
+async function refresh(user: User | null, pathname: string) {
+  const seq = ++refreshSeq;
+  if (!user) {
+    snapshot = { ready: true, session: null, canSwitchMode: false };
+    emit();
+    return;
+  }
+
+  syncActiveModeWithPath(pathname);
+  const { kind, canSwitchMode } = await resolveAuthSessionState(user);
+  if (seq !== refreshSeq) return;
+
+  snapshot = { ready: true, session: kind, canSwitchMode };
+  emit();
+}
+
+function bootstrap() {
+  if (bootstrapped || typeof window === "undefined") return;
+  bootstrapped = true;
+
+  void waitForAuthReady().then(() => {
+    subscribeAuth((user) => {
+      void refresh(user, latestPathname);
+    });
+  });
+
+  subscribeActiveMode(() => {
+    void refresh(getFirebaseAuth().currentUser, latestPathname);
+  });
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  bootstrap();
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot() {
+  return snapshot;
+}
+
+function getServerSnapshot() {
+  return serverSnapshot;
+}
 
 export function useShellSession() {
   const pathname = usePathname();
   const router = useRouter();
-  const [ready, setReady] = useState(false);
-  const [session, setSession] = useState<AuthSessionKind | null>(null);
-  const [canSwitchMode, setCanSwitchMode] = useState(false);
-
-  const refresh = useCallback(
-    async (user: User | null) => {
-      if (!user) {
-        setSession(null);
-        setCanSwitchMode(false);
-        setReady(true);
-        return;
-      }
-
-      syncActiveModeWithPath(pathname);
-
-      const [admin, profile, kind] = await Promise.all([
-        isAdminUser(user),
-        getUserProfile(user.uid),
-        resolveAuthSession(user),
-      ]);
-
-      setCanSwitchMode(admin && profile?.role === "creator");
-      setSession(kind);
-      setReady(true);
-    },
-    [pathname],
+  const { ready, session, canSwitchMode } = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
   );
 
   useEffect(() => {
-    let unsubAuth: (() => void) | undefined;
-    let cancelled = false;
-
-    void waitForAuthReady().then(() => {
-      if (cancelled) return;
-      unsubAuth = subscribeAuth((user) => {
-        void refresh(user);
-      });
-    });
-
-    const unsubMode = subscribeActiveMode(() => {
-      void refresh(getFirebaseAuth().currentUser);
-    });
-
-    return () => {
-      cancelled = true;
-      unsubAuth?.();
-      unsubMode();
-    };
-  }, [refresh]);
+    const pathChanged = latestPathname !== pathname;
+    latestPathname = pathname;
+    if (!ready || !pathChanged) return;
+    void refresh(getFirebaseAuth().currentUser, pathname);
+  }, [pathname, ready]);
 
   const switchMode = useCallback(() => {
     if (!canSwitchMode || !session) return;

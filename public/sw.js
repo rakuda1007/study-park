@@ -1,16 +1,19 @@
 /* Study Park — Service Worker（PWA・更新反映用） */
-const SW_VERSION = "10";
+const SW_VERSION = "11";
 
 const NO_STORE_PREFIXES = ["/kuku/", "/kencho/", "/shared/"];
 const NO_STORE_FILES = ["/sw.js", "/pwa-update.js", "/study-park-asset-version.js"];
 
 function shouldBypassCache(url) {
   const path = url.pathname;
-  if (path.endsWith(".html") || path.endsWith(".js") || path.endsWith(".css")) {
-    return true;
-  }
+  // ハッシュ付き Next 静的アセットは HTTP キャッシュを活かす
+  if (path.startsWith("/_next/static/")) return false;
+  if (path.endsWith(".html")) return true;
   if (NO_STORE_FILES.some((p) => path === p || path.endsWith(p))) return true;
-  return NO_STORE_PREFIXES.some((prefix) => path.startsWith(prefix));
+  if (NO_STORE_PREFIXES.some((prefix) => path.startsWith(prefix))) return true;
+  // public 直下の非ハッシュ JS/CSS は更新確実性のため network-only
+  if (path.endsWith(".js") || path.endsWith(".css")) return true;
+  return false;
 }
 
 function networkOnly(request) {
