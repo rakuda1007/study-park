@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   forwardRef,
   useEffect,
@@ -27,6 +26,8 @@ type Props = {
   masters: StudyItemMasterDoc[];
   subjectId: string;
   onAdd: (item: StudyItemDraft) => void;
+  /** よく使う教材名の管理へのリンク（計画追加画面内アンカー想定） */
+  mastersManageHref?: string;
 };
 
 export type StudyItemAddPanelHandle = {
@@ -51,7 +52,16 @@ function contentToRef(option: StudyAppContentOption): StudyContentRef {
 }
 
 export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
-  function StudyItemAddPanel({ workspaces, masters, subjectId, onAdd }, ref) {
+  function StudyItemAddPanel(
+    {
+      workspaces,
+      masters,
+      subjectId,
+      onAdd,
+      mastersManageHref = "/learner/study/new#study-plan-masters",
+    },
+    ref,
+  ) {
     const [externalLabel, setExternalLabel] = useState("");
     const [scopeNote, setScopeNote] = useState("");
     const [scopeHint, setScopeHint] = useState<string | undefined>();
@@ -269,15 +279,15 @@ export const StudyItemAddPanel = forwardRef<StudyItemAddPanelHandle, Props>(
                     {m.name}
                   </button>
                 ))}
-                <Link href="/learner/study/masters" className="study-item-add-row__masters-link">
+                <a href={mastersManageHref} className="study-item-add-row__masters-link">
                   管理
-                </Link>
+                </a>
               </div>
             ) : (
               <p className="study-item-add-row__masters-hint">
-                <Link href="/learner/study/masters" className="study-back-link">
+                <a href={mastersManageHref} className="study-back-link">
                   よく使う教材名を登録すると次回から選べます →
-                </Link>
+                </a>
               </p>
             )}
 

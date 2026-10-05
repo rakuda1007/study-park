@@ -1,51 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { StudyItemMasterManager } from "@/components/learner/study/StudyItemMasterManager";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { LearnerShell } from "@/components/learner/LearnerShell";
-import { loadStudySubjectData } from "@/lib/study/subject-options";
-import { subscribeAuth } from "@/lib/firebase/auth-client";
-import contentManifest from "@/public/content-manifest.json";
-import type { ContentManifest } from "@/lib/content/types";
 
+/** よく使う教材名の管理は「学習計画を追加」画面に集約 */
 export default function LearnerStudyMastersPage() {
-  const manifest = contentManifest as ContentManifest;
-  const [userId, setUserId] = useState("");
-  const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsub = subscribeAuth((user) => {
-      void (async () => {
-        if (!user) return;
-        setUserId(user.uid);
-        try {
-          const data = await loadStudySubjectData(user.uid, manifest);
-          setSubjects(data.subjects);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    });
-    return unsub;
-  }, [manifest]);
+    router.replace("/learner/study/new#study-plan-masters");
+  }, [router]);
 
   return (
     <LearnerShell title="学習管理">
-      <p className="study-back-link-wrap">
-        <Link href="/learner" className="study-back-link">
-          ← 学習管理に戻る
-        </Link>
-      </p>
-
-      <h2 className="shell-page-heading">よく使う教材名</h2>
-
-      {loading ? <p className="admin-loading">読み込み中…</p> : null}
-
-      {!loading && userId ? (
-        <StudyItemMasterManager userId={userId} subjects={subjects} />
-      ) : null}
+      <p className="admin-loading">学習計画の追加へ移動しています…</p>
     </LearnerShell>
   );
 }

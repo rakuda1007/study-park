@@ -1,23 +1,25 @@
 "use client";
 
-import Link from "next/link";
 import type { StudyTemplateDoc } from "@/lib/study/types";
 
 type Props = {
   templates: StudyTemplateDoc[];
   selectedId: string;
   onSelect: (templateId: string) => void;
+  manageHref?: string;
 };
 
-export function StudyTemplatePicker({ templates, selectedId, onSelect }: Props) {
+export function StudyTemplatePicker({
+  templates,
+  selectedId,
+  onSelect,
+  manageHref = "#study-plan-templates",
+}: Props) {
   if (templates.length === 0) {
     return (
       <section className="admin-card study-template-picker study-template-picker--empty">
         <p className="admin-msg">
-          計画テンプレはまだありません。計画を作ったあと、「記録する」画面から残せます。{" "}
-          <Link href="/learner/study/templates" className="study-back-link">
-            計画テンプレ一覧
-          </Link>
+          計画テンプレはまだありません。計画を作ったあと、「記録する」画面から「計画テンプレに残す」ができます。
         </p>
       </section>
     );
@@ -43,9 +45,9 @@ export function StudyTemplatePicker({ templates, selectedId, onSelect }: Props) 
         </select>
       </label>
       <p className="study-template-picker__link">
-        <Link href="/learner/study/templates" className="study-back-link">
+        <a href={manageHref} className="study-back-link">
           計画テンプレの管理 →
-        </Link>
+        </a>
       </p>
     </section>
   );

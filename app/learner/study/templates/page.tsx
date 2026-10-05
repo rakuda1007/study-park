@@ -1,39 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { StudyTemplateList } from "@/components/learner/study/StudyTemplateList";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { LearnerShell } from "@/components/learner/LearnerShell";
-import { subscribeAuth } from "@/lib/firebase/auth-client";
 
+/** 計画テンプレ管理は「学習計画を追加」画面に集約 */
 export default function LearnerStudyTemplatesPage() {
-  const [userId, setUserId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsub = subscribeAuth((user) => {
-      setUserId(user?.uid ?? "");
-      setLoading(false);
-    });
-    return unsub;
-  }, []);
+    router.replace("/learner/study/new#study-plan-templates");
+  }, [router]);
 
   return (
     <LearnerShell title="学習管理">
-      <p className="study-back-link-wrap">
-        <Link href="/learner" className="study-back-link">
-          ← 学習管理に戻る
-        </Link>
-      </p>
-
-      <h2 className="shell-page-heading">計画テンプレ</h2>
-      <p className="admin-msg">
-        よく使う学習計画の構成を残しておけます。計画の「記録する」画面から「計画テンプレに残す」ができます。
-      </p>
-
-      {loading ? <p className="admin-loading">読み込み中…</p> : null}
-
-      {!loading && userId ? <StudyTemplateList userId={userId} /> : null}
+      <p className="admin-loading">学習計画の追加へ移動しています…</p>
     </LearnerShell>
   );
 }

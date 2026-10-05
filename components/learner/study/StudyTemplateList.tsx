@@ -13,16 +13,27 @@ type Props = {
   userId: string;
   onApply?: (template: StudyTemplateDoc) => void;
   showApply?: boolean;
+  /** false のとき「計画を作成」リンクを出さない（計画追加画面への埋め込み用） */
+  showCreateLink?: boolean;
+  /** 一覧が変わったとき（削除後など）。親のピッカー選択肢の同期用 */
+  onChanged?: (templates: StudyTemplateDoc[]) => void;
 };
 
-export function StudyTemplateList({ userId, onApply, showApply = false }: Props) {
+export function StudyTemplateList({
+  userId,
+  onApply,
+  showApply = false,
+  showCreateLink = true,
+  onChanged,
+}: Props) {
   const [templates, setTemplates] = useState<StudyTemplateDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     const data = await listStudyTemplates(userId);
     setTemplates(data);
-  }, [userId]);
+    onChanged?.(data);
+  }, [userId, onChanged]);
 
   useEffect(() => {
     void (async () => {
@@ -97,14 +108,14 @@ export function StudyTemplateList({ userId, onApply, showApply = false }: Props)
               >
                 この計画テンプレを使う
               </button>
-            ) : (
+            ) : showCreateLink ? (
               <Link
                 href={`/learner/study/new?templateId=${encodeURIComponent(template.id)}`}
                 className="admin-btn admin-btn--primary"
               >
                 計画を作成
               </Link>
-            )}
+            ) : null}
             <button
               type="button"
               className="admin-btn admin-btn--danger"

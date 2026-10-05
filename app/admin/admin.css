@@ -3139,6 +3139,50 @@
   font-size: 0.85rem;
 }
 
+.study-new-manage {
+  margin: 1.5rem 0 2rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--admin-border, #d8dde6);
+  border-radius: 10px;
+  background: var(--admin-card, #fff);
+}
+
+.study-new-manage__summary {
+  cursor: pointer;
+  color: var(--admin-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.study-new-manage__summary::-webkit-details-marker {
+  display: none;
+}
+
+.study-new-manage__summary::before {
+  content: "▸ ";
+}
+
+.study-new-manage[open] .study-new-manage__summary::before {
+  content: "▾ ";
+}
+
+.study-new-manage__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.study-new-manage__section {
+  scroll-margin-top: 4.5rem;
+}
+
+.study-new-manage__heading {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
 .study-template-list {
   list-style: none;
   margin: 0;

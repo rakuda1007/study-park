@@ -22,6 +22,7 @@ type Props = {
   initial?: StudyPlanInput;
   submitLabel: string;
   onSubmit: (input: StudyPlanInput) => Promise<void>;
+  mastersManageHref?: string;
 };
 
 export function StudyPlanForm({
@@ -30,6 +31,7 @@ export function StudyPlanForm({
   initial,
   submitLabel,
   onSubmit,
+  mastersManageHref,
 }: Props) {
   const defaultSubject = defaultStudySubjectOption(subjectData.subjects);
   const addPanelRef = useRef<StudyItemAddPanelHandle>(null);
@@ -248,6 +250,7 @@ export function StudyPlanForm({
           masters={masters}
           subjectId={resolvedSubjectId}
           onAdd={addItem}
+          mastersManageHref={mastersManageHref}
         />
       </section>
 

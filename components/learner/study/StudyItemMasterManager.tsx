@@ -16,6 +16,10 @@ const ALL_SUBJECTS_ID = "";
 type Props = {
   userId: string;
   subjects: StudySubjectOption[];
+  /** 一覧が変わったとき。親のチップ選択肢の同期用 */
+  onMastersChange?: (masters: StudyItemMasterDoc[]) => void;
+  /** 画面下部の「計画追加へ」ヒントを出すか（計画追加画面に埋め込むときは false） */
+  showNewPlanHint?: boolean;
 };
 
 function subjectLabel(subjects: StudySubjectOption[], subjectId: string): string {
@@ -23,7 +27,12 @@ function subjectLabel(subjects: StudySubjectOption[], subjectId: string): string
   return subjects.find((s) => s.id === subjectId)?.name ?? subjectId;
 }
 
-export function StudyItemMasterManager({ userId, subjects }: Props) {
+export function StudyItemMasterManager({
+  userId,
+  subjects,
+  onMastersChange,
+  showNewPlanHint = true,
+}: Props) {
   const [masters, setMasters] = useState<StudyItemMasterDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -35,7 +44,8 @@ export function StudyItemMasterManager({ userId, subjects }: Props) {
   const refresh = useCallback(async () => {
     const data = await listStudyItemMasters(userId);
     setMasters(data);
-  }, [userId]);
+    onMastersChange?.(data);
+  }, [userId, onMastersChange]);
 
   useEffect(() => {
     void (async () => {
@@ -164,13 +174,19 @@ export function StudyItemMasterManager({ userId, subjects }: Props) {
         </ul>
       ) : null}
 
-      <p className="study-master-manager__hint">
-        登録した項目は{" "}
-        <Link href="/learner/study/new" className="study-back-link">
-          学習計画の追加
-        </Link>
-        画面の「その他の教材」から選べます。
-      </p>
+      {showNewPlanHint ? (
+        <p className="study-master-manager__hint">
+          登録した項目は{" "}
+          <Link href="/learner/study/new" className="study-back-link">
+            学習計画の追加
+          </Link>
+          画面の「その他の教材」から選べます。
+        </p>
+      ) : (
+        <p className="study-master-manager__hint">
+          登録した項目は、上のフォームの「その他の教材」からすぐ選べます。
+        </p>
+      )}
     </div>
   );
 }
