@@ -15,6 +15,8 @@ export type ShellMenuItem = {
   hint?: string;
   /** この項目の直前に区切り線を表示 */
   dividerBefore?: boolean;
+  /** クリックできないグループ見出し */
+  heading?: boolean;
 };
 
 type Props = {
@@ -29,7 +31,16 @@ type Props = {
 };
 
 function itemKey(item: ShellMenuItem): string {
+  if (item.heading) return `heading-${item.label}`;
   return `${item.action ?? item.href ?? ""}-${item.label}`;
+}
+
+function itemClassName(item: ShellMenuItem): string | undefined {
+  const classes = [
+    item.heading ? "shell-menu__item--section" : "",
+    item.dividerBefore ? "shell-menu__item--divider" : "",
+  ].filter(Boolean);
+  return classes.length > 0 ? classes.join(" ") : undefined;
 }
 
 function isExternalHref(href: string | undefined): boolean {
@@ -63,11 +74,10 @@ function MenuEntries({
   return (
     <>
       {items.map((item) => (
-        <li
-          key={itemKey(item)}
-          className={item.dividerBefore ? "shell-menu__item--divider" : undefined}
-        >
-          {item.action === "logout" ? (
+        <li key={itemKey(item)} className={itemClassName(item)}>
+          {item.heading ? (
+            <span className="shell-menu__section">{item.label}</span>
+          ) : item.action === "logout" ? (
             <button
               type="button"
               className="shell-menu__link shell-menu__button"
