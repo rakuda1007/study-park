@@ -12,6 +12,15 @@ import { getUserProfile } from "@/lib/users/firestore";
 import { getWorkspaceByOwner } from "@/lib/workspaces/firestore";
 import type { WorkspaceDoc } from "@/lib/workspaces/types";
 
+function pendingLinkProps(ready: boolean) {
+  if (ready) return {};
+  return {
+    "aria-disabled": true as const,
+    tabIndex: -1 as const,
+    style: { pointerEvents: "none" as const, opacity: 0.6 },
+  };
+}
+
 export default function CreatorDashboardPage() {
   const [ws, setWs] = useState<WorkspaceDoc | null>(null);
   const [wsMissing, setWsMissing] = useState(false);
@@ -59,15 +68,24 @@ export default function CreatorDashboardPage() {
       <div className="creator-page-toolbar">
         <h2 className="shell-page-heading creator-page-toolbar__title">教材</h2>
         {!wsMissing ? (
-          <Link
-            href="/creator/contents/new"
-            className="admin-btn admin-btn--primary creator-page-toolbar__action"
-            aria-disabled={!ws}
-            tabIndex={ws ? undefined : -1}
-            style={ws ? undefined : { pointerEvents: "none", opacity: 0.6 }}
-          >
-            教材を新規作成
-          </Link>
+          <div className="creator-page-toolbar__actions">
+            <Link href="/creator/subjects" className="admin-btn" {...pendingLinkProps(!!ws)}>
+              教科を編集
+            </Link>
+            <Link href="/creator/learners" className="admin-btn" {...pendingLinkProps(!!ws)}>
+              招待
+            </Link>
+            <Link href="/learner/materials" className="admin-btn">
+              学習者の画面
+            </Link>
+            <Link
+              href="/creator/contents/new"
+              className="admin-btn admin-btn--primary creator-page-toolbar__action"
+              {...pendingLinkProps(!!ws)}
+            >
+              教材を新規作成
+            </Link>
+          </div>
         ) : null}
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { AccountProfileForm } from "@/components/account/AccountProfileForm";
+import { CreatorProfileSettings } from "@/components/creator/CreatorProfileSettings";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 
 export default function CreatorProfilePage() {
@@ -8,6 +9,7 @@ export default function CreatorProfilePage() {
     <CreatorShell>
       <h2 className="shell-page-heading">プロフィール</h2>
       <AccountProfileForm />
+      <CreatorProfileSettings />
     </CreatorShell>
   );
 }
