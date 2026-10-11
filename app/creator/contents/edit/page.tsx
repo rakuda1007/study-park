@@ -22,9 +22,9 @@ import {
   normalizeQuizQuestion,
   prepareQuizQuestionForSave,
   quizQuestionNumberFromLabel,
+  syncQuizBlanksFromBodyChange,
 } from "@/lib/content/quiz-question";
-import { DEFAULT_QUIZ_BLANK_ANSWERS, blankAnswersToInput, parseBlankAnswersInput } from "@/lib/content/quiz-answers";
-import { defaultQuizBlankMarker } from "@/lib/content/quiz-markers";
+import { blankAnswersToInput, parseBlankAnswersInput } from "@/lib/content/quiz-answers";
 import type { BlankAnswer, LessonSection, QuizQuestion } from "@/lib/content/types";
 import {
   contentToPublishMode,
@@ -134,11 +134,11 @@ function EditInner() {
     setMsg("");
     const s = slug.trim().toLowerCase();
     if (!SLUG_PATTERN.test(s)) {
-      setErr("slug は英小文字・数字・ハイフンのみです。");
+      setErr("スラッグは英小文字・数字・ハイフンのみです。");
       return;
     }
     if (await isWorkspaceSlugTaken(ws.id, s, doc.id)) {
-      setErr("この slug は既に使われています。");
+      setErr("このスラッグは既に使われています。");
       return;
     }
     const editCheck = checkWorkspaceUsage(ws, "edit_content");
@@ -201,11 +201,20 @@ function EditInner() {
     );
   }
 
-  function removeBlank(qIndex: number, bIndex: number) {
+  function updateQuestionBody(
+    index: number,
+    blocks: QuizQuestion["blocks"],
+    template: string,
+  ) {
     setQuestions((prev) =>
       prev.map((q, i) => {
-        if (i !== qIndex) return q;
-        return { ...q, blanks: q.blanks.filter((_, j) => j !== bIndex) };
+        if (i !== index) return q;
+        return {
+          ...q,
+          blocks,
+          template,
+          blanks: syncQuizBlanksFromBodyChange(q.blanks, q.template, template),
+        };
       }),
     );
   }
@@ -237,12 +246,7 @@ function EditInner() {
           label,
           blocks: [{ kind: "paragraph", text: defaultText }],
           template: defaultText,
-          blanks: [
-            {
-              marker: defaultQuizBlankMarker(prev.length),
-              answers: DEFAULT_QUIZ_BLANK_ANSWERS,
-            },
-          ],
+          blanks: [],
         },
       ]);
     })();
@@ -258,74 +262,44 @@ function EditInner() {
 
   return (
     <CreatorShell>
-      <h2 className="shell-page-heading">{doc ? `編集: ${doc.title}` : "編集"}</h2>
+      <h2 className="shell-page-heading">教材を編集</h2>
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
-      {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
-      {msg ? <p className="admin-msg admin-msg--ok">{msg}</p> : null}
+      {!doc && err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
 
       {doc && ws ? (
         <>
+          <div className="creator-edit-savebar">
+            <button
+              type="button"
+              className="admin-btn admin-btn--primary"
+              disabled={saving}
+              onClick={() => void onSave()}
+            >
+              {saving ? "保存中…" : "保存"}
+            </button>
+            <Link href="/creator" className="admin-link">
+              一覧へ
+            </Link>
+            {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
+            {msg ? <p className="admin-msg admin-msg--ok">{msg}</p> : null}
+          </div>
+
           {showAds ? (
             <AdSenseUnit slotKey="creator_edit" className="adsense-unit--creator" />
           ) : null}
-          <section className="admin-card">
-            <h2>基本情報</h2>
-            <div className="admin-field">
-              <label htmlFor="title">タイトル</label>
-              <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-            <div className="admin-row">
-              <div className="admin-field" style={{ flex: "1 1 10rem" }}>
-                <label htmlFor="slug">slug</label>
-                <input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} />
-              </div>
-              <div className="admin-field" style={{ flex: "1 1 10rem" }}>
-                <label htmlFor="subject">教科</label>
-                <select
-                  id="subject"
-                  value={subjectId}
-                  onChange={(e) => setSubjectId(e.target.value)}
-                >
-                  {subjects.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <ContentPeriodFields
-              year={periodYear}
-              month={periodMonth}
-              onYearChange={setPeriodYear}
-              onMonthChange={setPeriodMonth}
-            />
-            <ContentPinnedField checked={pinned} onChange={setPinned} />
-            <CreatorContentPublishFields
-              publishMode={publishMode}
-              publishScope={publishScope}
-              onPublishModeChange={setPublishMode}
-              onPublishScopeChange={setPublishScope}
-              workspaceSlug={ws.slug}
-              workspaceId={ws.id}
-              contentId={doc.id}
-              contentSlug={slug}
-            />
-          </section>
+
+          <div className="admin-field">
+            <label htmlFor="title">タイトル</label>
+            <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
 
           {doc.type === "quiz" ? (
             <section className="admin-card">
               <h2>問題（{questions.length}問）</h2>
               {questions.map((q, qi) => (
                 <div key={q.id} className="admin-question">
-                  <div className="admin-row">
-                    <div className="admin-field" style={{ flex: "1 1 6rem" }}>
-                      <label>ラベル</label>
-                      <input
-                        value={q.label}
-                        onChange={(e) => updateQuestion(qi, { label: e.target.value })}
-                      />
-                    </div>
+                  <div className="creator-question-head">
+                    <p className="creator-question-label">{q.label.trim() || `問${qi + 1}`}</p>
                     <button
                       type="button"
                       className="admin-btn admin-btn--danger"
@@ -335,32 +309,40 @@ function EditInner() {
                       問題を削除
                     </button>
                   </div>
+                  <details className="creator-question-details">
+                    <summary>ラベルを変える</summary>
+                    <div className="admin-field">
+                      <label htmlFor={`question-label-${q.id}`}>ラベル</label>
+                      <input
+                        id={`question-label-${q.id}`}
+                        value={q.label}
+                        onChange={(e) => updateQuestion(qi, { label: e.target.value })}
+                      />
+                    </div>
+                  </details>
                   <QuizQuestionBodyEditor
                     contentId={doc.id}
                     workspaceId={ws.id}
                     workspace={ws}
                     blocks={q.blocks ?? [{ kind: "paragraph", text: q.template }]}
-                    onChange={(blocks, template) => updateQuestion(qi, { blocks, template })}
+                    hint="空欄はツールバーの「空欄を挿入」から入れます。入れた記号の答え欄が下に足されます。"
+                    onChange={(blocks, template) => updateQuestionBody(qi, blocks, template)}
                   />
                   <div className="admin-quiz-answers">
-                    <h3 className="admin-quiz-answers__heading">答えの登録</h3>
+                    <h3 className="admin-quiz-answers__heading">答え</h3>
                     <p className="admin-field-hint admin-quiz-answers__hint">
-                      本文に入れた空欄記号（① など）と同じ記号で答えを書きます。カンマ（,）や読点（、）も答えの本文に使えます。
+                      別解はカンマ（,）で並べられます。
                     </p>
                     {q.blanks.map((b, bi) => (
-                      <div key={`${q.id}-blank-${bi}`} className="admin-blank-row">
-                        <div className="admin-blank-marker">
-                          <label htmlFor={`blank-${q.id}-${bi}-marker`}>空欄記号</label>
-                          <input
-                            id={`blank-${q.id}-${bi}-marker`}
-                            value={b.marker}
-                            onChange={(e) => updateBlank(qi, bi, { marker: e.target.value })}
-                          />
-                        </div>
+                      <div
+                        key={`${q.id}-blank-${b.marker}-${bi}`}
+                        className="admin-blank-row creator-blank-row"
+                      >
+                        <p className="creator-blank-marker">{b.marker}</p>
                         <div className="admin-blank-answer">
                           <RichTextArea
                             id={`blank-${q.id}-${bi}-answers`}
-                            label="答え"
+                            label={`答え（${b.marker}）`}
                             value={blankAnswersToInput(b.answers)}
                             onChange={(v) =>
                               updateBlank(qi, bi, { answers: parseBlankAnswersInput(v) })
@@ -372,38 +354,13 @@ function EditInner() {
                             previewClass="answer-rich"
                           />
                         </div>
-                        <button
-                          type="button"
-                          className="admin-btn admin-btn--danger admin-btn--compact admin-blank-delete"
-                          onClick={() => removeBlank(qi, bi)}
-                          aria-label={`答え ${b.marker || bi + 1} を削除`}
-                        >
-                          削除
-                        </button>
                       </div>
                     ))}
                     {q.blanks.length === 0 ? (
                       <p className="admin-field-hint admin-quiz-answers__empty">
-                        答えの登録はありません（「はじめに」など、読むだけの導入に使えます）。
+                        本文に空欄を入れると、ここに答え欄が足されます。空欄のない問題は、読むだけの導入に使えます。
                       </p>
                     ) : null}
-                    <button
-                      type="button"
-                      className="admin-btn"
-                      onClick={() =>
-                        updateQuestion(qi, {
-                          blanks: [
-                            ...q.blanks,
-                            {
-                              marker: defaultQuizBlankMarker(q.blanks.length),
-                              answers: DEFAULT_QUIZ_BLANK_ANSWERS,
-                            },
-                          ],
-                        })
-                      }
-                    >
-                      ＋ 答えを追加
-                    </button>
                   </div>
                 </div>
               ))}
@@ -424,22 +381,61 @@ function EditInner() {
             </section>
           )}
 
-          <div className="admin-row" style={{ marginTop: "1rem" }}>
-            <button
-              type="button"
-              className="admin-btn admin-btn--primary"
-              disabled={saving}
-              onClick={() => void onSave()}
-            >
-              {saving ? "保存中…" : "保存"}
-            </button>
-            <button type="button" className="admin-btn" onClick={() => void onDelete()}>
-              削除
-            </button>
-            <Link href="/creator" className="admin-link">
-              一覧へ
-            </Link>
-          </div>
+          <section className="admin-card">
+            <CreatorContentPublishFields
+              publishMode={publishMode}
+              publishScope={publishScope}
+              onPublishModeChange={setPublishMode}
+              onPublishScopeChange={setPublishScope}
+              workspaceSlug={ws.slug}
+              workspaceId={ws.id}
+              contentId={doc.id}
+              contentSlug={slug}
+            />
+          </section>
+
+          <details className="creator-content-details">
+            <summary>詳細</summary>
+            <div className="admin-field">
+              <label htmlFor="slug">スラッグ</label>
+              <input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} />
+              <p className="admin-field-hint">URL に使います。英小文字・数字・ハイフンです。</p>
+            </div>
+            <div className="admin-field">
+              <label htmlFor="subject">教科</label>
+              <select
+                id="subject"
+                value={subjectId}
+                onChange={(e) => setSubjectId(e.target.value)}
+              >
+                {subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <ContentPeriodFields
+              year={periodYear}
+              month={periodMonth}
+              onYearChange={setPeriodYear}
+              onMonthChange={setPeriodMonth}
+            />
+            <ContentPinnedField checked={pinned} onChange={setPinned} />
+            <label className="admin-checkbox-field">
+              <input
+                type="checkbox"
+                checked={publishMode === "archived"}
+                onChange={(e) => setPublishMode(e.target.checked ? "archived" : "draft")}
+              />
+              <span>アーカイブ</span>
+            </label>
+            <div className="admin-row">
+              <button type="button" className="admin-btn admin-btn--danger" onClick={() => void onDelete()}>
+                削除
+              </button>
+            </div>
+          </details>
         </>
       ) : null}
     </CreatorShell>

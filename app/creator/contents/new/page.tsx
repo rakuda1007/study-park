@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ContentPeriodFields } from "@/components/admin/ContentPeriodFields";
 import { CreatorShell } from "@/components/creator/CreatorShell";
 import { refreshWorkspaceUsageSnapshot } from "@/lib/billing/refresh-usage";
 import { syncCreatorBillingState } from "@/lib/billing/starter";
 import { checkWorkspaceUsage } from "@/lib/billing/usage";
 import { currentContentPeriod } from "@/lib/content/period";
+import { slugBaseFromTitle, slugCandidate } from "@/lib/content/slug";
 import { DEFAULT_SUBJECTS } from "@/lib/content/subject-defaults";
-import { SLUG_PATTERN, type ContentType } from "@/lib/content/types";
+import type { ContentType } from "@/lib/content/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import {
   createWorkspaceContent,
@@ -49,10 +49,7 @@ export default function CreatorContentNewPage() {
   const [subjectsLoading, setSubjectsLoading] = useState(false);
   const [newType, setNewType] = useState<ContentType>("quiz");
   const [newSubjectId, setNewSubjectId] = useState("math");
-  const [newSlug, setNewSlug] = useState("");
   const [newTitle, setNewTitle] = useState("");
-  const [newPeriodYear, setNewPeriodYear] = useState(currentContentPeriod().year);
-  const [newPeriodMonth, setNewPeriodMonth] = useState(currentContentPeriod().month);
 
   useEffect(() => {
     const unsub = subscribeAuth((user) => {
@@ -116,9 +113,9 @@ export default function CreatorContentNewPage() {
     e.preventDefault();
     if (!ws || !uid) return;
     setErr("");
-    const slug = newSlug.trim().toLowerCase();
-    if (!SLUG_PATTERN.test(slug)) {
-      setErr("スラッグは英小文字・数字・ハイフンのみです。");
+    const title = newTitle.trim();
+    if (!title) {
+      setErr("タイトルを入力してください。");
       return;
     }
     const createCheck = checkWorkspaceUsage(ws, "create_content");
@@ -131,19 +128,23 @@ export default function CreatorContentNewPage() {
       setErr(usage.reason);
       return;
     }
-    if (await isWorkspaceSlugTaken(ws.id, slug)) {
-      setErr("このスラッグは既に使われています。");
-      return;
+    const base = slugBaseFromTitle(title);
+    let slug = base;
+    for (let attempt = 1; attempt <= 20; attempt += 1) {
+      slug = slugCandidate(base, attempt);
+      if (!(await isWorkspaceSlugTaken(ws.id, slug))) break;
+      if (attempt === 20) slug = `item-${Date.now().toString(36)}`;
     }
+    const period = currentContentPeriod();
     setCreating(true);
     try {
       const id = await createWorkspaceContent(ws.id, {
         subjectId: newSubjectId,
         type: newType,
         slug,
-        title: newTitle.trim() || slug,
-        periodYear: newPeriodYear,
-        periodMonth: newPeriodMonth,
+        title,
+        periodYear: period.year,
+        periodMonth: period.month,
         updatedBy: uid,
         visibility: "members",
       });
@@ -161,7 +162,7 @@ export default function CreatorContentNewPage() {
         <Link href="/creator">← 教材一覧へ</Link>
       </p>
       <p className="admin-field-hint creator-contents-hint">
-        作成後は非公開（下書き）です。編集画面から公開できます。
+        書きはじめた教材は下書きです。公開は編集画面からできます。
       </p>
 
       {err ? <p className="admin-msg admin-msg--error">{err}</p> : null}
@@ -227,44 +228,24 @@ export default function CreatorContentNewPage() {
               </div>
             </fieldset>
           </div>
-          <div className="admin-form-row">
-            <div className="admin-field creator-content-new-form__title">
-              <label htmlFor="new-title">タイトル</label>
-              <input
-                id="new-title"
-                placeholder="教材のタイトル"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-              />
-            </div>
-            <div className="admin-field creator-content-new-form__slug">
-              <label htmlFor="new-slug">スラッグ</label>
-              <input
-                id="new-slug"
-                placeholder="例: moon-move"
-                value={newSlug}
-                onChange={(e) => setNewSlug(e.target.value)}
-                required
-              />
-            </div>
+          <div className="admin-field creator-content-new-form__title">
+            <label htmlFor="new-title">タイトル</label>
+            <input
+              id="new-title"
+              placeholder="教材のタイトル"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              required
+            />
           </div>
-          <ContentPeriodFields
-            year={newPeriodYear}
-            month={newPeriodMonth}
-            onYearChange={setNewPeriodYear}
-            onMonthChange={setNewPeriodMonth}
-          />
           <div className="admin-row">
             <button
               type="submit"
               className="admin-btn admin-btn--primary"
-              disabled={creating || !formReady || subjectChoices.length === 0}
+              disabled={creating || !formReady || subjectChoices.length === 0 || !newTitle.trim()}
             >
-              {creating ? "作成中…" : "本編を作成する"}
+              {creating ? "作成中…" : "書きはじめる"}
             </button>
-            <Link href="/creator" className="admin-btn">
-              キャンセル
-            </Link>
           </div>
         </form>
       )}

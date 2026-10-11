@@ -19,6 +19,8 @@ type Props = {
   workspace?: WorkspaceDoc | null;
   blocks: LessonBlock[];
   onChange: (blocks: LessonBlock[], template: string) => void;
+  /** 未指定時は共通の説明 */
+  hint?: string;
 };
 
 export function QuizQuestionBodyEditor({
@@ -27,6 +29,7 @@ export function QuizQuestionBodyEditor({
   workspace,
   blocks,
   onChange,
+  hint,
 }: Props) {
   const sync = (next: LessonBlock[]) => {
     onChange(next, templateFromBlocks(next));
@@ -54,7 +57,8 @@ export function QuizQuestionBodyEditor({
   return (
     <div className="admin-lesson-blocks">
       <p className="admin-field-hint" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-        1枚の中に、本文・補足・画像を並べられます。空欄記号 ①②… は本文のツールバー「空欄を挿入」から入れてください。
+        {hint ??
+          "1枚の中に、本文・補足・画像を並べられます。空欄記号 ①②… は本文のツールバー「空欄を挿入」から入れてください。"}
       </p>
       {blocks.map((block, bi) => (
         <div key={`quiz-block-${bi}`} className="admin-block-wrap">
