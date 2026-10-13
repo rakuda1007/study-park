@@ -2086,7 +2086,7 @@
 
 .study-plan-card__item--list {
   display: grid;
-  grid-template-columns: minmax(0, 13em) 7.25rem;
+  grid-template-columns: minmax(0, 13em) minmax(0, 1fr);
   column-gap: 0.5rem;
   align-items: center;
 }
@@ -2110,9 +2110,11 @@
   font-size: 0.84rem;
 }
 
-.study-plan-card__item--list .study-progress {
-  width: 7.25rem;
-  max-width: 7.25rem;
+.study-plan-card__item--list .study-plan-card__item-progress .study-progress {
+  width: auto;
+  max-width: none;
+  flex: 1 1 auto;
+  min-width: 4.75rem;
 }
 
 .study-plan-card__item--list .study-progress__track {
@@ -2159,6 +2161,42 @@
   align-items: center;
   gap: 0.45rem;
   flex-shrink: 0;
+}
+
+.study-plan-card__item-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.study-plan-card__item-progress .study-progress {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.study-plan-card__bump {
+  flex: 0 0 auto;
+  padding: 0.12rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel);
+  color: var(--admin-accent);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.study-plan-card__bump:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+}
+
+.study-plan-card__bump:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .study-plan-card__header {
@@ -3164,12 +3202,12 @@
 
   .study-plan-card__item--list {
     column-gap: 0.6rem;
-    grid-template-columns: minmax(0, 13em) 7.5rem;
+    grid-template-columns: minmax(0, 13em) minmax(0, 1fr);
   }
 
-  .study-plan-card__item--list .study-progress {
-    width: 7.5rem;
-    max-width: 7.5rem;
+  .study-plan-card__item--list .study-plan-card__item-progress .study-progress {
+    width: auto;
+    max-width: none;
   }
 
   .study-plan-card__item--list .study-progress__track {

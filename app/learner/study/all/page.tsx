@@ -12,6 +12,7 @@ import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
 export default function LearnerStudyAllPage() {
+  const [userId, setUserId] = useState("");
   const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -29,6 +30,7 @@ export default function LearnerStudyAllPage() {
     const unsub = subscribeAuth((user) => {
       void (async () => {
         if (!user) return;
+        setUserId(user.uid);
         try {
           await refresh(user.uid);
         } finally {
@@ -59,7 +61,14 @@ export default function LearnerStudyAllPage() {
         <section className="study-plan-list">
           <h2 className="shell-page-heading">進行中の計画</h2>
           {active.map((plan) => (
-            <StudyPlanCard key={plan.id} plan={plan} />
+            <StudyPlanCard
+              key={plan.id}
+              plan={plan}
+              userId={userId}
+              onPlanChange={(next) =>
+                setPlans((prev) => prev.map((p) => (p.id === next.id ? next : p)))
+              }
+            />
           ))}
         </section>
       ) : null}

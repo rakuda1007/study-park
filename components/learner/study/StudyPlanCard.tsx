@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { workspacePlayHref } from "@/lib/content/urls";
+import { updateStudyItemProgress } from "@/lib/study/firestore";
+import { patchCachedStudyPlan } from "@/lib/study/plans-cache";
 import {
   averageProgress,
   delayStatus,
@@ -17,8 +20,13 @@ import { StudyReadableText } from "./StudyReadableText";
 import { StudyProgressBar } from "./StudyProgressBar";
 import { StudyProgressGauge } from "./StudyProgressGauge";
 
+const PROGRESS_BUMP = 10;
+
 type Props = {
   plan: StudyPlanWithItems;
+  userId?: string;
+  /** ＋10% 保存後に、親の一覧状態を更新する */
+  onPlanChange?: (plan: StudyPlanWithItems) => void;
   compact?: boolean;
   /** 週ビュー一覧用：科目名を出さずコンパクト表示 */
   listView?: boolean;
@@ -28,16 +36,46 @@ type Props = {
 
 export function StudyPlanCard({
   plan,
+  userId = "",
+  onPlanChange,
   compact = false,
   listView = false,
   hideStatusBadge = false,
 }: Props) {
+  const [savingItemId, setSavingItemId] = useState<string | null>(null);
+  const [bumpErr, setBumpErr] = useState("");
   const progress = averageProgress(plan.items);
   const completed = progress >= 100 || plan.status === "completed";
   const status = delayStatus(progress, plan.startDate, plan.dueDate);
   const statusLabel = completed ? null : delayStatusLabel(status);
   const daysLabel = formatDaysRemaining(plan.dueDate, new Date(), completed);
   const periodLabel = formatPlanPeriodCompact(plan.startDate, plan.dueDate);
+
+  async function bumpItem(itemId: string, currentPercent: number) {
+    if (!userId || savingItemId) return;
+    const nextPercent = Math.min(100, Math.max(0, Math.round(currentPercent)) + PROGRESS_BUMP);
+    if (nextPercent === currentPercent) return;
+
+    const nextPlan: StudyPlanWithItems = {
+      ...plan,
+      items: plan.items.map((item) =>
+        item.id === itemId ? { ...item, progressPercent: nextPercent } : item,
+      ),
+    };
+    setBumpErr("");
+    setSavingItemId(itemId);
+    onPlanChange?.(nextPlan);
+    patchCachedStudyPlan(userId, nextPlan);
+    try {
+      await updateStudyItemProgress(userId, plan.id, itemId, nextPercent);
+    } catch (e) {
+      onPlanChange?.(plan);
+      patchCachedStudyPlan(userId, plan);
+      setBumpErr(e instanceof Error ? e.message : "進捗を保存できませんでした。");
+    } finally {
+      setSavingItemId(null);
+    }
+  }
 
   return (
     <article
@@ -101,6 +139,7 @@ export function StudyPlanCard({
       />
 
       {!compact && plan.items.length > 0 ? (
+        <>
         <ul className={`study-plan-card__items${listView ? " study-plan-card__items--list" : ""}`}>
           {plan.items.map((item) => (
             <li
@@ -137,14 +176,29 @@ export function StudyPlanCard({
                   ) : null}
                 </span>
               </div>
-              <StudyProgressBar
-                percent={item.progressPercent}
-                size="sm"
-                hideBadge
-              />
+              <div className="study-plan-card__item-progress">
+                <StudyProgressBar
+                  percent={item.progressPercent}
+                  size="sm"
+                  hideBadge
+                />
+                {userId ? (
+                  <button
+                    type="button"
+                    className="study-plan-card__bump"
+                    disabled={savingItemId !== null || item.progressPercent >= 100}
+                    aria-label={`${item.label}を10%進める`}
+                    onClick={() => void bumpItem(item.id, item.progressPercent)}
+                  >
+                    ＋10%
+                  </button>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
+        {bumpErr ? <p className="admin-msg admin-msg--error">{bumpErr}</p> : null}
+        </>
       ) : null}
     </article>
   );

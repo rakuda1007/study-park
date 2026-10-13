@@ -116,7 +116,7 @@ function LearnerHomeInner() {
     <LearnerShell title="学習管理">
       {createdNotice ? (
         <p className="admin-msg admin-msg--ok" role="status">
-          「{createdNotice}」の学習計画を追加しました。進捗の記録は各計画の「記録する」からできます。
+          「{createdNotice}」の学習計画を追加しました。進んだ分は各項目の「＋10%」、細かい調整は「記録する」からできます。
         </p>
       ) : null}
 
@@ -218,6 +218,10 @@ function LearnerHomeInner() {
                   <StudyPlanCard
                     key={plan.id}
                     plan={plan}
+                    userId={userId}
+                    onPlanChange={(next) =>
+                      setPlans((prev) => prev.map((p) => (p.id === next.id ? next : p)))
+                    }
                     listView
                     hideStatusBadge={subjectPlans.length === 1}
                   />
