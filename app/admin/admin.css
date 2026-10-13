@@ -2036,6 +2036,7 @@
   column-gap: 0.65rem;
   row-gap: 0.3rem;
   align-items: center;
+  container-type: inline-size;
 }
 
 .study-plan-card--list:last-child {
@@ -2086,8 +2087,9 @@
 
 .study-plan-card__item--list {
   display: grid;
-  grid-template-columns: minmax(0, 13em) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   column-gap: 0.5rem;
+  row-gap: 0.25rem;
   align-items: center;
 }
 
@@ -2110,15 +2112,31 @@
   font-size: 0.84rem;
 }
 
+.study-plan-card__item--list .study-plan-card__item-progress {
+  max-width: 100%;
+}
+
 .study-plan-card__item--list .study-plan-card__item-progress .study-progress {
   width: auto;
   max-width: none;
   flex: 1 1 auto;
-  min-width: 4.75rem;
+  min-width: 0;
 }
 
 .study-plan-card__item--list .study-progress__track {
   height: 0.62rem;
+}
+
+/* カードが広いときだけ、項目名と進捗を横並びにする */
+@container (min-width: 32rem) {
+  .study-plan-card__item--list {
+    grid-template-columns: minmax(0, 13em) minmax(10.5rem, 1fr);
+    row-gap: 0;
+  }
+
+  .study-plan-card__item--list .study-plan-card__item-progress .study-progress {
+    min-width: 4.75rem;
+  }
 }
 
 .study-plan-card__toolbar {
@@ -3202,7 +3220,6 @@
 
   .study-plan-card__item--list {
     column-gap: 0.6rem;
-    grid-template-columns: minmax(0, 13em) minmax(0, 1fr);
   }
 
   .study-plan-card__item--list .study-plan-card__item-progress .study-progress {
