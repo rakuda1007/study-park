@@ -1879,6 +1879,50 @@
   text-decoration: underline;
 }
 
+.study-week-nav__settings {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--admin-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.study-week-nav__settings:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.study-period-settings {
+  margin: -0.35rem 0 0.75rem;
+  padding: 0.85rem 0.9rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-panel);
+}
+
+.study-period-settings__dates {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.study-period-settings__dates .admin-field {
+  margin-bottom: 0.75rem;
+}
+
+.study-period-settings__error {
+  margin-top: 0;
+}
+
+.study-period-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .study-summary-card--compact {
   padding: 0.75rem 1rem;
   margin-bottom: 0.75rem;
@@ -3181,6 +3225,10 @@
 
 @media (max-width: 640px) {
   .study-plan-form__dates {
+    grid-template-columns: 1fr;
+  }
+
+  .study-period-settings__dates {
     grid-template-columns: 1fr;
   }
 }

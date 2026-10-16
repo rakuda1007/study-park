@@ -48,7 +48,7 @@ export default function LearnerStudyAllPage() {
     <LearnerShell title="学習管理">
       <p className="study-back-link-wrap">
         <Link href="/learner" className="study-back-link">
-          ← 週ビューに戻る
+          ← 学習管理に戻る
         </Link>
       </p>
 

@@ -19,7 +19,19 @@ import {
   delayStatusLabel,
 } from "@/lib/study/progress";
 import type { StudyPlanWithItems } from "@/lib/study/types";
-import { getWeekEnd, getWeekStart } from "@/lib/study/week";
+import {
+  DEFAULT_STUDY_VIEW,
+  getPeriodEnd,
+  getPeriodStart,
+  usesWeekLabels,
+  type StudyViewSettings,
+} from "@/lib/study/view-period";
+import {
+  clearStudyViewSettings,
+  loadStudyViewSettings,
+  saveStudyViewSettings,
+} from "@/lib/study/view-settings";
+import { getWeekStart } from "@/lib/study/week";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
@@ -41,9 +53,16 @@ function LearnerHomeInner() {
   const [plans, setPlans] = useState<StudyPlanWithItems[]>([]);
   const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const [viewSettings, setViewSettings] = useState<StudyViewSettings>(DEFAULT_STUDY_VIEW);
+  const [viewReady, setViewReady] = useState(false);
+  const [viewLoadFailed, setViewLoadFailed] = useState(false);
+  const [periodStart, setPeriodStart] = useState(() => getWeekStart(new Date()));
   const [createdNotice, setCreatedNotice] = useState<string | null>(null);
-  const weekEnd = useMemo(() => getWeekEnd(weekStart), [weekStart]);
+  const periodEnd = useMemo(
+    () => getPeriodEnd(periodStart, viewSettings.spanDays),
+    [periodStart, viewSettings.spanDays],
+  );
+  const weekLabels = usesWeekLabels(viewSettings);
 
   useEffect(() => {
     const created = searchParams.get("created");
@@ -60,13 +79,43 @@ function LearnerHomeInner() {
   }, []);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setViewReady(false);
+      return;
+    }
+    let cancelled = false;
+    setViewReady(false);
+    setViewLoadFailed(false);
+    void (async () => {
+      try {
+        const next = await loadStudyViewSettings(userId);
+        if (cancelled) return;
+        setViewSettings(next);
+        if (next.anchorDate) {
+          setPeriodStart(getPeriodStart(new Date(), next));
+        }
+      } catch {
+        if (cancelled) return;
+        setViewSettings(DEFAULT_STUDY_VIEW);
+        setPeriodStart(getWeekStart(new Date()));
+        setViewLoadFailed(true);
+      } finally {
+        if (!cancelled) setViewReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId || !viewReady) return;
     let cancelled = false;
     setLoading(true);
     void (async () => {
       try {
         const [data, active] = await Promise.all([
-          fetchWeekStudyPlansCached(userId, weekStart, weekEnd),
+          fetchWeekStudyPlansCached(userId, periodStart, periodEnd),
           countActiveStudyPlans(userId),
         ]);
         if (!cancelled) {
@@ -80,7 +129,22 @@ function LearnerHomeInner() {
     return () => {
       cancelled = true;
     };
-  }, [userId, weekStart, weekEnd]);
+  }, [userId, viewReady, periodStart, periodEnd]);
+
+  async function handleSaveView(input: { anchorDate: string; spanDays: number }) {
+    if (!userId) throw new Error("ログインが必要です。");
+    await saveStudyViewSettings(userId, input);
+    const next: StudyViewSettings = input;
+    setViewSettings(next);
+    setPeriodStart(getPeriodStart(new Date(), next));
+  }
+
+  async function handleResetView() {
+    if (!userId) throw new Error("ログインが必要です。");
+    await clearStudyViewSettings(userId);
+    setViewSettings(DEFAULT_STUDY_VIEW);
+    setPeriodStart(getWeekStart(new Date()));
+  }
 
   const weekPlans = useMemo(() => plans, [plans]);
 
@@ -121,7 +185,7 @@ function LearnerHomeInner() {
       ) : null}
 
       <p className="admin-msg learner-welcome-msg">
-        自分やお子様の学習を、週単位でかんたんに管理できます。いつまでに何をやるか、どこまで進んだかを確認しましょう。
+        自分やお子様の学習をかんたんに管理できます。表示中の期間の学習計画を確認できます。いつまでに何をやるか、どこまで進んだかを確認しましょう。
         {userId ? (
           <span className="study-active-count-label">
             {" "}
@@ -132,7 +196,20 @@ function LearnerHomeInner() {
 
       <StudyActivePlanUsageBanner activeCount={activeCount} />
 
-      <StudyWeekNav weekStart={weekStart} onChange={setWeekStart} />
+      <StudyWeekNav
+        periodStart={periodStart}
+        settings={viewSettings}
+        editable={Boolean(userId) && viewReady && !viewLoadFailed}
+        onChange={setPeriodStart}
+        onSave={handleSaveView}
+        onReset={handleResetView}
+      />
+
+      {viewLoadFailed ? (
+        <p className="admin-msg admin-msg--error" role="alert">
+          期間設定を読み込めませんでした。表示は日曜始まりの7日間です。
+        </p>
+      ) : null}
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}
 
@@ -140,7 +217,7 @@ function LearnerHomeInner() {
         <section className="admin-card study-summary-card study-summary-card--compact">
           <div className="study-summary-card__row study-summary-card__row--bar">
             <span className="study-summary-card__title">
-              今週の進捗（{weekPlans.length}件）
+              {weekLabels ? "今週の進捗" : "この期間の進捗"}（{weekPlans.length}件）
             </span>
             <div className="study-summary-card__bar-wrap">
               <StudyProgressBar percent={overallProgress} size="sm" hideBadge />
@@ -178,7 +255,7 @@ function LearnerHomeInner() {
       {!loading && weekPlans.length === 0 ? (
         <section className="admin-card">
           <p>
-            この週に表示できる学習計画がありません。別の週を選ぶか、下のボタンから追加してください。
+            この期間に表示できる学習計画がありません。別の期間を選ぶか、下のボタンから追加してください。
           </p>
         </section>
       ) : null}
