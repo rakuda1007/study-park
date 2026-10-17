@@ -1895,12 +1895,81 @@
   cursor: not-allowed;
 }
 
+.study-period .study-week-nav {
+  margin-bottom: 0.25rem;
+}
+
+.study-period-standard {
+  margin: 0 0 0.75rem;
+  padding: 0 0.15rem;
+  font-size: 0.8rem;
+  color: var(--admin-text);
+}
+
+.study-period-standard__label {
+  display: inline-block;
+  margin-right: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--admin-accent);
+}
+
 .study-period-settings {
-  margin: -0.35rem 0 0.75rem;
+  margin: 0 0 0.75rem;
   padding: 0.85rem 0.9rem 0.95rem;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   background: var(--admin-panel);
+}
+
+.study-period-settings__title {
+  margin: 0 0 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.study-period-settings__section {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.study-period-settings__preview {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.study-period-settings__span {
+  max-width: 8rem;
+}
+
+.study-period-weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.study-period-weekdays__btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.study-period-weekdays__btn[aria-checked="true"] {
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: #fff;
+}
+
+.study-period-weekdays__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .study-period-settings__dates {

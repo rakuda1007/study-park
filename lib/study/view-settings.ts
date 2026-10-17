@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteField, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getFirestoreClient } from "@/lib/firebase/client";
 import {
   DEFAULT_STUDY_VIEW,
@@ -20,20 +20,16 @@ export async function loadStudyViewSettings(uid: string): Promise<StudyViewSetti
 
 export async function saveStudyViewSettings(
   uid: string,
-  settings: { anchorDate: string; spanDays: number },
+  settings: StudyViewSettings,
 ): Promise<void> {
+  const studyView: Record<string, string | number> = {
+    spanDays: settings.spanDays,
+    standardWeekday: settings.standardWeekday,
+    standardSpanDays: settings.standardSpanDays,
+  };
+  if (settings.anchorDate) studyView.anchorDate = settings.anchorDate;
   await updateDoc(userRef(uid), {
-    studyView: {
-      anchorDate: settings.anchorDate,
-      spanDays: settings.spanDays,
-    },
-    updatedAt: serverTimestamp(),
-  });
-}
-
-export async function clearStudyViewSettings(uid: string): Promise<void> {
-  await updateDoc(userRef(uid), {
-    studyView: deleteField(),
+    studyView,
     updatedAt: serverTimestamp(),
   });
 }

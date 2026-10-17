@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import {
+  formatStandardLabel,
   formatViewPeriodLabel,
   getPeriodStart,
+  parseSpanDays,
   parseStudyViewInput,
   periodContains,
   shiftPeriod,
   STUDY_VIEW_INPUT_ERROR,
   usesWeekLabels,
+  WEEKDAY_LABELS,
   type StudyViewSettings,
 } from "@/lib/study/view-period";
 import { formatStudyDate } from "@/lib/study/week";
@@ -19,6 +22,7 @@ type Props = {
   editable: boolean;
   onChange: (periodStart: Date) => void;
   onSave: (input: { anchorDate: string; spanDays: number }) => Promise<void>;
+  onSaveStandard: (input: { weekday: number; spanDays: number }) => Promise<void>;
   onReset: () => Promise<void>;
 };
 
@@ -30,6 +34,7 @@ export function StudyWeekNav({
   editable,
   onChange,
   onSave,
+  onSaveStandard,
   onReset,
 }: Props) {
   const weekLabels = usesWeekLabels(settings);
@@ -37,18 +42,27 @@ export function StudyWeekNav({
   const [open, setOpen] = useState(false);
   const [anchorInput, setAnchorInput] = useState("");
   const [spanInput, setSpanInput] = useState(String(settings.spanDays));
-  const [error, setError] = useState<string | null>(null);
+  const [weekday, setWeekday] = useState(settings.standardWeekday);
+  const [standardSpanInput, setStandardSpanInput] = useState(String(settings.standardSpanDays));
+  const [periodError, setPeriodError] = useState<string | null>(null);
+  const [standardError, setStandardError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const standardPreviewSpan = parseSpanDays(standardSpanInput);
 
   function toggleSettings() {
     if (open) {
       setOpen(false);
-      setError(null);
+      setPeriodError(null);
+      setStandardError(null);
       return;
     }
     setAnchorInput(formatStudyDate(periodStart));
     setSpanInput(String(settings.spanDays));
-    setError(null);
+    setWeekday(settings.standardWeekday);
+    setStandardSpanInput(String(settings.standardSpanDays));
+    setPeriodError(null);
+    setStandardError(null);
     setOpen(true);
   }
 
@@ -56,16 +70,35 @@ export function StudyWeekNav({
     event.preventDefault();
     const parsed = parseStudyViewInput(anchorInput, spanInput);
     if (!parsed) {
-      setError(STUDY_VIEW_INPUT_ERROR);
+      setPeriodError(STUDY_VIEW_INPUT_ERROR);
       return;
     }
     setSaving(true);
-    setError(null);
+    setPeriodError(null);
     try {
       await onSave(parsed);
       setOpen(false);
     } catch {
-      setError(SAVE_FAILED);
+      setPeriodError(SAVE_FAILED);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSaveStandard(event: React.FormEvent) {
+    event.preventDefault();
+    const spanDays = parseSpanDays(standardSpanInput);
+    if (spanDays === null) {
+      setStandardError(STUDY_VIEW_INPUT_ERROR);
+      return;
+    }
+    setSaving(true);
+    setStandardError(null);
+    try {
+      await onSaveStandard({ weekday, spanDays });
+      setOpen(false);
+    } catch {
+      setStandardError(SAVE_FAILED);
     } finally {
       setSaving(false);
     }
@@ -73,12 +106,12 @@ export function StudyWeekNav({
 
   async function handleReset() {
     setSaving(true);
-    setError(null);
+    setPeriodError(null);
     try {
       await onReset();
       setOpen(false);
     } catch {
-      setError(SAVE_FAILED);
+      setPeriodError(SAVE_FAILED);
     } finally {
       setSaving(false);
     }
@@ -128,50 +161,116 @@ export function StudyWeekNav({
         </button>
       </div>
 
+      <p className="study-period-standard">
+        <span className="study-period-standard__label">標準</span>
+        {formatStandardLabel(settings.standardWeekday, settings.standardSpanDays)}
+      </p>
+
       {open ? (
-        <form className="study-period-settings" aria-label="表示期間の設定" onSubmit={handleSave}>
-          <div className="study-period-settings__dates">
-            <label className="admin-field">
-              <span className="admin-label">はじまりの日付</span>
-              <input
-                type="date"
-                className="admin-input"
-                value={anchorInput}
+        <div className="study-period-settings">
+          <form aria-label="表示期間の設定" onSubmit={handleSave}>
+            <p className="study-period-settings__title">表示期間</p>
+            <div className="study-period-settings__dates">
+              <label className="admin-field">
+                <span className="admin-label">はじまりの日付</span>
+                <input
+                  type="date"
+                  className="admin-input"
+                  value={anchorInput}
+                  disabled={saving}
+                  onChange={(event) => setAnchorInput(event.target.value)}
+                />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">表示日数</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="admin-input"
+                  value={spanInput}
+                  disabled={saving}
+                  onChange={(event) => setSpanInput(event.target.value)}
+                />
+              </label>
+            </div>
+            {periodError ? (
+              <p className="admin-msg admin-msg--error study-period-settings__error" role="alert">
+                {periodError}
+              </p>
+            ) : null}
+            <div className="study-period-settings__actions">
+              <button type="submit" className="admin-btn admin-btn--primary" disabled={saving}>
+                この期間を保存
+              </button>
+              <button
+                type="button"
+                className="admin-btn"
                 disabled={saving}
-                onChange={(event) => setAnchorInput(event.target.value)}
-              />
-            </label>
-            <label className="admin-field">
-              <span className="admin-label">表示日数</span>
+                onClick={() => void handleReset()}
+              >
+                標準に戻す
+              </button>
+            </div>
+          </form>
+
+          <form
+            className="study-period-settings__section"
+            aria-label="標準の設定"
+            onSubmit={handleSaveStandard}
+          >
+            <p className="study-period-settings__title">標準</p>
+            <p className="study-period-settings__preview">
+              {standardPreviewSpan === null
+                ? `${WEEKDAY_LABELS[weekday]}曜始まり`
+                : formatStandardLabel(weekday, standardPreviewSpan)}
+            </p>
+            <div className="admin-field">
+              <span className="admin-label" id="study-standard-weekday-label">
+                始まりの曜日
+              </span>
+              <div
+                className="study-period-weekdays"
+                role="radiogroup"
+                aria-labelledby="study-standard-weekday-label"
+              >
+                {WEEKDAY_LABELS.map((label, index) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className="study-period-weekdays__btn"
+                    role="radio"
+                    aria-checked={weekday === index}
+                    disabled={saving}
+                    onClick={() => setWeekday(index)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="admin-field study-period-settings__span">
+              <span className="admin-label">日数</span>
               <input
                 type="text"
                 inputMode="numeric"
                 className="admin-input"
-                value={spanInput}
+                value={standardSpanInput}
                 disabled={saving}
-                onChange={(event) => setSpanInput(event.target.value)}
+                onChange={(event) => setStandardSpanInput(event.target.value)}
               />
             </label>
-          </div>
-          {error ? (
-            <p className="admin-msg admin-msg--error study-period-settings__error" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <div className="study-period-settings__actions">
-            <button type="submit" className="admin-btn admin-btn--primary" disabled={saving}>
-              保存
-            </button>
-            <button
-              type="button"
-              className="admin-btn"
-              disabled={saving}
-              onClick={() => void handleReset()}
-            >
-              標準に戻す
-            </button>
-          </div>
-        </form>
+            {standardError ? (
+              <p className="admin-msg admin-msg--error study-period-settings__error" role="alert">
+                {standardError}
+              </p>
+            ) : null}
+            <div className="study-period-settings__actions">
+              <button type="submit" className="admin-btn admin-btn--primary" disabled={saving}>
+                標準を保存
+              </button>
+            </div>
+          </form>
+        </div>
       ) : null}
     </div>
   );

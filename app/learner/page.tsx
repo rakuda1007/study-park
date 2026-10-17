@@ -23,15 +23,11 @@ import {
   DEFAULT_STUDY_VIEW,
   getPeriodEnd,
   getPeriodStart,
+  isFactoryDefault,
   usesWeekLabels,
   type StudyViewSettings,
 } from "@/lib/study/view-period";
-import {
-  clearStudyViewSettings,
-  loadStudyViewSettings,
-  saveStudyViewSettings,
-} from "@/lib/study/view-settings";
-import { getWeekStart } from "@/lib/study/week";
+import { loadStudyViewSettings, saveStudyViewSettings } from "@/lib/study/view-settings";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
@@ -56,7 +52,9 @@ function LearnerHomeInner() {
   const [viewSettings, setViewSettings] = useState<StudyViewSettings>(DEFAULT_STUDY_VIEW);
   const [viewReady, setViewReady] = useState(false);
   const [viewLoadFailed, setViewLoadFailed] = useState(false);
-  const [periodStart, setPeriodStart] = useState(() => getWeekStart(new Date()));
+  const [periodStart, setPeriodStart] = useState(() =>
+    getPeriodStart(new Date(), DEFAULT_STUDY_VIEW),
+  );
   const [createdNotice, setCreatedNotice] = useState<string | null>(null);
   const periodEnd = useMemo(
     () => getPeriodEnd(periodStart, viewSettings.spanDays),
@@ -91,13 +89,13 @@ function LearnerHomeInner() {
         const next = await loadStudyViewSettings(userId);
         if (cancelled) return;
         setViewSettings(next);
-        if (next.anchorDate) {
+        if (!isFactoryDefault(next)) {
           setPeriodStart(getPeriodStart(new Date(), next));
         }
       } catch {
         if (cancelled) return;
         setViewSettings(DEFAULT_STUDY_VIEW);
-        setPeriodStart(getWeekStart(new Date()));
+        setPeriodStart(getPeriodStart(new Date(), DEFAULT_STUDY_VIEW));
         setViewLoadFailed(true);
       } finally {
         if (!cancelled) setViewReady(true);
@@ -133,17 +131,38 @@ function LearnerHomeInner() {
 
   async function handleSaveView(input: { anchorDate: string; spanDays: number }) {
     if (!userId) throw new Error("ログインが必要です。");
-    await saveStudyViewSettings(userId, input);
-    const next: StudyViewSettings = input;
+    const next: StudyViewSettings = {
+      ...viewSettings,
+      anchorDate: input.anchorDate,
+      spanDays: input.spanDays,
+    };
+    await saveStudyViewSettings(userId, next);
+    setViewSettings(next);
+    setPeriodStart(getPeriodStart(new Date(), next));
+  }
+
+  async function handleSaveStandard(input: { weekday: number; spanDays: number }) {
+    if (!userId) throw new Error("ログインが必要です。");
+    const next: StudyViewSettings = {
+      spanDays: input.spanDays,
+      standardWeekday: input.weekday,
+      standardSpanDays: input.spanDays,
+    };
+    await saveStudyViewSettings(userId, next);
     setViewSettings(next);
     setPeriodStart(getPeriodStart(new Date(), next));
   }
 
   async function handleResetView() {
     if (!userId) throw new Error("ログインが必要です。");
-    await clearStudyViewSettings(userId);
-    setViewSettings(DEFAULT_STUDY_VIEW);
-    setPeriodStart(getWeekStart(new Date()));
+    const next: StudyViewSettings = {
+      spanDays: viewSettings.standardSpanDays,
+      standardWeekday: viewSettings.standardWeekday,
+      standardSpanDays: viewSettings.standardSpanDays,
+    };
+    await saveStudyViewSettings(userId, next);
+    setViewSettings(next);
+    setPeriodStart(getPeriodStart(new Date(), next));
   }
 
   const weekPlans = useMemo(() => plans, [plans]);
@@ -202,6 +221,7 @@ function LearnerHomeInner() {
         editable={Boolean(userId) && viewReady && !viewLoadFailed}
         onChange={setPeriodStart}
         onSave={handleSaveView}
+        onSaveStandard={handleSaveStandard}
         onReset={handleResetView}
       />
 
