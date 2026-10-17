@@ -69,15 +69,6 @@ export default function CreatorDashboardPage() {
         <h2 className="shell-page-heading creator-page-toolbar__title">教材</h2>
         {!wsMissing ? (
           <div className="creator-page-toolbar__actions">
-            <Link href="/creator/subjects" className="admin-btn" {...pendingLinkProps(!!ws)}>
-              教科を編集
-            </Link>
-            <Link href="/creator/learners" className="admin-btn" {...pendingLinkProps(!!ws)}>
-              招待
-            </Link>
-            <Link href="/learner/materials" className="admin-btn">
-              学習者の画面
-            </Link>
             <Link
               href="/creator/contents/new"
               className="admin-btn admin-btn--primary creator-page-toolbar__action"
