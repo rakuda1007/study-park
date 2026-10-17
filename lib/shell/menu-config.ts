@@ -8,12 +8,6 @@ export type ShellMenuConfig = {
   bottomItems: ShellMenuItem[];
 };
 
-const LOGGED_IN_BOTTOM: ShellMenuItem[] = [
-  { label: "プロフィール", href: "" },
-  { label: "別のアカウントでログイン", href: "/login" },
-  { label: "ログアウト", action: "logout" },
-];
-
 function profilePath(session: AuthSessionKind): string {
   switch (session) {
     case "admin":
@@ -25,23 +19,41 @@ function profilePath(session: AuthSessionKind): string {
   }
 }
 
-function loggedInBottom(session: AuthSessionKind): ShellMenuItem[] {
-  return LOGGED_IN_BOTTOM.map((item) =>
-    item.label === "プロフィール" ? { ...item, href: profilePath(session) } : item,
-  );
-}
-
 export function getGuestShellMenu(): ShellMenuConfig {
   return {
     items: [
-      { label: "ログイン", href: "/login" },
-      { label: "学習管理をはじめる", href: "/signup/learner" },
-      { label: "問題を作って配る", href: "/signup/creator" },
-      PARK_MENU_ITEM,
-      PORTAL_MENU_ITEM,
-      { ...MANUAL_MENU_ITEM, dividerBefore: true },
+      { label: "はじめる", heading: true },
+      {
+        label: "学習管理をはじめる",
+        href: "/signup/learner",
+        hint: "計画と進捗を記録する",
+      },
+      {
+        label: "問題を作って配る",
+        href: "/signup/creator",
+        hint: "作った問題を学習者に届ける",
+      },
+      { label: "試す", heading: true },
+      {
+        ...PARK_MENU_ITEM,
+        label: "無料コンテンツ",
+        hint: "九九・県庁所在地など",
+      },
+      { label: "案内", heading: true },
+      {
+        ...MANUAL_MENU_ITEM,
+        label: "使い方",
+        hint: "別ページのガイドを開きます",
+      },
+      {
+        ...PORTAL_MENU_ITEM,
+        hint: "学習管理・出題・問題づくり",
+      },
     ],
-    bottomItems: [],
+    bottomItems: [
+      { label: "アカウント", heading: true },
+      { label: "ログイン", href: "/login" },
+    ],
   };
 }
 
@@ -110,16 +122,53 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
     case "admin":
       return {
         items: [
-          { label: "コンテンツ一覧", href: "/admin/contents" },
-          { label: "教科マスタ", href: "/admin/subjects" },
-          { label: "利用者一覧", href: "/admin/users" },
-          { label: "学習管理の運用", href: "/admin/study-ops" },
-          { label: "教材", href: "/learner/materials" },
-          { ...PARK_MENU_ITEM, dividerBefore: true },
+          { label: "公式コンテンツ", heading: true },
+          {
+            label: "コンテンツ一覧",
+            href: "/admin/contents",
+            hint: "公園に出す問題・レッスン",
+          },
+          {
+            label: "教科",
+            href: "/admin/subjects",
+            hint: "公式コンテンツの教科",
+          },
+          { label: "利用者", heading: true },
+          {
+            label: "利用者",
+            href: "/admin/users",
+            hint: "登録数と参加者",
+          },
+          {
+            label: "学習管理の運用",
+            href: "/admin/study-ops",
+            hint: "進行中の上限とアーカイブ",
+          },
+          { label: "見え方", heading: true },
+          {
+            label: "学習者の画面",
+            href: "/learner/materials",
+            hint: "参加中の教材の見え方",
+          },
+          {
+            ...PARK_MENU_ITEM,
+            label: "無料コンテンツ",
+            hint: "九九・県庁所在地など",
+          },
+          { label: "案内", heading: true },
+          {
+            ...MANUAL_MENU_ITEM,
+            label: "使い方",
+            hint: "別ページのガイドを開きます",
+          },
           PORTAL_MENU_ITEM,
-          { ...MANUAL_MENU_ITEM, dividerBefore: true },
         ],
-        bottomItems: loggedInBottom(session),
+        bottomItems: [
+          { label: "アカウント", heading: true },
+          { label: "プロフィール", href: profilePath(session) },
+          { label: "アカウントを切り替える", href: "/login" },
+          { label: "ログアウト", action: "logout" },
+        ],
       };
   }
 }
