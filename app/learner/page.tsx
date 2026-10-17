@@ -18,6 +18,7 @@ import {
   delayStatus,
   delayStatusLabel,
 } from "@/lib/study/progress";
+import { sortStudyPlans } from "@/lib/study/plan-order";
 import type { StudyPlanWithItems } from "@/lib/study/types";
 import {
   DEFAULT_STUDY_VIEW,
@@ -31,15 +32,20 @@ import { loadStudyViewSettings, saveStudyViewSettings } from "@/lib/study/view-s
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
-function groupPlansBySubject(plans: StudyPlanWithItems[]): Map<string, StudyPlanWithItems[]> {
-  const map = new Map<string, StudyPlanWithItems[]>();
+/** 並び順を保ったまま、隣り合う同じ科目だけ見出しを共有する */
+function groupConsecutiveBySubject(
+  plans: StudyPlanWithItems[],
+): { key: string; subjectName: string; plans: StudyPlanWithItems[] }[] {
+  const groups: { key: string; subjectName: string; plans: StudyPlanWithItems[] }[] = [];
   for (const plan of plans) {
-    const key = plan.subjectName;
-    const list = map.get(key) ?? [];
-    list.push(plan);
-    map.set(key, list);
+    const last = groups[groups.length - 1];
+    if (last && last.subjectName === plan.subjectName) {
+      last.plans.push(plan);
+      continue;
+    }
+    groups.push({ key: plan.id, subjectName: plan.subjectName, plans: [plan] });
   }
-  return map;
+  return groups;
 }
 
 function LearnerHomeInner() {
@@ -193,7 +199,10 @@ function LearnerHomeInner() {
     return { nearDue, behind, completed };
   }, [weekPlans]);
 
-  const grouped = useMemo(() => groupPlansBySubject(weekPlans), [weekPlans]);
+  const grouped = useMemo(
+    () => groupConsecutiveBySubject(sortStudyPlans(weekPlans)),
+    [weekPlans],
+  );
 
   return (
     <LearnerShell title="学習管理">
@@ -282,7 +291,7 @@ function LearnerHomeInner() {
 
       {!loading && weekPlans.length > 0 ? (
         <div className="study-plan-list study-week-page__plans">
-          {[...grouped.entries()].map(([subjectName, subjectPlans]) => {
+          {grouped.map(({ key, subjectName, plans: subjectPlans }) => {
             const singlePlan = subjectPlans.length === 1 ? subjectPlans[0] : null;
             const singleProgress = singlePlan ? averageProgress(singlePlan.items) : 0;
             const singleCompleted =
@@ -300,7 +309,7 @@ function LearnerHomeInner() {
               singleStatus && singlePlan ? delayStatusLabel(singleStatus) : null;
 
             return (
-              <section key={subjectName} className="study-subject-section">
+              <section key={key} className="study-subject-section">
                 <div className="study-subject-section__head">
                   <h2 className="study-subject-section__title">{subjectName}</h2>
                   {singleBadge ? (

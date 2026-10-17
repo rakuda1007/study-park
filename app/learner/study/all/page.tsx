@@ -7,6 +7,7 @@ import { LearnerShell } from "@/components/learner/LearnerShell";
 import { fetchAllStudyPlansCached } from "@/lib/study/plans-loader";
 import { countActiveStudyPlans } from "@/lib/study/firestore";
 import { isStudyActivePlanAtLimit, studyActivePlanUsageLabel } from "@/lib/study/limits";
+import { isStudyPlanCompleted, sortStudyPlans } from "@/lib/study/plan-order";
 import type { StudyPlanWithItems } from "@/lib/study/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
@@ -41,8 +42,9 @@ export default function LearnerStudyAllPage() {
     return unsub;
   }, [refresh]);
 
-  const active = plans.filter((p) => p.status === "active");
-  const completed = plans.filter((p) => p.status === "completed");
+  const sorted = sortStudyPlans(plans);
+  const active = sorted.filter((plan) => !isStudyPlanCompleted(plan));
+  const completed = sorted.filter((plan) => isStudyPlanCompleted(plan));
 
   return (
     <LearnerShell title="学習管理">
