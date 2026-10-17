@@ -7,6 +7,10 @@ export function studyPlanEditHref(planId: string): string {
 }
 
 /** 学習管理トップ。作成完了時は created に科目名を渡す */
+export function studyActiveSummaryHref(): string {
+  return "/learner/study/active";
+}
+
 export function learnerHomeHref(opts?: { createdSubject?: string }): string {
   if (opts?.createdSubject) {
     return `/learner?created=${encodeURIComponent(opts.createdSubject)}`;

@@ -10,6 +10,7 @@ import { isStudyActivePlanAtLimit, studyActivePlanUsageLabel } from "@/lib/study
 import { isStudyPlanCompleted, sortStudyPlans } from "@/lib/study/plan-order";
 import type { StudyPlanWithItems } from "@/lib/study/types";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
+import { studyActiveSummaryHref } from "@/lib/study/urls";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
 
 export default function LearnerStudyAllPage() {
@@ -54,7 +55,11 @@ export default function LearnerStudyAllPage() {
         </Link>
       </p>
 
-      <p className="admin-msg">{studyActivePlanUsageLabel(activeCount)}</p>
+      <p className="admin-msg">
+        <Link href={studyActiveSummaryHref()} className="study-active-count-link">
+          {studyActivePlanUsageLabel(activeCount)}
+        </Link>
+      </p>
       <StudyActivePlanUsageBanner activeCount={activeCount} />
 
       {loading ? <p className="admin-loading">読み込み中…</p> : null}

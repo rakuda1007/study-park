@@ -28,6 +28,7 @@ import {
   usesWeekLabels,
   type StudyViewSettings,
 } from "@/lib/study/view-period";
+import { studyActiveSummaryHref } from "@/lib/study/urls";
 import { loadStudyViewSettings, saveStudyViewSettings } from "@/lib/study/view-settings";
 import { subscribeAuth } from "@/lib/firebase/auth-client";
 import { StudyActivePlanUsageBanner } from "@/components/learner/study/StudyActivePlanUsageBanner";
@@ -215,10 +216,14 @@ function LearnerHomeInner() {
       <p className="admin-msg learner-welcome-msg">
         自分やお子様の学習をかんたんに管理できます。表示中の期間の学習計画を確認できます。いつまでに何をやるか、どこまで進んだかを確認しましょう。
         {userId ? (
-          <span className="study-active-count-label">
+          <>
             {" "}
-            （{studyActivePlanUsageLabel(activeCount)}）
-          </span>
+            （
+            <Link href={studyActiveSummaryHref()} className="study-active-count-link">
+              {studyActivePlanUsageLabel(activeCount)}
+            </Link>
+            ）
+          </>
         ) : null}
       </p>
 

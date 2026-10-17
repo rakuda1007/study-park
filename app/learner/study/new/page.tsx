@@ -12,6 +12,7 @@ import { customSubjectOption, isCustomSubjectId } from "@/lib/study/subject-opti
 import { createStudyPlan, countActiveStudyPlans } from "@/lib/study/firestore";
 import { isStudyActivePlanAtLimit, studyActivePlanUsageLabel } from "@/lib/study/limits";
 import { invalidateStudyPlansCache } from "@/lib/study/plans-loader";
+import { studyActiveSummaryHref } from "@/lib/study/urls";
 import { listStudyItemMasters } from "@/lib/study/masters-firestore";
 import { loadStudySubjectData } from "@/lib/study/subject-options";
 import type { StudySubjectData } from "@/lib/study/subject-options";
@@ -121,7 +122,11 @@ function LearnerStudyNewInner() {
 
       {!loading ? (
         <>
-          <p className="admin-msg">{studyActivePlanUsageLabel(activeCount)}</p>
+          <p className="admin-msg">
+            <Link href={studyActiveSummaryHref()} className="study-active-count-link">
+              {studyActivePlanUsageLabel(activeCount)}
+            </Link>
+          </p>
           <StudyActivePlanUsageBanner activeCount={activeCount} />
         </>
       ) : null}
