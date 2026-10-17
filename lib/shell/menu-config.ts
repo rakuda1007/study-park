@@ -50,13 +50,28 @@ export function getLoggedInShellMenu(session: AuthSessionKind): ShellMenuConfig 
     case "learner":
       return {
         items: [
+          { label: "学習", heading: true },
           { label: "学習管理", href: "/learner" },
           { label: "教材", href: "/learner/materials" },
-          { ...PARK_MENU_ITEM, dividerBefore: true },
+          { label: "案内", heading: true },
+          {
+            ...PARK_MENU_ITEM,
+            label: "無料コンテンツ",
+            hint: "九九・県庁所在地など",
+          },
+          {
+            ...MANUAL_MENU_ITEM,
+            label: "使い方",
+            hint: "別ページのガイドを開きます",
+          },
           PORTAL_MENU_ITEM,
-          { ...MANUAL_MENU_ITEM, dividerBefore: true },
         ],
-        bottomItems: loggedInBottom(session),
+        bottomItems: [
+          { label: "アカウント", heading: true },
+          { label: "プロフィール", href: profilePath(session) },
+          { label: "アカウントを切り替える", href: "/login" },
+          { label: "ログアウト", action: "logout" },
+        ],
       };
     case "creator":
       return {
