@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const outDir = fileURLToPath(new URL("../out", import.meta.url));
 
-/** AdSense 等でルート公開が必要な *.txt は残す */
-const KEEP_TXT = new Set(["ads.txt"]);
+/** ルート公開が必要な *.txt は残す（RSC のペイロードではない） */
+const KEEP_TXT = new Set(["ads.txt", "robots.txt"]);
 
 async function walkRemoveTxt(dir) {
   const names = await readdir(dir, { withFileTypes: true });

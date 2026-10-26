@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { siteOriginFromEnv } from "@/lib/site-url";
 
+/** 静的エクスポート（output: "export"）では動的ルートにできない */
+export const dynamic = "force-static";
+
 /**
  * 検索エンジン向けの公開 URL。
  * 学習者・クリエイター・管理画面は noindex のため含めない。
