@@ -55,3 +55,6 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: study-park-fb726
           channelId: live
+          # 15.34.1 以降は serviceusage.services.get が必要になり、
+          # GitHub 用サービスアカウントのデプロイが 403 になる。
+          firebaseToolsVersion: 15.34.0
