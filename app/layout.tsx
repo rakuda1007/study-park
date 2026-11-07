@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { siteOriginFromEnv } from "@/lib/site-url";
 import { PwaRegister } from "./pwa-register";
 import "./globals.css";
@@ -68,6 +69,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <GoogleAnalytics />
         </Suspense>
+        <MicrosoftClarity />
         <PwaRegister />
         {children}
       </body>

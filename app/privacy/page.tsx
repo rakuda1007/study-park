@@ -77,6 +77,7 @@ export default function PrivacyPage() {
         <p>当サービスは、サービス改善や広告配信のため、以下の外部サービスを利用する場合があります。</p>
         <ul>
           <li>Firebase Analytics / Google Analytics（利用状況の分析）</li>
+          <li>Microsoft Clarity（利用状況の分析、操作の記録）</li>
           <li>Google AdSense（広告表示）</li>
         </ul>
         <p>これらのサービスは、それぞれのプライバシーポリシーに従って情報を扱います。</p>
@@ -95,6 +96,12 @@ export default function PrivacyPage() {
             <strong>Stripe</strong>（決済処理）—{" "}
             <a href="https://stripe.com/jp/privacy" target="_blank" rel="noopener noreferrer">
               プライバシーポリシー
+            </a>
+          </li>
+          <li>
+            <strong>Microsoft Clarity</strong>（アクセス解析）—{" "}
+            <a href="https://privacy.microsoft.com/ja-jp/privacystatement" target="_blank" rel="noopener noreferrer">
+              プライバシーに関する声明
             </a>
           </li>
           <li>
